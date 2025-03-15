@@ -13,8 +13,10 @@ const [nome, setNome] = useState("");
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/login", { nome, senha }, {include:true}, {withCredentials: true});
-      alert("Login realizado com sucesso!");
+      const resposta = await axios.post("http://localhost:5000/login", { nome, senha }, {include:true}, {withCredentials: true});
+      if(resposta.status === 200){
+        document.cookie = `usuarioLogado=${resposta.data.nome}; max-age=3600; path=/;`  
+      }
       navigate("/paginainicial");
     } catch (err) {
       alert("Erro ao fazer login");

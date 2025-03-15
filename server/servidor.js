@@ -1,7 +1,7 @@
 require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
-const cookieParser = require('cookie-parser');
+
 
 const app = express();
 
@@ -17,8 +17,8 @@ app.use(cors({
     allowedHeaders:["Content-type"]}),
 );
 
-app.use(cookieParser());
-const bancoDeDados = [];
+
+let bancoDeDados = [];
 
 
 class User{
@@ -30,15 +30,19 @@ class User{
 }
 
 app.get("/paginainicial", async(req, res) => {
-    const usuario = req.cookies.usuarioLogado;
-    if(usuario){
-        res.status(200).json({nome: usuario})
+    const cookies = req.headers.cookie || "";
+    const usuarioCookie = cookies.split("; ").find((cookie) => cookie.startsWith("usuarioLogado="));
+
+    if(usuarioCookie){
+        const usuario = usuarioCookie.split("=")[1];
+        res.status(200).json({nome: usuario});
     }
     else{
         res.status(401).json({message: "Nenhum usuário logado"});
     }
 })
 app.post("/login",async (req,res) => {
+
     const {nome , senha} = req.body;
     if(!nome || !senha){
         res.status(401).send("Usuario e senha são obrigatórios");
@@ -46,7 +50,7 @@ app.post("/login",async (req,res) => {
     const encontrado = bancoDeDados.find(u => u.nome === nome && u.senha === senha);
 
             if(encontrado){
-                res.cookie("usuarioLogado", encontrado.nome, {httpOnly: true, maxAge:3600000, sameSite: "lax"})
+                res.setHeader("Set-Cookie",`usuarioLogado=${encontrado.nome}, Max-Age=3600; Path=/`);
                 res.status(200).json({message : "Logando...",nome: encontrado.nome});
                 
             }
@@ -70,6 +74,15 @@ app.post("/cadastrar", (req,res) => {
     console.log(bancoDeDados);
     res.status(200).send("O usuario foi criado com sucesso");
 })
+
+app.post("/logout", (req,res) => {
+    res.setHeader("Set-Cookie", "usuarioLogado=; Max-Age=0; Path=/")
+    res.status(200).json({message:"Logout realizado com sucesso"});
+})
+
+app.get("/cadastrar", (req,res) => {
+    res.status(200).send(bancoDeDados);
+});
 
 
 
