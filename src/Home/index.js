@@ -31,7 +31,8 @@ const [nome, setNome] = useState("");
           <input id="email" placeholder="Email" type="email" className="input-login" onChange={(e) => setNome(e.target.value)} required />
           <input id="senha" placeholder="Senha" type="password" className="input-login" onChange={(e) => setSenha(e.target.value)} required />
           <button type="submit">Logar</button>
-          <Link to="/cadastrar">Criar Conta</Link> 
+          <Link to="/cadastrar">Criar Conta</Link>
+          <Link to ="/esqueci-minha-senha">Esqueceu sua senha?</Link>
         </form>
       </div>
     

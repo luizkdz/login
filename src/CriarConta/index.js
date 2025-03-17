@@ -20,8 +20,8 @@ function CriarConta(){
     return (
     <div>
         <form onSubmit={handleSubmit}>
-        <input placeholder = "Nome de Usuario" onChange={(e) => setNome(e.target.value)}></input>
-        <input placeholder = "Senha" onChange={(e) => setSenha(e.target.value)}></input>
+        <input placeholder = "Email" type = "email" required onChange={(e) => setNome(e.target.value)}></input>
+        <input placeholder = "Senha" required onChange={(e) => setSenha(e.target.value)}></input>
         <button type="submit">Cadastrar</button>
         </form>
     </div>
