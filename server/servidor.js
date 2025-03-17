@@ -1,7 +1,8 @@
 require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
-
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 const app = express();
 
@@ -28,38 +29,44 @@ class User{
     }
 
 }
-
-app.get("/paginainicial", async(req, res) => {
+const autenticarToken = (req, res, next) => {
     const cookies = req.headers.cookie || "";
-    const usuarioCookie = cookies.split("; ").find((cookie) => cookie.startsWith("usuarioLogado="));
+    const usuarioCookie = cookies.split("; ").find((cookie) => cookie.startsWith("token="));
 
-    if(usuarioCookie){
-        const usuario = usuarioCookie.split("=")[1];
-        res.status(200).json({nome: usuario});
+    if (!usuarioCookie) {
+        return res.status(401).json({ message: "Token ausente ou inválido" });
     }
-    else{
-        res.status(401).json({message: "Nenhum usuário logado"});
+
+    const token = decodeURIComponent(usuarioCookie.split("=")[1]);
+    
+    try {
+        const decoded = jwt.verify(token, "segredo_seguranca");
+        req.usuario = decoded;
+        next();
+    } catch (error) {
+        return res.status(403).json({ message: "Token inválido" });
     }
+}
+
+
+app.get("/paginainicial",autenticarToken, (req, res) => {
+    res.status(200).json({nome:req.usuario.nome});
 })
 app.post("/login",async (req,res) => {
-
     const {nome , senha} = req.body;
-    if(!nome || !senha){
-        res.status(401).send("Usuario e senha são obrigatórios");
+    
+    const encontrado = bancoDeDados.find(u => u.nome === nome);
+    
+    if(!encontrado || !(await bcrypt.compare(senha,encontrado.senha))){
+       return res.status(401).send("Usuario ou senha inválidos");
     }
-    const encontrado = bancoDeDados.find(u => u.nome === nome && u.senha === senha);
 
-            if(encontrado){
-                res.setHeader("Set-Cookie",`usuarioLogado=${encontrado.nome}, Max-Age=3600; Path=/`);
-                res.status(200).json({message : "Logando...",nome: encontrado.nome});
-                
-            }
-            else{
-                res.status(401).json({message: "Usuario ou senha inválidos"});
+    else{
+        const token = jwt.sign({nome: encontrado.nome}, "segredo_seguranca", {expiresIn:"1h"});
+        res.setHeader("Set-Cookie", `token=${encodeURIComponent(token)}; Max-Age=3600; HttpOnly; Path=/; Secure; SameSite=None`);
+        res.status(200).json({message : "Logando..."});  
             }
             
-        
-
     }
 );
 
@@ -67,22 +74,26 @@ app.get("/", (req, res) => {
     res.send("Servidor rodando com sucesso!");
 });
 
-app.post("/cadastrar", (req,res) => {
+app.post("/cadastrar", async (req,res) => {
     const {nome,senha} = req.body;
-    const user = new User(nome,senha);
+
+    const hashedPassword = await bcrypt.hash(senha,10);
+
+    const user = new User(nome,hashedPassword);
     bancoDeDados.push(user);
     console.log(bancoDeDados);
     res.status(200).send("O usuario foi criado com sucesso");
 })
 
 app.post("/logout", (req,res) => {
-    res.setHeader("Set-Cookie", "usuarioLogado=; Max-Age=0; Path=/")
+    res.setHeader("Set-Cookie",`token=; Max-Age=0; Path=/`)
     res.status(200).json({message:"Logout realizado com sucesso"});
 })
 
 app.get("/cadastrar", (req,res) => {
     res.status(200).send(bancoDeDados);
 });
+
 
 
 

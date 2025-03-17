@@ -22,7 +22,7 @@ function PaginaInicial() {
   const handleLogout = async () => {
     try{
         const resposta = await axios.post("http://localhost:5000/logout", {}, {withCredentials: true});
-        document.cookie = "usuarioLogado=; Max-Age = 0; path=/;";
+        
         alert(resposta.data.message);
     }
     catch(error){

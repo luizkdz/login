@@ -15,9 +15,8 @@ const [nome, setNome] = useState("");
     try {
       const resposta = await axios.post("http://localhost:5000/login", { nome, senha }, {include:true}, {withCredentials: true});
       if(resposta.status === 200){
-        document.cookie = `usuarioLogado=${resposta.data.nome}; max-age=3600; path=/;`  
-      }
-      navigate("/paginainicial");
+         navigate("/paginainicial");
+      }   
     } catch (err) {
       alert("Erro ao fazer login");
     }
