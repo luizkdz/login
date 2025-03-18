@@ -11,7 +11,7 @@ function PaginaInicial() {
       try {
         const resposta = await axios.get("http://localhost:5000/paginainicial", { withCredentials: true });
         setNome(resposta.data.nome);
-        console.log("Nome recebido:", resposta.data.nome); // Mova o console.log para cá
+        console.log("Nome recebido:", resposta.data.nome); 
       } catch (error) {
         console.log("Erro ao buscar nome:", error);
       }

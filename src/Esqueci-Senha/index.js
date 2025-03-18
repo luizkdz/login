@@ -9,6 +9,7 @@ function EsqueciSenha() {
         e.preventDefault();
         try{
             const resposta = await axios.post("http://localhost:5000/esqueci-minha-senha", {email});
+            console.log(resposta.data.message);
             alert(`O email foi enviado para ${resposta.data.message}`)
         }
         catch(error){

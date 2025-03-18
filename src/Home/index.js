@@ -6,21 +6,26 @@ function Home(){
 
 
 
-const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const resposta = await axios.post("http://localhost:5000/login", { nome, senha }, {include:true}, {withCredentials: true});
-      if(resposta.status === 200){
-         navigate("/paginainicial");
+      const resposta = await axios.post("http://localhost:5000/login", 
+        { email, senha }, 
+        { withCredentials: true },
+        {include:true}
+      );
+
+      if (resposta.status === 200) {
+        navigate("/paginainicial");
       }   
     } catch (err) {
       alert("Erro ao fazer login");
     }
-  };
+};
 
   return (
     
@@ -28,7 +33,7 @@ const [nome, setNome] = useState("");
 
       <div className="App">
         <form onSubmit={handleSubmit}>
-          <input id="email" placeholder="Email" type="email" className="input-login" onChange={(e) => setNome(e.target.value)} required />
+          <input id="email" placeholder="Email" type="email" className="input-login" onChange={(e) => setEmail(e.target.value)} required />
           <input id="senha" placeholder="Senha" type="password" className="input-login" onChange={(e) => setSenha(e.target.value)} required />
           <button type="submit">Logar</button>
           <Link to="/cadastrar">Criar Conta</Link>

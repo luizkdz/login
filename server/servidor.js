@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const mysql = require('mysql2/promise');
 const nodemailer = require('nodemailer');
-
+const cookieParser = require('cookie-parser');
 const app = express();
 
 
@@ -30,7 +30,7 @@ app.use(cors({
     methods:["GET","POST"],credentials: true,
     allowedHeaders:["Content-type"]}),
 );
-
+app.use(cookieParser());
 
 
 const db = mysql.createPool({
@@ -41,62 +41,64 @@ const db = mysql.createPool({
     port:"3306"
 });
 
+const gerarTokens = async (usuarioId) => {
+    const accessToken = jwt.sign({usuarioId} , "segredo_seguranca", {expiresIn:"15m"});
+    const refreshToken = jwt.sign({usuarioId}, "segredo_seguranca", {expiresIn:"7d"});
 
-const autenticarToken = async (req, res, next) => {
-    
-    const cookies = req.headers.cookie || "";
-    const usuarioCookie = cookies.split("; ").find((cookie) => cookie.startsWith("token="));
+    await db.query("INSERT INTO refresh_tokens (usuario_id, token) VALUES (?, ?)" , [usuarioId, refreshToken]);
 
-    if (!usuarioCookie) {
-        return res.status(401).json({ message: "Token ausente ou inválido" });
-    }
-
-    const token = decodeURIComponent(usuarioCookie.split("=")[1]);
-    
-    try {
-        const decoded = jwt.verify(token, "segredo_seguranca");
-        req.usuario = decoded;
-        next();
-    } catch (error) {
-        return res.status(403).json({ message: "Token inválido" });
-    }
+    return {accessToken, refreshToken};
 }
 
 
-app.get("/paginainicial",autenticarToken, (req, res) => {
 
-    res.status(200).json({nome:req.usuario.nome});
+const autenticarToken = async (req, res, next) => {
+    
+    const token = req.headers.authorization?.split(" ")[1];
+    
+    if (!token) {
+        return res.status(401).json({ message: "Token ausente ou inválido" });
+    } 
+    jwt.verify(token, "segredo_seguranca", (err, decoded) => {
+        if (err) return res.status(403).json({ message: "Token inválido" });
+        req.usuarioId = decoded.usuarioId;
+        next();
+      });
+
+}
+
+app.get("/paginainicial",autenticarToken, async (req, res) => {
+    const [usuarios] = await db.query("SELECT nome FROM usuarios where id = ?",[req.usuarioId]);
+    res.status(200).json(usuarios[0].nome);
 })
-app.post("/login",async (req,res) => {
-    const {nome , senha} = req.body;
-    
-    const [usuarios] = await db.query("SELECT * FROM USUARIOS WHERE nome = ?", [nome]);
+app.post("/login", async (req, res) => {
+    const { email, senha } = req.body;
+
+    const [usuarios] = await db.query("SELECT * FROM usuarios WHERE email = ?", [email]);
     const encontrado = usuarios[0];
-    
-    if(!encontrado || !(await bcrypt.compare(senha,encontrado.senha))){
-       return res.status(401).send("Usuario ou senha inválidos");
+
+    if (!encontrado || !(await bcrypt.compare(senha, encontrado.senha_hash))) {
+        return res.status(401).json({message:"Usuário ou senha inválidos"});
     }
 
-    else{
-        const token = jwt.sign({nome: encontrado.nome}, "segredo_seguranca", {expiresIn:"1h"});
-        res.setHeader("Set-Cookie", `token=${encodeURIComponent(token)}; Max-Age=3600; HttpOnly; Path=/;`);
-        res.status(200).json({message : "Logando..."});  
-            }
-            
-    }
-);
+    const { accessToken, refreshToken } = await gerarTokens(encontrado.id);
+
+    res.setHeader("Set-Cookie", `refreshToken=${encodeURIComponent(refreshToken)}; HttpOnly; Max-Age=3600`);
+    res.setHeader("Set-Cookie", `usuarioNome= ${encodeURIComponent(encontrado.nome)} HttpOnly; Max-Age=3600`);
+    res.json({ accessToken });
+});
 
 app.get("/", (req, res) => {
     res.send("Servidor rodando com sucesso!");
 });
 
 app.post("/cadastrar", async (req,res) => {
-    const {nome,senha} = req.body;
+    const {nome, email, senha} = req.body;
 
     const hashedPassword = await bcrypt.hash(senha,10);
 
     try{
-        await db.query("INSERT INTO usuarios (nome, senha) VALUES (?,?)", [nome, hashedPassword]);
+        await db.query("INSERT INTO usuarios (nome,email,senha_hash) VALUES (?,?,?)", [nome,email, hashedPassword]);
     
     res.status(200).send("O usuario foi criado com sucesso");
 }
@@ -106,25 +108,8 @@ catch(error){
 });
 
 app.post("/logout", (req,res) => {
-    res.setHeader("Set-Cookie",`token=; Max-Age=0; Path=/`)
+    res.setHeader("Set-Cookie","refreshToken=; HttpOnl; Max-Age=0; Path=/")
     res.status(200).json({message:"Logout realizado com sucesso"});
-})
-
-app.post("/esqueci-minha-senha",async (req,res) => {
-    const {email} = req.body;
-    try{
-        const [usuario] = await db.query("SELECT nome from usuarios where nome = ?",[email]);
-        
-        if(usuario.length === 0){
-            return res.status(400).json({message: "O email não está cadastrado"});
-        }
-        const usuarioSelecionado = usuario[0];
-        await enviarEmail(usuarioSelecionado, "Restauração de senha", `Olá usuário sua senha é 123`);
-        res.status(200).send({message: usuarioSelecionado});
-    }
-    catch(error){
-        alert("Esse email não é válido");
-    }
 })
 
 const enviarEmail = async (destinatario, assunto, mensagem) => {
@@ -139,6 +124,24 @@ const enviarEmail = async (destinatario, assunto, mensagem) => {
         alert("Erro ao enviar email");
 }
 }
+app.post("/esqueci-minha-senha",async (req,res) => {
+    const {email} = req.body;
+    try{
+        const [usuario] = await db.query("SELECT nome from usuarios where email = ?",[email]);
+        
+        if(usuario.length === 0){
+            return res.status(400).json({message: "O email não está cadastrado"});
+        }
+        const usuarioSelecionado = usuario[0];
+        await enviarEmail(usuarioSelecionado, "Restauração de senha", `Olá usuário sua senha é 123`);
+        res.status(200).send({message: usuarioSelecionado});
+    }
+    catch(error){
+        res.status(400).json({message:"Esse email não é válido"});
+    }
+})
+
+
 
 app.get("/cadastrar", (req,res) => {
     
