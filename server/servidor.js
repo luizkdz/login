@@ -11,7 +11,7 @@ const app = express();
 
 const port = 5000;
 const emailTransporter = "luizgrfc12@gmail.com";
-const senhaEmail = "So@d4everx1";
+const senhaEmail = "oqbq dgxh xmks wufo";
 const transporter = nodemailer.createTransport({
     service:'gmail',
     auth:{
@@ -54,7 +54,7 @@ const gerarTokens = async (usuarioId) => {
 
 const autenticarToken = async (req, res, next) => {
     
-    const token = req.headers.authorization?.split(" ")[1];
+    const token = req.cookies.accessToken;
     
     if (!token) {
         return res.status(401).json({ message: "Token ausente ou inválido" });
@@ -69,6 +69,10 @@ const autenticarToken = async (req, res, next) => {
 
 app.get("/paginainicial",autenticarToken, async (req, res) => {
     const [usuarios] = await db.query("SELECT nome FROM usuarios where id = ?",[req.usuarioId]);
+    if(usuarios.length === 0 ){
+        return res.status(404).json({message: "Usuario não encontrado"});
+    }
+    
     res.status(200).json(usuarios[0].nome);
 })
 app.post("/login", async (req, res) => {
@@ -83,8 +87,14 @@ app.post("/login", async (req, res) => {
 
     const { accessToken, refreshToken } = await gerarTokens(encontrado.id);
 
-    res.setHeader("Set-Cookie", `refreshToken=${encodeURIComponent(refreshToken)}; HttpOnly; Max-Age=3600`);
-    res.setHeader("Set-Cookie", `usuarioNome= ${encodeURIComponent(encontrado.nome)} HttpOnly; Max-Age=3600`);
+    res.cookie("accessToken", accessToken,{
+        httpOnly:true,
+        maxAge:15 * 60 * 1000
+    });
+    res.cookie("usuarioNome", encontrado.nome,{
+        httpOnly:false,
+        maxAge:15 * 60 * 1000
+    });
     res.json({ accessToken });
 });
 
@@ -107,33 +117,34 @@ catch(error){
 }
 });
 
-app.post("/logout", (req,res) => {
-    res.setHeader("Set-Cookie","refreshToken=; HttpOnl; Max-Age=0; Path=/")
-    res.status(200).json({message:"Logout realizado com sucesso"});
-})
+app.post("/logout", (req, res) => {
+    res.clearCookie("usuarioNome", {path:"/"},{ httpOnly: true });
+    res.clearCookie("accessToken", { httpOnly: true });
+    res.status(200).json({ message: "Logout realizado com sucesso!" });
+});
 
 const enviarEmail = async (destinatario, assunto, mensagem) => {
     try{
         await transporter.sendMail({
-        from: destinatario,
+        from: emailTransporter,
         to: destinatario,
         subject:assunto,
         text:mensagem
     })}
     catch(error){
-        alert("Erro ao enviar email");
+        console.log(error);
 }
 }
 app.post("/esqueci-minha-senha",async (req,res) => {
     const {email} = req.body;
     try{
-        const [usuario] = await db.query("SELECT nome from usuarios where email = ?",[email]);
+        const [usuarioEmail] = await db.query("SELECT email from usuarios where email = ?",[email]);
         
-        if(usuario.length === 0){
+        if(usuarioEmail.length === 0){
             return res.status(400).json({message: "O email não está cadastrado"});
         }
-        const usuarioSelecionado = usuario[0];
-        await enviarEmail(usuarioSelecionado, "Restauração de senha", `Olá usuário sua senha é 123`);
+        const usuarioSelecionado = usuarioEmail[0];
+        await enviarEmail(usuarioSelecionado.email, "Restauração de senha", `Olá usuário sua senha é 123`);
         res.status(200).send({message: usuarioSelecionado});
     }
     catch(error){
