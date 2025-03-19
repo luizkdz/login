@@ -29,7 +29,7 @@ app.use(express.json());
 app.use(cors({
     origin:"http://localhost:3000",
     methods:["GET","POST"],credentials: true,
-    allowedHeaders:["Content-type"]}),
+    allowedHeaders:["Content-type","Authorization"]}),
 );
 app.use(cookieParser());
 
@@ -43,7 +43,7 @@ const db = mysql.createPool({
 });
 
 const gerarTokens = async (usuarioId) => {
-    const accessToken = jwt.sign({usuarioId} , "segredo_seguranca", {expiresIn:"15m"});
+    const accessToken = jwt.sign({usuarioId} , "segredo_seguranca", {expiresIn:"1m"});
     const refreshToken = jwt.sign({usuarioId}, "segredo_seguranca", {expiresIn:"7d"});
 
     await db.query("INSERT INTO refresh_tokens (usuario_id, token) VALUES (?, ?)" , [usuarioId, refreshToken]);
@@ -74,7 +74,7 @@ app.get("/paginainicial",autenticarToken, async (req, res) => {
         return res.status(404).json({message: "Usuario não encontrado"});
     }
     
-    res.status(200).json(usuarios[0].nome);
+    res.status(200).json({nome:usuarios[0].nome});
 })
 app.post("/login", async (req, res) => {
     const { email, senha } = req.body;
@@ -90,7 +90,7 @@ app.post("/login", async (req, res) => {
 
     res.cookie("accessToken", accessToken,{
         httpOnly:true,
-        maxAge: 15 * 60 * 1000,
+        maxAge: 1 * 60 * 1000,
         
     });
     res.cookie("refreshToken", refreshToken , {
@@ -121,8 +121,12 @@ app.post("/renovarsessao" , async (req,res) => {
         const newAccessToken = jwt.sign(
             { usuarioId: decoded.usuarioId },
             "segredo_seguranca",
-            { expiresIn: "15m" }
+            { expiresIn: "1m" }
         );
+        res.cookie("accessToken", newAccessToken,{
+            httpOnly:true,
+            maxAge: 1 * 60 * 1000,
+        })
         res.status(200).json({token:newAccessToken});
     }
     catch(erro){
