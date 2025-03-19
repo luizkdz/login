@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const mysql = require('mysql2/promise');
 const nodemailer = require('nodemailer');
 const cookieParser = require('cookie-parser');
+const crypto = require('crypto');
 const app = express();
 
 
@@ -89,14 +90,49 @@ app.post("/login", async (req, res) => {
 
     res.cookie("accessToken", accessToken,{
         httpOnly:true,
-        maxAge:15 * 60 * 1000
+        maxAge: 15 * 60 * 1000,
+        
     });
-    res.cookie("usuarioNome", encontrado.nome,{
-        httpOnly:false,
-        maxAge:15 * 60 * 1000
-    });
+    res.cookie("refreshToken", refreshToken , {
+        httpOnly:true,
+        maxAge:15 * 60 * 1000 * 4 * 24 * 7,
+    })
+    
     res.json({ accessToken });
 });
+
+app.post("/renovarsessao" , async (req,res) => {
+    const refreshToken = req.cookies.refreshToken;
+    if(!refreshToken){
+       return res.status(400).json({message:"Token invalido"});
+    }
+
+    try{
+
+    const [token] = await db.query("SELECT * from refresh_tokens where token = ?", [refreshToken]);
+    
+    if(token.length === 0){
+        return res.status(400).json({message:"token não existe"});
+    }
+    const tokenCerto = token[0].token;
+    
+    try {
+        const decoded = jwt.verify(tokenCerto, "segredo_seguranca");
+        const newAccessToken = jwt.sign(
+            { usuarioId: decoded.usuarioId },
+            "segredo_seguranca",
+            { expiresIn: "15m" }
+        );
+        res.status(200).json({token:newAccessToken});
+    }
+    catch(erro){
+        return res.status(400).json({message:"Token invalido"})
+    
+    }
+} catch(erro){
+    return res.status(500).json({message:"Erro interno do servidor"});
+}
+})  
 
 app.get("/", (req, res) => {
     res.send("Servidor rodando com sucesso!");
@@ -117,9 +153,10 @@ catch(error){
 }
 });
 
-app.post("/logout", (req, res) => {
-    res.clearCookie("usuarioNome", {path:"/"},{ httpOnly: true });
+app.post("/logout", async (req, res) => {
+    const accessToken = req.cookies.accessToken;
     res.clearCookie("accessToken", { httpOnly: true });
+    db.query("DELETE FROM refresh_tokens where token = ? ", [accessToken]);
     res.status(200).json({ message: "Logout realizado com sucesso!" });
 });
 
@@ -135,6 +172,10 @@ const enviarEmail = async (destinatario, assunto, mensagem) => {
         console.log(error);
 }
 }
+
+const gerarNovaSenha = (tamanho) => {
+    return crypto.randomBytes(tamanho).toString("base64").slice(0,tamanho);
+}
 app.post("/esqueci-minha-senha",async (req,res) => {
     const {email} = req.body;
     try{
@@ -144,7 +185,10 @@ app.post("/esqueci-minha-senha",async (req,res) => {
             return res.status(400).json({message: "O email não está cadastrado"});
         }
         const usuarioSelecionado = usuarioEmail[0];
-        await enviarEmail(usuarioSelecionado.email, "Restauração de senha", `Olá usuário sua senha é 123`);
+        const novaSenha = gerarNovaSenha(12);
+        const novaSenhaComHash = await bcrypt.hash(novaSenha,10);
+        await db.query("UPDATE usuarios SET senha_hash = ? where email = ?",[novaSenhaComHash,usuarioSelecionado.email]);
+        await enviarEmail(usuarioSelecionado.email, "Restauração de senha", `Olá usuário sua senha é ${novaSenha}`);
         res.status(200).send({message: usuarioSelecionado});
     }
     catch(error){
