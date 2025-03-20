@@ -1,40 +1,57 @@
-require("dotenv").config();
-const cors = require("cors");
-const express = require("express");
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const mysql = require('mysql2/promise');
-const nodemailer = require('nodemailer');
-const cookieParser = require('cookie-parser');
-const crypto = require('crypto');
+import dotenv from "dotenv";
+import express from "express";
+import cors from "cors";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import mysql from "mysql2/promise";
+import nodemailer from "nodemailer";
+import cookieParser from "cookie-parser";
+import crypto from "crypto";
+import session from "express-session";
+import passport from "../server/passport.js"; // Certifique-se de que este arquivo também usa ES Modules
+import authRoutes from "./authRoutes.js";
+
+dotenv.config();
+
 const app = express();
-
-
 const port = 5000;
-const emailTransporter = "luizgrfc12@gmail.com";
-const senhaEmail = "oqbq dgxh xmks wufo";
+
+// Evite expor credenciais diretamente no código!
+const emailTransporter = process.env.EMAIL_TRANSPORTER;
+const senhaEmail = process.env.SENHA_EMAIL;
+
+// Configurando o transporte de e-mails
 const transporter = nodemailer.createTransport({
-    service:'gmail',
-    auth:{
+    service: "gmail",
+    auth: {
         user: emailTransporter,
         pass: senhaEmail
     }
-})
+});
 
+// Configuração da sessão
+app.use(session({
+    secret: "segredo_seguranca",
+    resave: false,
+    saveUninitialized: false
+}));
 
-
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(express.json());
 
 app.use(cors({
-    origin:"http://localhost:3000",
-    methods:["GET","POST"],credentials: true,
-    allowedHeaders:["Content-type","Authorization"]}),
-);
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"],
+    credentials: true,
+    allowedHeaders: ["Content-type", "Authorization"]
+}));
+
 app.use(cookieParser());
 
 
-const db = mysql.createPool({
+export const db = mysql.createPool({
     host:"localhost",
     user:"root",
     password:"root",
@@ -140,6 +157,39 @@ app.post("/renovarsessao" , async (req,res) => {
 
 app.get("/", (req, res) => {
     res.send("Servidor rodando com sucesso!");
+});
+
+app.get("/auth/google", passport.authenticate("google",{scope:["profile","email"]}));
+
+app.get("/auth/google/callback", passport.authenticate("google",{failureRedirect:"/login"}), 
+    async (req,res) => {
+        const email = req.user.emails[0].value;
+        const [usuarios] = await db.query("SELECT * FROM usuarios where email = ?",[email]);
+        const usuario = usuarios[0];
+        if(!usuario){
+            return res.status(400).json({message: "Usuario não encontrado"});
+        }
+        const {accessToken, refreshToken} = await gerarTokens(usuario.id);
+
+        res.cookie("accessToken", accessToken,
+            {httpOnly:true,
+            maxAge:15 * 60 * 1000
+            }
+         )
+         res.cookie("refreshToken", refreshToken,
+            {httpOnly:true,
+            maxAge:15 * 60 * 1000 * 4 * 24 * 7
+            }
+         )
+         res.redirect("http://localhost:3000/paginainicial");
+})
+
+app.get("/auth/logout", (req, res) => {
+    req.logout(() => {
+        res.clearCookie("accessToken");
+        res.clearCookie("refreshToken");
+        res.redirect("http://localhost:3000");
+    });
 });
 
 app.post("/cadastrar", async (req,res) => {
