@@ -2,6 +2,8 @@ import {Link, Navigate, redirect, useNavigate} from 'react-router-dom';
 import { useState } from "react";
 import axios from "axios";
 import { GoogleLogin } from '@react-oauth/google';
+import Header from '../componentes/header';
+import './styles.css';
 function Home(){
 
 
@@ -27,38 +29,35 @@ function Home(){
     }
 };
 
-const handleGoogleSuccess = async (credentialResponse) => {
-  try {
-      const resposta = await axios.post("http://localhost:5000/auth/google", 
-          { token: credentialResponse.credential }, 
-          { withCredentials: true }
-      );
-
-      if (resposta.status === 200) {
-          navigate("/paginainicial");
-      }
-  } catch (error) {
-      alert("Erro ao autenticar com o Google");
-  }
-};
 const handleGoogleRedirect = () => {
     window.location.href = "http://localhost:5000/auth/google";
 }
   return (
-      <div className="App">
+      <div className="pagina-toda">
+        <Header/>
+        <div className="container-card">
+          <div className="card">
+            <img src="../images/logo.svg" alt="logo"/>
         <form onSubmit={handleSubmit}>
-          <input id="email" placeholder="Email" type="email" className="input-login" onChange={(e) => setEmail(e.target.value)} required />
-          <input id="senha" placeholder="Senha" type="password" className="input-login" onChange={(e) => setSenha(e.target.value)} required />
-          <button type="submit">Logar</button>
-          <Link to="/cadastrar">Criar Conta</Link>
-          <Link to ="/esqueci-minha-senha">Esqueceu sua senha?</Link>
+          <div className="container-login">
+          <input className="input-email-senha" id="email" placeholder="Email" type="email"  onChange={(e) => setEmail(e.target.value)} required />
+          <input className="input-email-senha" id="senha" placeholder="Senha" type="password" onChange={(e) => setSenha(e.target.value)} required />
+          <button type="submit">Entrar</button>
+         <div className="container-links">
+          <Link className = "link-criar-conta"to="/cadastrar">Criar Conta</Link>
+          <Link className = "link-esqueci-senha"to ="/esqueci-minha-senha">Esqueceu sua senha?</Link>
+          </div>
           <div onClick = {handleGoogleRedirect}>
           <GoogleLogin onError={() => {
             alert("Erro ao fazer login com o google");
           }}/>
-          </div> 
+          </div>
+           </div>
         </form>
       </div>
+      </div>
+      </div>
+
     
   );
 }

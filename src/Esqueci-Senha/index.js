@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
-
-
+import './styles.css';
+import Header from '../componentes/header/index.js'
 function EsqueciSenha() {
     const[email,setEmail] = useState("");
     
@@ -17,13 +17,27 @@ function EsqueciSenha() {
         }
         
     }
+
+    const handleVoltar = () => {
+        window.location.href = "/";
+    }
     
     return (
-    <div>
-        <form onSubmit={handleSubmit}>
-            <input type= "email" placeholder= "Digite seu email" onChange = {(e) => {setEmail(e.target.value)}} ></input>
-            <button type="submit">Enviar email</button>
-        </form>
+    <div className="pagina-toda">
+        <Header/>
+        <div className="card-container">
+            <div className="card">
+                <img src = "./images/logo.svg" alt= "logo"/>
+                <form onSubmit={handleSubmit}>
+                <div className="container-email">
+                    <input type= "email" placeholder= "Digite seu email" onChange = {(e) => {setEmail(e.target.value)}} ></input>
+                    <button type="submit">Enviar email</button>
+                    <button onClick={handleVoltar}>Voltar</button>
+                </div>
+                </form>
+                
+        </div>
+    </div>
     </div>
     
 )

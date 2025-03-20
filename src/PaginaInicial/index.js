@@ -24,7 +24,7 @@ function PaginaInicial() {
       }
       console.log("Nome recebido:", resposta.data);
     } catch (error) {     
-      if (error.response && error.response.status === 401) {
+      if ((error.response && error.response.status === 401) || (error.response && error.response.status === 403)){
         const novoTokenAcesso = await refreshAccessToken();
 
         if (novoTokenAcesso) {

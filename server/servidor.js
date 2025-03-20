@@ -8,19 +8,18 @@ import nodemailer from "nodemailer";
 import cookieParser from "cookie-parser";
 import crypto from "crypto";
 import session from "express-session";
-import passport from "../server/passport.js"; // Certifique-se de que este arquivo também usa ES Modules
-import authRoutes from "./authRoutes.js";
+import passport from "../server/passport.js";
 
 dotenv.config();
 
 const app = express();
 const port = 5000;
 
-// Evite expor credenciais diretamente no código!
+
 const emailTransporter = process.env.EMAIL_TRANSPORTER;
 const senhaEmail = process.env.SENHA_EMAIL;
 
-// Configurando o transporte de e-mails
+
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -29,7 +28,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// Configuração da sessão
+
 app.use(session({
     secret: "segredo_seguranca",
     resave: false,
@@ -161,7 +160,7 @@ app.get("/", (req, res) => {
 
 app.get("/auth/google", passport.authenticate("google",{scope:["profile","email"]}));
 
-app.get("/auth/google/callback", passport.authenticate("google",{failureRedirect:"/login"}), 
+app.get("/auth/google/callback", passport.authenticate("google",{failureRedirect:"/"}), 
     async (req,res) => {
         const email = req.user.emails[0].value;
         const [usuarios] = await db.query("SELECT * FROM usuarios where email = ?",[email]);
@@ -198,6 +197,10 @@ app.post("/cadastrar", async (req,res) => {
     const hashedPassword = await bcrypt.hash(senha,10);
 
     try{
+        const emailJaExiste = await db.query("SELECT * from usuarios where email = ?", [email]);
+        if(emailJaExiste[0].length > 0 ){
+            return res.status(400).send("O email já é cadastrado");
+        }
         await db.query("INSERT INTO usuarios (nome,email,senha_hash) VALUES (?,?,?)", [nome,email, hashedPassword]);
     
     res.status(200).send("O usuario foi criado com sucesso");
