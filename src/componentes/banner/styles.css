@@ -1,0 +1,67 @@
+.imagem-banner{
+    width:100vw;
+    height:300px;
+}
+
+.banner-container{
+    
+    position:relative;
+}
+
+.banner-container:hover .seta-esquerda,
+.banner-container:hover .seta-direita {
+    opacity: 1; /* Torna visível ao passar o mouse */
+    visibility: visible;
+}
+
+.seta-esquerda{
+    opacity:0;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(226, 226, 229, 0.964);
+    color: white;
+    border: none;
+    font-size: 24px;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.seta-direita{
+    opacity: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(226, 226, 229, 0.964);
+    color: white;
+    border: none;
+    font-size: 24px;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 50%;
+    right:10px;
+    position: absolute;
+}
+
+.indicadores {
+    left:50%;
+    top:85%;
+    position:absolute;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.bolinha {
+    width: 12px;
+    height: 12px;
+    margin: 5px;
+    background-color: rgba(203, 194, 194, 0.823);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.bolinha.ativa {
+    background-color: aqua
+}

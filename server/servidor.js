@@ -259,5 +259,31 @@ app.get("/cadastrar", (req,res) => {
     
 });
 
+app.get("/produtos", async (req,res) => {
+    
+    try{
+        const [produtos] = await db.query("SELECT * FROM PRODUTOS");
+        if(produtos.length === 0 ){
+        return res.status(400).json({message: "Não existem produtos cadastrados"});
+    }
+    res.status(200).json(produtos);
+} catch(err){
+    res.status(500).json({message: "Erro ao buscar produtos"});
+}})
+
+app.get("/produto/:id", async (req, res) => {
+    const {id} = req.params;
+    try{
+        const [produto] = await db.query("SELECT * FROM PRODUTOS WHERE ID = ?",[id]);
+        if(produto.length === 0){
+            return res.status(400).json({message: "Produto não encontrado"});
+        }
+        res.status(200).json({produto: produto[0]});
+    }
+    catch(error){
+        res.status(500).json({message:"Erro no servidor"});
+    }
+})
+
 
 app.listen(port, () => {console.log("servidor rodando na porta " + `${port}`)});

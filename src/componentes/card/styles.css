@@ -1,0 +1,26 @@
+*{
+    font-family: 'Poppins', sans-serif;
+  }
+
+.card-produto{
+    cursor:pointer;
+    width:150px;
+    height:200px;
+    margin:20px;
+}
+
+.imagem-card{
+    
+    height:100px;
+}
+
+.nome-produto{
+    font-size: 18px;
+}
+
+.preco-produto{
+    font-size: 18px;
+}
+.descricao-produto{
+    font-size:18px;
+}

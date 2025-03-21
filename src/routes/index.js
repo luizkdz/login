@@ -3,6 +3,8 @@ import CriarConta from "../CriarConta";
 import Home from "../Home/index.js";
 import PaginaInicial from '../PaginaInicial/index.js';
 import EsqueciSenha from '../Esqueci-Senha/index.js';
+import PaginaProduto from '../PaginaProduto/index.js';
+
 function Rotas() {
   return (
     <Routes>
@@ -10,6 +12,7 @@ function Rotas() {
       <Route path="/cadastrar" element={<CriarConta />} />
       <Route path="/paginainicial" element = {<PaginaInicial/>}/>
       <Route path="/esqueci-minha-senha" element = {<EsqueciSenha/>}></Route>
+      <Route path="/produto/:id" element = {<PaginaProduto/>}></Route>
     </Routes>
   );
 }
