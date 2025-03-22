@@ -75,13 +75,6 @@ function Header({props}) {
         navigate('/');
       }
     
-      const showMenu = () => {
-        return (
-            <div>
-                <h1>Oi</h1>
-            </div>
-        )
-      }
 
     return (
         <header>
@@ -99,7 +92,13 @@ function Header({props}) {
                              
                     )}
                     {props && (
-                        <div className="container-usuario"><p onClick={toggleMenu}> {nome}</p>
+                        <div className="container-usuario">
+                          <div className="usuario-setinha">
+                            <img className="imagem-notificacao" src = "./images/notification.png"/>
+                            <img className="imagem-carrinho" src = "./images/carrinho-de-compras.png"/>
+                            <p onClick={toggleMenu} className="nome-usuario"> {nome}</p>
+                            <img className="imagem-dropdown" src="./images/setinha-dropdown.png"/>
+                            </div>
                         {menuAberto && (
                             <div className="dropdown-menu">
                                 <ul>

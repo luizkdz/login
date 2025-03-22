@@ -5,6 +5,7 @@ import Header from '../componentes/header/index.js';
 import './styles.css';
 import Banner from '../componentes/banner/index.js';
 import SessaoProdutos from "../componentes/secao-produtos/index.js";
+import CardCategorias from "../componentes/card-categorias/index.js";
 function PaginaInicial() {
   
   const navigate = useNavigate();
@@ -16,10 +17,13 @@ function PaginaInicial() {
     <div className="pagina-toda">
       <Header props="barra-pesquisa"/>
       <Banner/>
-      <SessaoProdutos/>
       <div className= "container-data">
       
-    </div>
+      
+      </div>  
+      <SessaoProdutos/>
+      <CardCategorias/>
+    
     </div>
   );
 }
