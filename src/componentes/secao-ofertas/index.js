@@ -67,13 +67,13 @@ function SecaoOfertas() {
 
     const avancar = () => {
         if(indice + itensVisiveis < ofertas.length){
-            setIndice(indice+1);    
+            setIndice(indice+4);    
         }
     };
 
     const voltar = () => {
         if(indice > 0){
-            setIndice(indice - 1);
+            setIndice(indice - 4);
         }
     }
     return (
@@ -84,9 +84,9 @@ function SecaoOfertas() {
             <button className="botao-setinha" disabled={indice === 0} onClick={voltar}>
             <img src = "./images/setinha-esquerda.png" disabled={indice === 0} className="imagem-setinha-esquerda"/>
                 </button>
-
+                <div className="lista-ofertas" key={indice}>
                 {ofertas.slice(indice, indice + itensVisiveis).map((item, index) => (
-                        <div key={index} className="card-ofertas"  >
+                        <div key={index} className="card-ofertas fade-in"  >
                             <img src={item.imagem} className="imagem-ofertas" alt={item.nome} />
                                 <p className="nome-ofertas">{item.nome}</p>
                                 <p className="preco-ofertas">{item.preco}</p>
@@ -94,6 +94,7 @@ function SecaoOfertas() {
                                 <p className="preco-pix-ofertas">ou <strong>{item.precoPix}</strong> no Pix</p>
                         </div>
                     ))}
+                    </div>
                     <button onClick={avancar} className="botao-setinha-direita" disabled= {indice + itensVisiveis >= ofertas.length} ><img src = "./images/setinha-direita.png" className="imagem-setinha-direita"/></button>
                     </div>
                     

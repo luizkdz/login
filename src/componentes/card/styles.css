@@ -24,3 +24,9 @@
 .descricao-produto{
     font-size:18px;
 }
+
+.info-produtos{
+    display:flex;
+    flex-direction: column;
+    gap:5px;
+}

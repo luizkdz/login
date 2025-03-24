@@ -30,7 +30,11 @@ function SessaoProdutos() {
     
     return (
         <div className="secao-produtos">
+            <div className="container-produtos">
+            <h1>Em promoção</h1>
+            <div className="container-cards-produtos">
             {produtos.map((item) => (
+                
                 <Card 
                     key={item.nome} 
                     imagem={item.imagem} 
@@ -39,7 +43,8 @@ function SessaoProdutos() {
                     descricao={item.descricao}
                 onClick = {() => {redirectProduct(item.id)}}
                 />
-            ))}
+            ))}</div>
+        </div>
         </div>
     );
 }
