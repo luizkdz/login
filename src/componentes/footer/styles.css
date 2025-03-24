@@ -1,0 +1,8 @@
+.secao-footer{
+    padding-top:20px;
+    height: auto;
+    width:100vw;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+}
