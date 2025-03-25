@@ -154,6 +154,8 @@ const chunkArray = (arr, size) => {
   }, []);
 };
 
+ 
+
 
 function Header({props}) {
     const [nome, setNome] = useState("");
@@ -231,13 +233,13 @@ function Header({props}) {
         <header>
           <div className="nav-todo">
             <div className="nav-div">
-                <img className="imagem-logo" src="./images/logo.svg" alt="Logo" />
+                <img className="imagem-logo" src="/images/logo.svg" alt="Logo" />
 
                 <div className="container-pesquisa">
                     {props && (
                         <div className="input-wrapper">
                             <input className="input-pesquisa" placeholder="Buscar produtos e marcas" />
-                            <img className="icone-lupa" src="./images/lupa.png" alt="Buscar" />
+                            <img className="icone-lupa" src="/images/lupa.png" alt="Buscar" />
                             <div className="nome-usuario">
                             </div>
                         </div>
@@ -246,10 +248,10 @@ function Header({props}) {
                     {props && (
                         <div className="container-usuario">
                           <div className="usuario-setinha">
-                            <img className="imagem-notificacao" src = "./images/notification.png"/>
-                            <img className="imagem-carrinho" src = "./images/carrinho-de-compras.png"/>
+                            <img className="imagem-notificacao" src = "/images/notification.png"/>
+                            <img className="imagem-carrinho" src = "/images/carrinho-de-compras.png"/>
                             <p onClick={toggleMenu} className="nome-usuario"> {nome}</p>
-                            <img className="imagem-dropdown" src="./images/setinha-dropdown.png"/>
+                            <img className="imagem-dropdown" src="/images/setinha-dropdown.png"/>
                             </div>
                         {menuAberto && (
                             <div className="dropdown-menu">
@@ -273,13 +275,13 @@ function Header({props}) {
                 <div className="container-link-produtos">
                   <a className="link-secao-links">
                     Todos os produtos
-                    <img className="imagem-dropdown-produtos" src="./images/setinha-dropdown.png" alt="Seta dropdown" />
+                    <img className="imagem-dropdown-produtos" src="/images/setinha-dropdown.png" alt="Seta dropdown" />
                   </a>
                   <div className="menu-link-produtos">
                     <ul className="ul-produtos">
-                      {categorias.map((categoria, index) => {
+                      {categorias.slice(0,11).map((categoria, index) => {
                         const groupedItems = chunkArray(categoria.subcategorias, 5);
-
+                        
                         return   (
                           
                         <div className="container-menu-submenu">
@@ -301,13 +303,79 @@ function Header({props}) {
                   </div>
                 </div>
               </div>
-        
-              <a className="link-secao-links">Ofertas</a>
-              <a className="link-secao-links">Imóveis</a>
-              <a className="link-secao-links">Eletrodomésticos</a>
-              <a className="link-secao-links">Informática</a>
-              <a className="link-secao-links">Televisão</a>
-              <a className="link-secao-links">Celulares</a>
+        <div className="ofertas-container">
+        <a href="#" className="link-secao-links">Ofertas
+        <div className="menu-ofertas">
+        <ul>
+          <li>Oferta 1</li>
+          <li>Oferta 2</li>
+          <li>Oferta 3</li>
+          </ul>
+</div>
+</a>
+
+              </div>
+              <div className="ofertas-container">
+              <a className="link-secao-links">Imóveis
+        <div className="menu-ofertas">
+        <ul>
+          <li>Oferta 1</li>
+          <li>Oferta 2</li>
+          <li>Oferta 3</li>
+          </ul>
+</div>
+</a>
+              </div>
+              
+              
+              <div className="ofertas-container">
+              <a className="link-secao-links">Eletrodomésticos
+        <div className="menu-eletrodomesticos">
+        <ul>
+          <li>Oferta 1</li>
+          <li>Oferta 2</li>
+          <li>Oferta 3</li>
+          </ul>
+</div>
+</a>
+              </div>
+              <div className="ofertas-container">
+              <a className="link-secao-links">Informática
+        <div className="menu-ofertas">
+        <ul>
+          <li>Oferta 1</li>
+          <li>Oferta 2</li>
+          <li>Oferta 3</li>
+          </ul>
+</div>
+</a>
+              </div>
+              
+              
+              <div className="ofertas-container">
+              <a className="link-secao-links">Televisão
+        <div className="menu-ofertas">
+        <ul>
+          <li>Oferta 1</li>
+          <li>Oferta 2</li>
+          <li>Oferta 3</li>
+          </ul>
+</div>
+</a>
+              </div>
+              
+              <div className="ofertas-container">
+              <a className="link-secao-links">Celulares
+        <div className="menu-ofertas">
+        <ul>
+          <li>Oferta 1</li>
+          <li>Oferta 2</li>
+          <li>Oferta 3</li>
+          </ul>
+</div>
+</a>
+              </div>
+              
             </div>
             )}
             </div>

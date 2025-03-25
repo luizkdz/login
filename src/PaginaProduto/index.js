@@ -23,7 +23,7 @@ function PaginaProduto(){
 
     return (
         <div>
-            <Header/>
+            <Header props/>
             {produto ? (
                 <>
                     <h1>{produto.nome}</h1>
