@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import './styles.css';
 import Header from '../componentes/header/index.js'
+import Footer from "../componentes/footer/index.js";
 function EsqueciSenha() {
     const[email,setEmail] = useState("");
     
@@ -38,6 +39,7 @@ function EsqueciSenha() {
                 
         </div>
     </div>
+    <Footer/>
     </div>
     
 )

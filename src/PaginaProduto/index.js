@@ -2,7 +2,8 @@ import { useParams } from 'react-router-dom';
 import './styles.css';
 import { useState,useEffect } from 'react';
 import axios from 'axios';
-
+import Header from '../componentes/header';
+import Footer from '../componentes/footer';
 function PaginaProduto(){
     const { id} = useParams();
     const [produto,setProduto] = useState(null);
@@ -22,6 +23,7 @@ function PaginaProduto(){
 
     return (
         <div>
+            <Header/>
             {produto ? (
                 <>
                     <h1>{produto.nome}</h1>
@@ -32,6 +34,7 @@ function PaginaProduto(){
             ) : (
                 <p>Carregando...</p>
             )}
+            <Footer/>
         </div>
     );  
 }

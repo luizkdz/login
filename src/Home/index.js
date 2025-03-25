@@ -3,6 +3,7 @@ import { useState } from "react";
 import axios from "axios";
 import { GoogleLogin } from '@react-oauth/google';
 import Header from '../componentes/header';
+import Footer from '../componentes/footer';
 import './styles.css';
 function Home(){
 
@@ -56,6 +57,7 @@ const handleGoogleRedirect = () => {
         </form>
       </div>
       </div>
+      <Footer/>
       </div>
 
     

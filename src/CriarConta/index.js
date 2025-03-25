@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import './styles.css';
 import Header from '../componentes/header/index.js'
-
+import Footer from "../componentes/footer/index.js";
 function CriarConta(){
 
     const [nome, setNome] = useState('');
@@ -44,6 +44,7 @@ function CriarConta(){
         
     </div>
     </div>
+    <Footer/>
     </div>
 
 )}

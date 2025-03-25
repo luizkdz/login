@@ -109,3 +109,112 @@
 .nome-usuario{
     color:white;
 }
+
+.secao-links{
+    display:flex;
+    gap:40px;
+    justify-content: center;
+}
+
+.nav-todo{
+    background-color: #111111;
+}
+
+.container-links-produtos{
+    display:flex;
+
+}
+
+.imagem-dropdown-produtos{
+    width:25px;
+    height:25px;
+    
+}
+
+.container-link-produtos {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .menu-link-produtos {
+    display: none;
+    position:absolute;
+    top: 100%; 
+    left: 0;
+    background-color: #111111;
+    border: 1px solid #111111;
+    padding: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    width:300px;
+    height:500px;
+    z-index: 1000; 
+  }
+  
+  
+  .container-link-produtos:hover .menu-link-produtos {
+    display: block;
+  }
+  
+ 
+  .link-secao-links {
+    display: flex;
+    padding: 10px;
+    text-decoration: none;
+    color: white;
+  }
+  
+
+.ul-produtos{
+    position:relative;
+    display:flex;
+    flex-direction: column;
+    
+    list-style: none;
+}
+
+.li-categorias{
+    color:white;
+}
+.container-menu-submenu {
+    display: flex; 
+  }
+  
+  .submenu {
+    position: absolute;
+    top: -15px;
+    left: 100%; 
+    display: none; 
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 700px;
+    height:504px;
+  }
+  
+  .container-menu-submenu:hover .submenu {
+    display: block; 
+  }
+  
+  .submenu ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .submenu li {
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+  
+  .submenu li:hover {
+    background-color: #f1f1f1;
+  }
+
+  .submenu-itens{
+    display:flex;
+    flex-direction: column;
+  }
+
+  .submenu-fileiras{
+    display:flex;
+  }

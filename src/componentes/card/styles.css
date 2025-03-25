@@ -14,16 +14,6 @@
     height:100px;
 }
 
-.nome-produto{
-    font-size: 18px;
-}
-
-.preco-produto{
-    font-size: 18px;
-}
-.descricao-produto{
-    font-size:18px;
-}
 
 .info-produtos{
     display:flex;

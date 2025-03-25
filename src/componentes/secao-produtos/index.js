@@ -31,7 +31,7 @@ function SessaoProdutos() {
     return (
         <div className="secao-produtos">
             <div className="container-produtos">
-            <h1>Em promoção</h1>
+            <h1>Em oferta</h1>
             <div className="container-cards-produtos">
             {produtos.map((item) => (
                 
