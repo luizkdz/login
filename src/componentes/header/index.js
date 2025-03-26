@@ -232,6 +232,16 @@ function Header({props}) {
     return (
         <header>
           <div className="nav-todo">
+            <div className="container-links-topo">
+              <a href="#">Nossos produtos</a>
+              <a href="#">Nossas regras</a>
+              <a href="#">Tenha um estabelecimento</a>
+              <a href="#">Segurança e privacidade</a>
+              <a href="#">Atendimento</a>
+              <span>Compre pelo telefone: XXXXX-XXXX</span>
+              <a href="#">Fale conosco</a>
+              
+              </div>
             <div className="nav-div">
                 <img className="imagem-logo" src="/images/logo.svg" alt="Logo" />
 
@@ -378,6 +388,7 @@ function Header({props}) {
               
             </div>
             )}
+            
             </div>
         </header>
     );

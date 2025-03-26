@@ -22,9 +22,9 @@ function Footer() {
                 <div className="footer-section">
                     <h3>Redes Sociais</h3>
                     <div className="social-icons">
-                        <a href="#"><img src="./images/facebook.png" alt="Facebook" />Facebook</a>
-                        <a href="#"><img src="./images/instagram.png" alt="Instagram" />Instagram</a>
-                        <a href="#"><img src="./images/twitter.png" alt="Twitter" />Twitter</a>
+                        <a href="#"><img src="/images/facebook.png" alt="Facebook" />Facebook</a>
+                        <a href="#"><img src="/images/instagram.png" alt="Instagram" />Instagram</a>
+                        <a href="#"><img src="/images/twitter.png" alt="Twitter" />Twitter</a>
                     </div>
                 </div>
             </div>
@@ -36,7 +36,15 @@ function Footer() {
             <a href="https://www.flaticon.com/free-icons/facebook" title="facebook icons">Facebook icons created by Pixel perfect - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/instagram-logo" title="instagram logo icons">Instagram logo icons created by Pixel perfect - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/twitter-logo" title="twitter logo icons">Twitter logo icons created by Md Tanvirul Haque - Flaticon</a>    
-                <p>&copy; 2025 Login ltda</p>
+            <a href="https://www.flaticon.com/free-icons/localization" title="localization icons">Localization icons created by Fathema Khanom - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/right-arrow" title="right arrow icons">Right arrow icons created by Steven Edward Simanjuntak - Flaticon</a> 
+            <a href="https://www.flaticon.com/free-icons/gold" title="gold icons">Gold icons created by Nuricon - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/individual" title="individual icons">Individual icons created by meaicon - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/open-menu" title="open menu icons">Open menu icons created by Pixel perfect - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/shopping-bag" title="shopping bag icons">Shopping bag icons created by Darius Dan - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/fast-delivery" title="fast delivery icons">Fast delivery icons created by nawicon - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/commerce-and-shopping" title="commerce and shopping icons">Commerce and shopping icons created by Iconsmeet - Flaticon</a>
+            <p>&copy; 2025 Login ltda</p>
             </div>
         </footer>
     );

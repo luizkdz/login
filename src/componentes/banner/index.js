@@ -21,7 +21,7 @@ function Banner() {
     const selecionarImagem = (index) => {
         setIndice(index);
     };
-
+    
     return (
         <div className="banner-container">
             <div className="secao-banner">
