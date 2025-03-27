@@ -25,13 +25,18 @@
 }
 
 .imagem-card-pagina-produto{
+    cursor:pointer;
     box-sizing: border-box;
-    border:2px solid grey;
+    border:2px solid rgb(224, 187, 187);
     padding:10px;
     border-radius: 10px;
     margin-left:10px;
     width:100px;
     height:100px;
+}
+
+.imagem-card-pagina-produto:hover{
+    border-color: blue;
 }
 .container-imagem-card-produto{
     display: flex;
@@ -118,7 +123,7 @@
     display:flex;
     flex-direction: column;
     gap:20px;
-    margin-top:-120px;
+    margin-top:-180px;
 }
 
 .link-todas-avaliacoes{
@@ -251,8 +256,12 @@
 
     width:100%;
     display:flex;
-    justify-content: flex-end;
+    justify-content: space-between;    
     padding-right:50px;
+}
+
+.empty{
+    flex:1
 }
 
 .imagem-caminhao-frete{
@@ -288,11 +297,12 @@
 .container-informacoes-loja{
     
     display:flex;
-    justify-content: end;
+    margin-top:30px;
     padding-right:50px;
 }
 
 .card-vendedor{
+    
     display:flex;
     flex-direction: column;
 }
@@ -314,4 +324,24 @@
     padding-right:50px;
     display:flex;
     justify-content: space-between;
+}
+
+.icone-avaliacao{
+    width:80px;
+    height:40px;
+}
+
+.caixa-texto-icones{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.icones-avaliacoes-vendedor{
+    display:flex;
+    gap:50px;
+}
+
+.fonte-produtos-vendidos{
+    font-size: 10px;
 }

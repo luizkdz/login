@@ -7,11 +7,12 @@ import Footer from '../componentes/footer';
 function PaginaProduto(){
     const { id} = useParams();
     const [produto,setProduto] = useState(null);
-
+    const [imagemSelecionada, setImagemSelecionada] = useState("");
     const buscarProduto = async () => {
         try{
             const resposta = await axios.get(`http://localhost:5000/produto/${id}`);
             setProduto(resposta.data.produto);
+            setImagemSelecionada(resposta.data.produto.imagem)
         }
         catch(err){
             console.log("Erro ao buscar produto");
@@ -34,15 +35,15 @@ function PaginaProduto(){
                     <div className="container-frete">
                     <div className="container-imagens">
                     <div className="container-imagem-card-produto">
-                    <img className="imagem-card-pagina-produto"src={produto.imagem} alt={produto.nome} />
-                    <img className="imagem-card-pagina-produto"src={produto.imagem} alt={produto.nome} />
-                    <img className="imagem-card-pagina-produto"src={produto.imagem} alt={produto.nome} />
-                    <img className="imagem-card-pagina-produto"src={produto.imagem} alt={produto.nome} />
-                    <img className="imagem-card-pagina-produto"src={produto.imagem} alt={produto.nome} />
+                    <img className="imagem-card-pagina-produto"src={produto.imagem} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagem)}/>
+                    <img className="imagem-card-pagina-produto"src={produto.imagem} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagem)}/>
+                    <img className="imagem-card-pagina-produto"src={produto.imagem} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagem)}/>
+                    <img className="imagem-card-pagina-produto"src={produto.imagem} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagem)}/>
+                    <img className="imagem-card-pagina-produto"src={produto.imagem} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagem)}/>
                     
                     </div>
                     <div className="container-imagem-pagina-produto">
-                    <img className="imagem-pagina-produto"src={produto.imagem} alt={produto.nome} />
+                    <img className="imagem-pagina-produto" src={imagemSelecionada} alt={produto.nome} />
                     </div>
                     <div className="container-preco-avaliacao">
                         <p>*********** 4.8 (3199) <a href="#">Avaliar Produto</a></p>
@@ -80,6 +81,7 @@ function PaginaProduto(){
                     
                     </div>
                     <div className="container-card-frete">
+                        <div className="empty"></div>
                     <div className="card-frete">
                         <div className="container-imagem-texto">
                         <img src="/images/caminhao.png" className="imagem-caminhao-frete"/>
@@ -110,13 +112,32 @@ function PaginaProduto(){
                         <p>Nome do vendedor</p>
                         <p>Vendedor cadastrado desde 2019</p>
                         </div>
+                        
                         </div>
                         <img src="/images/barra-amarela.png" className="imagem-grafico" alt="imagem-grafico"/>
+                        <div className="icones-avaliacoes-vendedor">
+                            <div className="caixa-texto-icones">
+                                <img src="/images/shopping-bag-preta.png" className="icone-avaliacao"/>
+                                <p><strong>+200</strong></p>
+                                <p className="fonte-produtos-vendidos">Produtos vendidos</p>
+                            </div>
+                            <div className="caixa-texto-icones">
+                                <img src="/images/caminhao-entrega.png" className="icone-avaliacao"/>
+                                <p><strong>Entrega</strong></p>
+                                <p className="fonte-produtos-vendidos">Entrega pontual</p>
+                            </div>
+                            <div className="caixa-texto-icones">
+                                <img src="/images/chat.png" className="icone-avaliacao"/>
+                                <p><strong>Atendimento</strong></p>
+                                <p className="fonte-produtos-vendidos">Responde rápido</p>
+                            </div>
+                        </div>
                         </div>
                     </div>
                     <div className="informacoes-produto">
                     
                     <p>{produto.descricao}</p>
+                    
                     <div className="ver-todas-avaliacoes">
                     <a className="link-todas-avaliacoes" href="#">Ver todas as avaliações<img src="/images/right-arrow.png" className="icone-seta-avaliacoes"/></a>
                     </div>

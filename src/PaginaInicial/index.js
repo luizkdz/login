@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Header from '../componentes/header/index.js';
 import './styles.css';
@@ -10,11 +8,6 @@ import Conecte from "../componentes/secao-conecte/index.js";
 import SecaoOfertas from "../componentes/secao-ofertas/index.js";
 import Footer from "../componentes/footer/index.js";
 function PaginaInicial() {
-  
-  const navigate = useNavigate();
-
-  
-
   
   return (
     <div className="pagina-toda">

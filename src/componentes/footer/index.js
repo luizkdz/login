@@ -44,6 +44,8 @@ function Footer() {
             <a href="https://www.flaticon.com/free-icons/shopping-bag" title="shopping bag icons">Shopping bag icons created by Darius Dan - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/fast-delivery" title="fast delivery icons">Fast delivery icons created by nawicon - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/commerce-and-shopping" title="commerce and shopping icons">Commerce and shopping icons created by Iconsmeet - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/truck" title="truck icons">Truck icons created by Google - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/comment" title="comment icons">Comment icons created by Smashicons - Flaticon</a>
             <p>&copy; 2025 Login ltda</p>
             </div>
         </footer>
