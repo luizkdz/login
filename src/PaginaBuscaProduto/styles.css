@@ -1,0 +1,52 @@
+.imagem-texto-card{
+    display:flex;
+   gap: 20px;
+    
+}
+
+.container-texto-card-produto{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    width:200px;
+    
+}
+
+.card-produto-busca-produto{
+    flex: 0 0 48%;
+    box-sizing: border-box;
+    border:2px solid #f0f0f0;
+    align-items: center;
+    text-align: center;
+    display:flex;
+    width:450px;
+}
+
+.container-card-produtos{
+    display:flex;
+    position:relative;
+}
+
+
+.botao-voltar{
+    border:none;
+    background-color: transparent;
+}
+
+.botao-avancar{
+    border:none;
+    background-color: transparent;
+   
+   margin-left:-20px;
+}
+
+.oferta-nome{
+    font-size: 14px;
+}
+
+.container-titulo-exibicao-produtos{
+    margin-top:20px;
+    display:flex;
+    justify-content: space-between;
+}
+
