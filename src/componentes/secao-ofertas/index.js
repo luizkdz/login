@@ -76,6 +76,8 @@ function SecaoOfertas() {
             setIndice(indice - 4);
         }
     }
+
+
     return (
         <div className="secao-ofertas">
             <div className="container-ofertas">

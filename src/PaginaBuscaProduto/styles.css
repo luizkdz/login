@@ -1,6 +1,7 @@
 .imagem-texto-card{
     display:flex;
    gap: 20px;
+   
     
 }
 
@@ -40,13 +41,32 @@
    margin-left:-20px;
 }
 
-.oferta-nome{
-    font-size: 14px;
-}
-
-.container-titulo-exibicao-produtos{
+.paginacao{
     margin-top:20px;
     display:flex;
-    justify-content: space-between;
+    gap:20px;
+    justify-content: center;
 }
 
+.paginacao button{
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    background-color:#111111;
+    box-sizing: border-box;
+    border: 2px solid #111111;
+    border-radius:10px;
+    color:white;
+    width:30px;
+    height:26px;
+}
+
+.seta-branca{
+    width:30px;
+    height:26px;
+}
+
+.seta-branca-esquerda{
+    width:30px;
+    height:23px;
+}
