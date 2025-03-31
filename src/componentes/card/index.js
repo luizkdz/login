@@ -9,7 +9,7 @@ function Card({imagem, nome, preco, descricao, onClick}) {
             <div className="info-produtos">
             <p className="nome-produto">{nome}</p>
             <p className="preco-produto">R$ {preco}</p>
-            <p className="descricao-produto">{descricao}</p>
+            <p className="descricao-produto">{descricao.length > 20 ? descricao.slice(0, 17) + "..." : descricao}</p>
             </div>
         </div>
 

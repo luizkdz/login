@@ -266,24 +266,71 @@ app.get("/produtos", async (req,res) => {
         if(produtos.length === 0 ){
         return res.status(400).json({message: "Não existem produtos cadastrados"});
     }
-    res.status(200).json(produtos);
+    const produtosComParcelamento = produtos.map((produto) => {
+        
+        const parcelas_maximas = produto.parcelas_maximas || 1; // Garante pelo menos 1 parcela
+        const opcoesParcelamento = [];
+
+        for (let i = 1; i <= parcelas_maximas; i++) {
+            opcoesParcelamento.push({
+                parcelas: i,
+                valorParcela: (preco / i).toFixed(2),
+            });
+        }
+
+        return {
+            ...produto,
+            parcelas: opcoesParcelamento, 
+        };
+    });
+
+    res.status(200).json(produtosComParcelamento);
 } catch(err){
     res.status(500).json({message: "Erro ao buscar produtos"});
 }})
 
 app.get("/produto/:id", async (req, res) => {
     const {id} = req.params;
-    try{
-        const [produto] = await db.query("SELECT * FROM PRODUTOS WHERE ID = ?",[id]);
-        if(produto.length === 0){
+    try {
+        const [produto] = await db.query(`
+            SELECT 
+    p.id AS produto_id,
+    p.nome AS produto_nome,
+    p.descricao AS produto_descricao,
+    p.preco AS produto_preco,
+    p.preco_parcelado AS produto_preco_parcelado,
+    p.parcelas_máximas AS produto_parcelas_máximas,
+    p.preco_pix AS produto_preco_pix,
+    p.desconto AS produto_desconto,
+    p.estoque AS produto_estoque,
+    c.nome AS categoria_nome
+    
+    FROM produtos p
+    LEFT JOIN categorias c ON p.categoria_id = c.id
+    WHERE p.id = ?;`, [id]);
+
+    const [imagens] = await db.query("Select url from imagens_produto where produto_id = ?",[id]);
+
+    const [avaliacoes] = await db.query("select nota,comentario,usuario_id from avaliacoes where produto_id = ?",[id]);
+
+    const [frete] = await db.query("select localidade, valor, prazo from frete where produto_id = ?",[id]);
+
+        if (produto.length === 0) {
             return res.status(400).json({message: "Produto não encontrado"});
         }
-        res.status(200).json({produto: produto[0]});
+
+        const produtoFormatado = {
+            ...produto[0],
+            imagens: imagens.map(img => img.url),
+            avaliacoes: avaliacoes,
+            frete:frete.length ? frete[0] : null
+        };
+
+        res.status(200).json({produto: produtoFormatado});
+    } catch (error) {
+        res.status(500).json({message: "Erro no servidor"});
     }
-    catch(error){
-        res.status(500).json({message:"Erro no servidor"});
-    }
-})
+});
 
 
 app.listen(port, () => {console.log("servidor rodando na porta " + `${port}`)});

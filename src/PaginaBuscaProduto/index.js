@@ -4,7 +4,8 @@ import Footer from '../componentes/footer';
 import Header from '../componentes/header';
 import './styles.css';
 import CardPaginaBuscaProduto from '../componentes/card-pagina-busca-produto';
-
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const filtros = [
     { titulo: 'Categoria', itens: ['Elétrica', 'Manual', 'Pneumática', 'Acessórios', 'Compressor'], isCheckBox: false },
@@ -18,74 +19,33 @@ const filtros = [
     { titulo: 'Tipo de Produto', itens: ['Alicate', 'Chave de fenda', 'Martelo', 'Furadeira'], isCheckBox: true },
 ];
 
-const ofertas = [
-    {
-        nome: "Notebook Arius 4124",
-        imagem: "./images/prato1.jpeg",
-        preco: "R$ 3.500,00",
-        precoParcelado: "12x de R$ 350,00",
-        precoPix: "R$ 3.200,00"
-    },
-    {
-        nome: "Smartphone Zeta X10",
-        imagem: "./images/prato2.jpeg",
-        preco: "R$ 2.000,00",
-        precoParcelado: "10x de R$ 200,00",
-        precoPix: "R$ 1.850,00"
-    },
-    {
-        nome: "Fone de Ouvido BassPro",
-        imagem: "./images/prato3.jpeg",
-        preco: "R$ 250,00",
-        precoParcelado: "5x de R$ 50,00",
-        precoPix: "R$ 220,00"
-    },
-    {
-        nome: "Smart TV 55' Ultra HD",
-        imagem: "./images/imagem-jogos.png",
-        preco: "R$ 4.500,00",
-        precoParcelado: "10x de R$ 450,00",
-        precoPix: "R$ 4.100,00"
-    },{
-        nome: "Notebook Arius 4124",
-        imagem: "./images/prato1.jpeg",
-        preco: "R$ 3.500,00",
-        precoParcelado: "12x de R$ 350,00",
-        precoPix: "R$ 3.200,00"
-    },
-    {
-        nome: "Smartphone Zeta X10",
-        imagem: "./images/prato2.jpeg",
-        preco: "R$ 2.000,00",
-        precoParcelado: "10x de R$ 200,00",
-        precoPix: "R$ 1.850,00"
-    },
-    {
-        nome: "Fone de Ouvido BassPro",
-        imagem: "./images/prato3.jpeg",
-        preco: "R$ 250,00",
-        precoParcelado: "5x de R$ 50,00",
-        precoPix: "R$ 220,00"
-    },
-    {
-        nome: "Smart TV 55' Ultra HD",
-        imagem: "./images/imagem-jogos.png",
-        preco: "R$ 4.500,00",
-        precoParcelado: "10x de R$ 450,00",
-        precoPix: "R$ 4.100,00"
-    }
-];
 
 function PaginaBuscaProduto() {
 
+    const [produtos,setProdutos] = useState([]);
+
+    const fetchProducts = async () => {
+        try{
+            const resposta = await axios.get("http://localhost:5000/produtos");
+            setProdutos(resposta.data);
+        }
+        catch(err){
+            console.log("Erro ao buscar produtos", err);
+        }
+
+    }
+
+    useEffect(() => {
+        fetchProducts();
+    },[])
     const [indice,setIndice] = useState(0);
     const produtosPorPagina = 8;
     const[paginaAtual, setPaginaAtual] = useState(1);
     
-    const totalPaginas = Math.ceil(ofertas.length/produtosPorPagina);
+    const totalPaginas = Math.ceil(produtos.length/produtosPorPagina);
     const indiceInicial = (paginaAtual - 1) * produtosPorPagina;
     const indiceFinal = indiceInicial + produtosPorPagina;
-    const produtosPaginados = ofertas.slice(indiceInicial/indiceFinal);
+    const produtosPaginados = produtos.slice(indiceInicial,indiceFinal);
 
     const limitePaginasVisiveis = 5;
 
@@ -118,7 +78,7 @@ function PaginaBuscaProduto() {
         const itensVisiveis = 2;
     
         const avancar = () => {
-            if(indice + itensVisiveis < ofertas.length){
+            if(indice + itensVisiveis < produtos.length){
                 setIndice(indice+2);    
             }
             else{
@@ -131,11 +91,18 @@ function PaginaBuscaProduto() {
                 setIndice(indice - 2);
             }
             else{
-                setIndice(ofertas.length - itensVisiveis)
+                setIndice(produtos.length - itensVisiveis)
             }
         }
     
-        setInterval(avancar,8000);
+        const calcularPrecoParcelado = (preco, parcelas) => {
+            return (preco / parcelas).toFixed(2);
+        };
+
+        const navigate = useNavigate();
+        const redirectProduct = (id) => {
+        navigate(`/produto/${id}`)
+    }
 
     return (
         <div className="pagina-toda-busca-produto">
@@ -154,15 +121,15 @@ function PaginaBuscaProduto() {
             <div className="container-card-produtos">
             <button className="botao-voltar" onClick={voltar}><img src="/images/setinha-esquerda.png" className="imagem-setinha-esquerda"/></button>
                 <div className="imagem-texto-card" key={indice} >
-                   {ofertas.slice(indice, indice + 2).map((oferta,index) => {
+                   {produtos.slice(indice, indice + 2).map((oferta,index) => {
                     return (
-                    <div className="card-produto-busca-produto fade-in" key={index}>
+                    <div className="card-produto-busca-produto fade-in" key={index} onClick={() => {redirectProduct(oferta.id)}}>
                         <img src={oferta.imagem} className="imagem-secao-card-produtos"/>
                             <div className="container-texto-card-produto">
-                                <p className="oferta-nome">{oferta.nome}</p>
-                                <p>{oferta.preco}</p>
-                                <p>{oferta.precoParcelado}</p>
-                                <p><strong>{oferta.precoPix}</strong> no Pix</p>
+                                <p className="oferta-nome">{oferta.nome.length > 255 ? oferta.nome.slice(0, 252) + "..." : oferta.nome}</p>
+                                <p>R$ {oferta.preco}</p>
+                                <p>em {oferta.parcelas_maximas}x de R$ {calcularPrecoParcelado(oferta.preco_parcelado, oferta.parcelas_maximas)}</p>
+                                <p><strong>R${oferta.preco_pix}</strong> no Pix</p>
                         </div>
                         </div>
                     )
@@ -192,7 +159,7 @@ function PaginaBuscaProduto() {
                     <div className="secao-mostrar-produtos">
                         {produtosPaginados.map((oferta, index) => {
                       return(
-                            <CardPaginaBuscaProduto key = {index} oferta={oferta}/>        
+                            <CardPaginaBuscaProduto key = {index} oferta={oferta} onClick={() => redirectProduct(oferta.id)}/>        
                     )
                         })}
                     </div>

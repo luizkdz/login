@@ -22,6 +22,7 @@
 }
 
 .card-produto-pagina-busca{
+    cursor:pointer;
     padding:10px;
     height:500px;
     box-sizing:border-box;
@@ -82,4 +83,9 @@
 .texto-entrega{
     font-size:14px;
     color:white;
+}
+
+.estrela-avaliacao{
+    width:25px;
+    height:20px;
 }

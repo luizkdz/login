@@ -14,6 +14,7 @@
 }
 
 .card-produto-busca-produto{
+    cursor:pointer;
     flex: 0 0 48%;
     box-sizing: border-box;
     border:2px solid #f0f0f0;

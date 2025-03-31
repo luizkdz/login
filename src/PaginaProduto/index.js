@@ -12,7 +12,7 @@ function PaginaProduto(){
         try{
             const resposta = await axios.get(`http://localhost:5000/produto/${id}`);
             setProduto(resposta.data.produto);
-            setImagemSelecionada(resposta.data.produto.imagem)
+            setImagemSelecionada(resposta.data.produto.imagens[0]);
         }
         catch(err){
             console.log("Erro ao buscar produto");
@@ -22,6 +22,36 @@ function PaginaProduto(){
         buscarProduto();
     },[])
 
+    const calcularEstrelas = (avaliacao) => {
+        const totalEstrelas = 5;
+        const inteira = Math.floor(avaliacao);
+        const temMeia = avaliacao % 1 !== 0;
+        const estrelas = [];
+    
+        for (let i = 0; i < inteira; i++) {
+            estrelas.push(<img key={i} src="/images/estrelacheia.png" className="estrela-avaliacao" alt="⭐" />);
+        }
+        if (temMeia) {
+            estrelas.push(<img key="meia" src="/images/meiaestrela.png" className="estrela-avaliacao" alt="⭐½" />);
+        }
+        while (estrelas.length < totalEstrelas) {
+            estrelas.push(<img key={estrelas.length} src="/images/estrelavazia.png" className="estrela-avaliacao" alt="☆" />);
+        }
+        return estrelas;
+    };
+    const calcularFrete = (valor) => {
+        return valor == 0 ? "Frete Grátis" : `Frete: R$ ${valor.toFixed(2)}`;
+    };
+    
+    const calcularDesconto = (desconto) => {
+        const descontoNumber = Number(desconto);
+        return descontoNumber ? `(${descontoNumber}% de desconto no pix)` : "";
+    }
+
+    const calcularPrecoParcelado = (preco, parcelas) => {
+        return (preco / parcelas).toFixed(2);
+    };
+
     return (
         <div>
             <Header props/>
@@ -30,25 +60,25 @@ function PaginaProduto(){
             {produto ? (
                 <>
                 <div className="titulo-produto-pagina-produto">
-                    <h1>{produto.nome}</h1>
+                    <h1>{produto.produto_nome.length > 255 ? produto.produto_nome.slice(0,252) + '...' : produto.produto_nome}</h1>
                     </div>
                     <div className="container-frete">
                     <div className="container-imagens">
                     <div className="container-imagem-card-produto">
-                    <img className="imagem-card-pagina-produto"src={produto.imagem} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagem)}/>
-                    <img className="imagem-card-pagina-produto"src={produto.imagem} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagem)}/>
-                    <img className="imagem-card-pagina-produto"src={produto.imagem} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagem)}/>
-                    <img className="imagem-card-pagina-produto"src={produto.imagem} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagem)}/>
-                    <img className="imagem-card-pagina-produto"src={produto.imagem} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagem)}/>
+                    <img className="imagem-card-pagina-produto"src={produto.imagens[0]} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagens[0])}/>
+                    <img className="imagem-card-pagina-produto"src={produto.imagens[1]} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagens[1])}/>
+                    <img className="imagem-card-pagina-produto"src={produto.imagens[2]} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagens[2])}/>
+                    <img className="imagem-card-pagina-produto"src={produto.imagens[3]} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagens[3])}/>
+                    <img className="imagem-card-pagina-produto"src={produto.imagens[4   ]} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagens[4])}/>
                     
                     </div>
                     <div className="container-imagem-pagina-produto">
                     <img className="imagem-pagina-produto" src={imagemSelecionada} alt={produto.nome} />
                     </div>
                     <div className="container-preco-avaliacao">
-                        <p>*********** 4.8 (3199) <a href="#">Avaliar Produto</a></p>
+                        <p>{calcularEstrelas(produto.avaliacao)} {produto.avaliacao} (500) <a href="#">Avaliar Produto</a></p>
                         <p>Cor: preta</p>
-                        <img className="imagem-container-preco" src={produto.imagem}></img>
+                        <img className="imagem-container-preco" src={produto.imagens[0]}></img>
                         <p>Vendido e entregue por </p>
                         <p>Nossa loja garante sua compra <a href="#">Saiba mais</a></p>
                         <p>{produto.preco}</p>
