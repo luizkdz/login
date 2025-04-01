@@ -315,16 +315,69 @@ app.get("/produto/:id", async (req, res) => {
 
     const [frete] = await db.query("select localidade, valor, prazo from frete where produto_id = ?",[id]);
 
+    const [variacoes] = await db.query("select nome, valor from variacoes_produto where produto_id = ?",[id]);
+
+    const [vendedores] = await db.query("select u.nome, u.created_at,ve.total_vendidos,ve.nota_entrega,ve.nota_atendimento from usuarios u join produtos p ON p.user_id = u.id left join vendedores_estatisticas ve on ve.user_id = u.id where p.id = ?",[id]);
+
+    const [usuariosComentarios] = await db.query("SELECT u.nome,u.foto_url, a.created_at, a.nota, a.comentario FROM usuarios u JOIN avaliacoes a ON u.id = a.usuario_id WHERE a.produto_id = ? ",[id]);
+    
         if (produto.length === 0) {
             return res.status(400).json({message: "Produto não encontrado"});
         }
 
+        
+        const vendedoresFormatados = vendedores.map(vendedor => ({
+            nome: vendedor.nome,
+            cliente_desde: new Date(vendedor.created_at).getFullYear(),
+            total_vendidos: vendedor.total_vendidos,
+            nota_entrega:vendedor.nota_entrega,
+            nota_atendimento:vendedor.nota_atendimento
+        }))
+
+        const totalAvaliacoes = avaliacoes.length;
+        const mediaAvaliacoes = totalAvaliacoes > 0 ? (avaliacoes.reduce((sum, a) => sum + parseFloat(a.nota), 0) / totalAvaliacoes) : 0.0;
+        const totalComentarios = avaliacoes.filter((a) => a.comentario && a.comentario.trim() !== '').length;
+
+        function formatTimeAgo(date) {
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - new Date(date)) / 1000);
+        
+            const years = Math.floor(diffInSeconds / (60 * 60 * 24 * 365));
+            const months = Math.floor(diffInSeconds / (60 * 60 * 24 * 30));
+            const days = Math.floor(diffInSeconds / (60 * 60 * 24));
+            const hours = Math.floor(diffInSeconds / (60 * 60));
+            const minutes = Math.floor(diffInSeconds / 60);
+        
+            if (years > 0) {
+                return `Há ${years} ano${years > 1 ? 's' : ''}`;
+            } else if (months > 0) {
+                return `Há ${months} mês${months > 1 ? 'es' : ''}`;
+            } else if (days > 0) {
+                return `Há ${days} dia${days > 1 ? 's' : ''}`;
+            } else if (hours > 0) {
+                return `Há ${hours} hora${hours > 1 ? 's' : ''}`;
+            } else if (minutes > 0) {
+                return `Há ${minutes} minuto${minutes > 1 ? 's' : ''}`;
+            } else {
+                return 'Há menos de 1 minuto';
+            }
+        }
         const produtoFormatado = {
             ...produto[0],
             imagens: imagens.map(img => img.url),
             avaliacoes: avaliacoes,
-            frete:frete.length ? frete[0] : null
+            totalAvaliacoes,
+            mediaAvaliacoes,
+            totalComentarios,
+            frete:frete.length ? frete : null,
+            variacoes,
+            vendedores: vendedoresFormatados,
+            usuariosComentarios: usuariosComentarios.map((comentario) => ({
+                ...comentario,
+                dataFormatada: formatTimeAgo(comentario.created_at)
+            }))
         };
+
 
         res.status(200).json({produto: produtoFormatado});
     } catch (error) {
