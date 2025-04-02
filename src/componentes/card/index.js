@@ -2,14 +2,17 @@ import './styles.css';
 
 
 
-function Card({imagem, nome, preco, descricao, onClick}) {
+function Card({url, nome, preco,precoParcelado, precoPix, onClick}) {
+
     return (
         <div className="card-produto" onClick={onClick}>
-            <img src={imagem} className="imagem-card"></img>
+            <img src={url} className="imagem-card"></img>
             <div className="info-produtos">
-            <p className="nome-produto">{nome}</p>
+            <p className="nome-produto">{nome.length > 20 ? nome.slice(0,17) + "..." : nome}</p>
             <p className="preco-produto">R$ {preco}</p>
-            <p className="descricao-produto">{descricao.length > 20 ? descricao.slice(0, 17) + "..." : descricao}</p>
+            <p className="preco-parcelado">R$ {precoParcelado}</p>
+            <p className="preco-pix">ou R$ <strong>{precoPix}</strong> no Pix</p>
+            
             </div>
         </div>
 

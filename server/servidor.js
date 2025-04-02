@@ -262,13 +262,14 @@ app.get("/cadastrar", (req,res) => {
 app.get("/produtos", async (req,res) => {
     
     try{
-        const [produtos] = await db.query("SELECT * FROM PRODUTOS");
+        const localidade = req.query.localidade;
+        const [produtos] = await db.query("SELECT p.id, p.nome,p.preco, p.descricao, p.preco_parcelado, p.parcelas_máximas, p.preco_pix, p.desconto,f.valor, (SELECT i.url FROM imagens_produto i WHERE i.produto_id = p.id LIMIT 1) AS url, ROUND(COALESCE(AVG(a.nota),0),1) AS media_avaliacoes, COUNT(a.nota) as total_avaliacoes FROM produtos p LEFT JOIN avaliacoes a ON p.id = a.produto_id LEFT JOIN frete f ON p.id = f.produto_id and f.localidade= ? GROUP BY p.id, p.nome, p.preco, p.descricao, p.preco_parcelado,  p.parcelas_máximas, p.preco_pix, p.desconto;",[localidade]);
         if(produtos.length === 0 ){
         return res.status(400).json({message: "Não existem produtos cadastrados"});
     }
     const produtosComParcelamento = produtos.map((produto) => {
-        
-        const parcelas_maximas = produto.parcelas_maximas || 1; // Garante pelo menos 1 parcela
+        const preco = produto.preco;
+        const parcelas_maximas = produto.parcelas_maximas || 1;
         const opcoesParcelamento = [];
 
         for (let i = 1; i <= parcelas_maximas; i++) {

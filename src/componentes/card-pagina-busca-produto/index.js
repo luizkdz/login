@@ -1,6 +1,9 @@
 import './styles.css';
 import { useState } from 'react';
-
+import { calcularPrecoParcelado } from '../../utils/calcularPrecoParcelado';
+import { calcularEstrelas } from '../../utils/calcularEstrelas';
+import { calcularDesconto } from '../../utils/calcularDesconto';
+import { calcularFrete } from '../../utils/calcularFrete';
 function CardPaginaBuscaProduto({oferta, onClick}){
 
     const [imagemCoracao, setImagemCoracao] = useState("/images/coracao-branco.png");
@@ -10,35 +13,7 @@ function CardPaginaBuscaProduto({oferta, onClick}){
             imagem === "/images/coracao-branco.png" ? "/images/heart.png"  : "/images/coracao-branco.png")
     }
 
-    const calcularEstrelas = (avaliacao) => {
-        const totalEstrelas = 5;
-        const inteira = Math.floor(avaliacao);
-        const temMeia = avaliacao % 1 !== 0;
-        const estrelas = [];
     
-        for (let i = 0; i < inteira; i++) {
-            estrelas.push(<img key={i} src="/images/estrelacheia.png" className="estrela-avaliacao" alt="⭐" />);
-        }
-        if (temMeia) {
-            estrelas.push(<img key="meia" src="/images/meiaestrela.png" className="estrela-avaliacao" alt="⭐½" />);
-        }
-        while (estrelas.length < totalEstrelas) {
-            estrelas.push(<img key={estrelas.length} src="/images/estrelavazia.png" className="estrela-avaliacao" alt="☆" />);
-        }
-        return estrelas;
-    };
-    const calcularFrete = (valor) => {
-        return valor == 0 ? "Frete Grátis" : `Frete: R$ ${valor.toFixed(2)}`;
-    };
-    
-    const calcularDesconto = (desconto) => {
-        const descontoNumber = Number(desconto);
-        return descontoNumber ? `(${descontoNumber}% de desconto no pix)` : "";
-    }
-
-    const calcularPrecoParcelado = (preco, parcelas) => {
-        return (preco / parcelas).toFixed(2);
-    };
 
     return (
                 <div className="card-produto-pagina-busca">
@@ -56,13 +31,13 @@ function CardPaginaBuscaProduto({oferta, onClick}){
                     </div>
                     </div>
                     <div className="imagem-card-clique" onClick={onClick}>
-                    <img src={oferta.imagem} className="imagem-card-produto-pagina-busca"/>
+                    <img src={oferta.url} className="imagem-card-produto-pagina-busca"/>
                 
                 <div className="texto-card-produto-pagina-busca">
-                    <p className="paragrafo-card">{oferta.nome}</p>
-                    <p className="paragrafo-card">{calcularEstrelas(oferta.avaliacao)} {oferta.avaliacao} (340)</p>
+                    <p className="paragrafo-card">{oferta.nome.length > 25 ? oferta.nome.slice(0,22) + "..." : oferta.nome}</p>
+                    <p className="paragrafo-card">{calcularEstrelas(oferta.media_avaliacoes)} {oferta.media_avaliacoes} ({oferta.total_avaliacoes})</p>
                     <p className="paragrafo-card">R${oferta.preco}</p>
-                    <p className="paragrafo-card">em {oferta.parcelas_maximas}x de R${calcularPrecoParcelado(oferta.preco_parcelado, oferta.parcelas_maximas)}</p>
+                    <p className="paragrafo-card">em {oferta.parcelas_máximas}x de R${calcularPrecoParcelado(oferta.preco_parcelado, oferta.parcelas_máximas)}</p>
                     <p className="paragrafo-preco-card"><strong>{oferta.preco_pix}</strong> no Pix</p>
                     <p className="paragrafo-desconto">{calcularDesconto(oferta.desconto)}</p>
                     <p className="paragrafo-card">{calcularFrete(oferta.frete)}</p>

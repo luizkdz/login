@@ -6,6 +6,7 @@ import './styles.css';
 import CardPaginaBuscaProduto from '../componentes/card-pagina-busca-produto';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { calcularPrecoParcelado } from '../utils/calcularPrecoParcelado';
 
 const filtros = [
     { titulo: 'Categoria', itens: ['Elétrica', 'Manual', 'Pneumática', 'Acessórios', 'Compressor'], isCheckBox: false },
@@ -95,9 +96,6 @@ function PaginaBuscaProduto() {
             }
         }
     
-        const calcularPrecoParcelado = (preco, parcelas) => {
-            return (preco / parcelas).toFixed(2);
-        };
 
         const navigate = useNavigate();
         const redirectProduct = (id) => {
@@ -124,11 +122,11 @@ function PaginaBuscaProduto() {
                    {produtos.slice(indice, indice + 2).map((oferta,index) => {
                     return (
                     <div className="card-produto-busca-produto fade-in" key={index} onClick={() => {redirectProduct(oferta.id)}}>
-                        <img src={oferta.imagem} className="imagem-secao-card-produtos"/>
+                        <img src={oferta.url} className="imagem-secao-card-produtos"/>
                             <div className="container-texto-card-produto">
                                 <p className="oferta-nome">{oferta.nome.length > 255 ? oferta.nome.slice(0, 252) + "..." : oferta.nome}</p>
                                 <p>R$ {oferta.preco}</p>
-                                <p>em {oferta.parcelas_maximas}x de R$ {calcularPrecoParcelado(oferta.preco_parcelado, oferta.parcelas_maximas)}</p>
+                                <p>em {oferta.parcelas_máximas}x de R$ {calcularPrecoParcelado(oferta.preco_parcelado, oferta.parcelas_máximas)}</p>
                                 <p><strong>R${oferta.preco_pix}</strong> no Pix</p>
                         </div>
                         </div>
@@ -186,7 +184,7 @@ function PaginaBuscaProduto() {
           {calcularPaginasVisiveis()[0] > 2 && <span>...</span>}
         
 
-      {/* Renderiza os botões das páginas visíveis */}
+      
       {calcularPaginasVisiveis().map((num) => (
         <button
           key={num}
@@ -197,7 +195,7 @@ function PaginaBuscaProduto() {
         </button>
       ))}
 
-      {/* Botão para a última página */}
+      
       {paginaAtual < totalPaginas - 2 && (
         <>
           {calcularPaginasVisiveis().slice(-1)[0] < totalPaginas - 1 && <span>...</span>}
@@ -207,7 +205,7 @@ function PaginaBuscaProduto() {
         </>
       )}
 
-      {/* Botão Próximo */}
+      
       {paginaAtual < 10 && (<button
         onClick={() => setPaginaAtual((prev) => Math.min(totalPaginas, prev + 1))}
         disabled={paginaAtual === totalPaginas}

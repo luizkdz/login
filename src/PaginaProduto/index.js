@@ -4,10 +4,29 @@ import { useState,useEffect } from 'react';
 import axios from 'axios';
 import Header from '../componentes/header';
 import Footer from '../componentes/footer';
+import { calcularPrecoParcelado } from '../utils/calcularPrecoParcelado';
+import { calcularFretePorCep } from '../utils/calcularFretePorCep';
 function PaginaProduto(){
     const { id} = useParams();
     const [produto,setProduto] = useState(null);
     const [imagemSelecionada, setImagemSelecionada] = useState("");
+    const [localidade, setLocalidade] = useState("");
+    const [valorFrete, setValorFrete] = useState(null);
+    const [prazo, setPrazo] = useState(null);
+    const [cep, setCep] = useState("");
+    const [mostrarModalCep, setMostrarModalCep] = useState(false);
+
+    const handleCepChange = (e) => {
+        setCep(e.target.value);
+    };
+
+    const abrirModalCep = () => {
+        setMostrarModalCep(true);
+    };
+
+    const fecharModalCep = () => {
+        setMostrarModalCep(false);
+    };
     const buscarProduto = async () => {
         try{
             const resposta = await axios.get(`http://localhost:5000/produto/${id}`);
@@ -20,6 +39,7 @@ function PaginaProduto(){
     }
     useEffect(() => {
         buscarProduto();
+         // calcularFretePorCep(30710550, setLocalidade, setValorFrete, setPrazo);
     },[])
 
     const calcularEstrelas = (avaliacao) => {
@@ -40,49 +60,14 @@ function PaginaProduto(){
         return estrelas;
     };
     
-    const valoresFrete = {
-        "Belo Horizonte": 15.00,
-        "São Paulo": 20.00,
-        "Rio de Janeiro": 18.50,
-        "Curitiba": 22.00,
-        "Porto Alegre": 25.00,
-        "Salvador": 19.50,
-        "Recife": 21.00,
-        "Fortaleza": 23.50,
-        "Brasília": 17.00,
-        "Manaus": 30.00
-    };
     
     const calcularDesconto = (desconto) => {
         const descontoNumber = Number(desconto);
         return descontoNumber ? `(${descontoNumber}% de desconto no pix)` : "";
     }
 
-    const calcularPrecoParcelado = (preco, parcelas) => {
-        
-        return (preco / parcelas).toFixed(2);
-    };
 
-    const calcularFretePorCep = async (cep) => {
-       try{
-
-        
-        const response = await axios.get(`https://viacep.com.br/ws/${cep}/json`);
-        const localidade = response.data.localidade;
-
-        const valorFrete = valoresFrete[localidade] || 25.00;
     
-        return {
-            localidade,
-            valorFrete
-        }
-    }
-
-    catch(err){
-        console.log("Erro ao buscar cep",err);
-        return {localidade: "Desconhecida" , valorFrete: 25.00}
-    }
-    }
 
     return (
         <div>
@@ -97,11 +82,9 @@ function PaginaProduto(){
                     <div className="container-frete">
                     <div className="container-imagens">
                     <div className="container-imagem-card-produto">
-                    <img className="imagem-card-pagina-produto"src={produto.imagens[0]} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagens[0])}/>
-                    <img className="imagem-card-pagina-produto"src={produto.imagens[1]} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagens[1])}/>
-                    <img className="imagem-card-pagina-produto"src={produto.imagens[2]} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagens[2])}/>
-                    <img className="imagem-card-pagina-produto"src={produto.imagens[3]} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagens[3])}/>
-                    <img className="imagem-card-pagina-produto"src={produto.imagens[4]} alt={produto.nome} onMouseOver={() => setImagemSelecionada(produto.imagens[4])}/>
+                    {produto.imagens?.slice(0,5).map((imagem, index) => (
+        <img key={index} className="imagem-card-pagina-produto"src={imagem}  alt={produto.nome} onMouseOver={() => setImagemSelecionada(imagem)}/>
+))}
                     
                     </div>
                     <div className="container-imagem-pagina-produto">
@@ -109,13 +92,14 @@ function PaginaProduto(){
                     </div>
                     <div className="container-preco-avaliacao">
                         <p>{calcularEstrelas(produto.mediaAvaliacoes)} {produto.mediaAvaliacoes} ({produto.totalAvaliacoes}) <a href="#">Avaliar Produto</a></p>
-                        <p>{produto.variacoes[0].nome}:{produto.variacoes[0].valor}</p>
+                        <p>{produto.variacoes && produto.variacoes.length > 0 ? `${produto.variacoes[0].nome}: ${produto.variacoes[0].valor}` : ""}
+</p>
                         <img className="imagem-container-preco" src={produto.imagens[0]}></img>
-                        <p>Vendido e entregue por </p>
+                        <p>Vendido e entregue por <a style={{ color: "black" }} href="#">{produto.vendedores[0].nome}</a></p>
                         <p>Nossa loja garante sua compra <a href="#">Saiba mais</a></p>
-                        <p>{produto.produto_preco}</p>
-                        <p>{produto.produto_parcelas_máximas}x de {calcularPrecoParcelado(produto.produto_preco_parcelado,produto.produto_parcelas_máximas)}</p>
-                        <p>ou <strong>{produto.produto_preco_pix}</strong> no Pix</p>
+                        <p>R$ {produto.produto_preco}</p>
+                        <p>{produto.produto_parcelas_máximas}x de R${calcularPrecoParcelado(produto.produto_preco_parcelado,produto.produto_parcelas_máximas)}</p>
+                        <p>ou R$<strong className="paragrafo-preco-produto">{produto.produto_preco_pix}</strong> no Pix</p>
                         <div className="container-cartao">
                             <div className="secao-container-cartao">
                             <a href="#">Cartão de crédito</a>
@@ -124,7 +108,7 @@ function PaginaProduto(){
                             </div>
                             <div className="preco-container-cartao">
                             <p>{produto.preco}</p>
-                            <p>{produto.produto_parcelas_máximas}x de {calcularPrecoParcelado(produto.produto_preco_parcelado,produto.produto_parcelas_máximas)}</p>                           
+                            <p>{produto.produto_parcelas_máximas}x de R${calcularPrecoParcelado(produto.produto_preco_parcelado,produto.produto_parcelas_máximas)}</p>                           
                             </div>
                         </div>
                         <div className="container-botoes">
@@ -133,27 +117,40 @@ function PaginaProduto(){
                         <div className="card-cep">
                             <div className="container-imagem-cep">
                             <img src= "/images/localizacao.png" className="icone-localizacao-card-cep"/>
-                            <p>Insira seu cep</p>
+                            <p>{localidade}</p>
+                            <a onClick={abrirModalCep}>Alterar</a>
                             </div>
-                            <a href="#">alterar</a>
+                            
                         </div>
                         
                         </div>
                     </div>
                     
                     </div>
+                    {mostrarModalCep && (
+                                <div className="modal-cep">
+                                    <div className="modal-conteudo">
+                                        <h3>Digite seu CEP</h3>
+                                        <input type="text" placeholder="Digite seu CEP" value={cep} onChange={handleCepChange} maxLength={8} autoFocus />
+                                        <div className="botoes-modal">
+                                            <button onClick={fecharModalCep} className="botao-cancelar">Cancelar</button>
+                                            <button className="botao-confirmar">Confirmar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                     <div className="container-card-frete">
                         <div className="empty"></div>
                     <div className="card-frete">
                         <div className="container-imagem-texto">
                         <img src="/images/caminhao.png" className="imagem-caminhao-frete"/>
                         <div className="texto-frete">
-                        <p>Receba em até {produto.frete[0].prazo} dias úteis</p>
+                        <p>Receba em até {prazo} dias úteis</p>
                         <p>Após pagamento confirmado</p>
                         <p className="texto-prazo">Os prazos de entrega são contabilizados a partir da confirmação do pagamento e podem sofrer variações caso haja a compra de mais de uma unidade do mesmo produto.</p>
                         </div>
                         </div>
-                        <p className="preco-frete">R$ {produto.frete[0].valor}</p> 
+                        <p className="preco-frete"> {produto.frete ? `R$${valorFrete}` : `Consulte informações`}</p> 
                                             
                         </div>
                         
@@ -211,7 +208,7 @@ function PaginaProduto(){
                         <div className="container-classificacao">
                         <div className="container-avaliacao-comentarios">
                         <div className="card-nota-imagem">
-                        <h1>{produto.totalAvaliacoes}</h1>
+                        <h1>{produto.mediaAvaliacoes}</h1>
                         <img src="/images/estrela.png" className="estrela-avaliacao-grande"/>
                         
                         </div>

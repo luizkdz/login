@@ -7,10 +7,11 @@
 
 .card-conecte{
     box-sizing: border-box;
-    border: 2px solid #0097a7;
+    border: 2px solid #111111;
     border-radius: 12px;
-    background-color: aqua;
+    background-color: #111111;
     display:flex;
+    padding:20px;
     flex-direction: row;
     width:75vw;
 }
@@ -46,8 +47,8 @@
 .botao-cadastrar{
     height:40px;
     padding: 10px 15px;
-    background-color: #007bff;
-    color: white;
+    background-color: white;
+    color: #111111;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -60,4 +61,12 @@
 
 .container-contato{
     margin-left:30px;
+}
+
+.container-contato h2{
+    color:white;
+}
+
+.container-contato p{
+    color:white;
 }
