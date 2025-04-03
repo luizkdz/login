@@ -6,25 +6,32 @@ import Header from '../componentes/header';
 import Footer from '../componentes/footer';
 import { calcularPrecoParcelado } from '../utils/calcularPrecoParcelado';
 import { calcularFretePorCep } from '../utils/calcularFretePorCep';
+import { useCep } from '../context/CepContext';
+import ModalCep from '../componentes/modalCep/ModalCep';
+
 function PaginaProduto(){
     const { id} = useParams();
     const [produto,setProduto] = useState(null);
     const [imagemSelecionada, setImagemSelecionada] = useState("");
-    const [localidade, setLocalidade] = useState("");
-    const [valorFrete, setValorFrete] = useState(null);
-    const [prazo, setPrazo] = useState(null);
-    const [cep, setCep] = useState("");
+    const [localidade, setLocalidade] = useState("Insira seu cep");
+    const [valorFrete, setValorFrete] = useState("Consulte Condições");
+    const [prazo, setPrazo] = useState("15");
+    const {cep} = useCep();
     const [mostrarModalCep, setMostrarModalCep] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-    const handleCepChange = (e) => {
-        setCep(e.target.value);
-    };
 
     const abrirModalCep = () => {
-        setMostrarModalCep(true);
+        setLoading(true);
+        setTimeout(() => {
+            setLoading(false);
+            setMostrarModalCep(true);
+        },1000);
+        
     };
 
     const fecharModalCep = () => {
+        
         setMostrarModalCep(false);
     };
     const buscarProduto = async () => {
@@ -38,9 +45,19 @@ function PaginaProduto(){
         }
     }
     useEffect(() => {
-        buscarProduto();
-         // calcularFretePorCep(30710550, setLocalidade, setValorFrete, setPrazo);
-    },[])
+        const buscarDados = async () => {
+            await buscarProduto();
+        if(cep && cep.length === 8) {
+            try{
+            await calcularFretePorCep(cep, setLocalidade, setValorFrete, setPrazo);
+            }
+           catch(err){
+            console.error("Erro ao calcular frete", err);
+           }
+        }
+        }
+        buscarDados();  
+    },[cep])
 
     const calcularEstrelas = (avaliacao) => {
         const totalEstrelas = 5;
@@ -58,16 +75,7 @@ function PaginaProduto(){
             estrelas.push(<img key={estrelas.length} src="/images/estrelavazia.png" className="estrela-avaliacao" alt="☆" />);
         }
         return estrelas;
-    };
-    
-    
-    const calcularDesconto = (desconto) => {
-        const descontoNumber = Number(desconto);
-        return descontoNumber ? `(${descontoNumber}% de desconto no pix)` : "";
-    }
-
-
-    
+    };    
 
     return (
         <div>
@@ -117,8 +125,12 @@ function PaginaProduto(){
                         <div className="card-cep">
                             <div className="container-imagem-cep">
                             <img src= "/images/localizacao.png" className="icone-localizacao-card-cep"/>
-                            <p>{localidade}</p>
-                            <a onClick={abrirModalCep}>Alterar</a>
+                            
+                            <div className="cep-indicador"><div className="cep-cidade" style={{ gap: localidade !== "Insira seu cep" ? "50px" : "0px" }}>
+                                <p>{cep}</p><p>{localidade === "Insira seu cep" ? "Insira seu cep" : localidade}</p>
+                                </div>
+                            {loading && <span className="loading-indicator"></span>}</div>
+                            <a className="botao-alterar"onClick={abrirModalCep}>Alterar</a>
                             </div>
                             
                         </div>
@@ -128,16 +140,7 @@ function PaginaProduto(){
                     
                     </div>
                     {mostrarModalCep && (
-                                <div className="modal-cep">
-                                    <div className="modal-conteudo">
-                                        <h3>Digite seu CEP</h3>
-                                        <input type="text" placeholder="Digite seu CEP" value={cep} onChange={handleCepChange} maxLength={8} autoFocus />
-                                        <div className="botoes-modal">
-                                            <button onClick={fecharModalCep} className="botao-cancelar">Cancelar</button>
-                                            <button className="botao-confirmar">Confirmar</button>
-                                        </div>
-                                    </div>
-                                </div>
+                                <ModalCep fecharModalCep = {fecharModalCep} calcularFretePorCep={calcularFretePorCep} setLocalidade={setLocalidade} setPrazo={setPrazo} setValorFrete={setValorFrete}/>
                             )}
                     <div className="container-card-frete">
                         <div className="empty"></div>
@@ -150,7 +153,7 @@ function PaginaProduto(){
                         <p className="texto-prazo">Os prazos de entrega são contabilizados a partir da confirmação do pagamento e podem sofrer variações caso haja a compra de mais de uma unidade do mesmo produto.</p>
                         </div>
                         </div>
-                        <p className="preco-frete"> {produto.frete ? `R$${valorFrete}` : `Consulte informações`}</p> 
+                        <p className="preco-frete"> {valorFrete !== "Consulte Condições" ? `R$${valorFrete}` : <img src="/images/zip-code.png" className="imagem-zip-code" />}</p> 
                                             
                         </div>
                         

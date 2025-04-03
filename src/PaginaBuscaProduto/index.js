@@ -27,7 +27,7 @@ function PaginaBuscaProduto() {
 
     const fetchProducts = async () => {
         try{
-            const resposta = await axios.get("http://localhost:5000/produtos");
+          const resposta = await axios.get(`http://localhost:5000/produtos?localidade=${encodeURIComponent("Belo Horizonte")}`);
             setProdutos(resposta.data);
         }
         catch(err){

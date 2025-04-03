@@ -318,4 +318,25 @@
     display: block;
   }
 
-  
+.container-localidade p{
+  margin-top:10px;
+  color:white;
+}
+
+
+.imagem-localizacao-branco{
+  width:38px;
+  height:38px;
+}
+.ofertas-para{
+  gap:10px;
+  display:flex;
+  transition: transform 0.3s ease-in-out;
+}
+.ofertas-para:hover {
+  transform: scale(1.15);
+}
+
+.ofertas-cep p{
+  font-size:12px;
+}

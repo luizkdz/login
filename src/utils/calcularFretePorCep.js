@@ -18,6 +18,9 @@ export const calcularFretePorCep = async (cep, setLocalidade, setValorFrete, set
         const response = await axios.get(`https://viacep.com.br/ws/${cep}/json`);
         const novaLocalidade = response.data.localidade;
 
+        if(!novaLocalidade){
+            throw new Error("Localidade não encontrada para esse cep");
+        }
         const valorFretePrazo = valoresFrete[novaLocalidade] || {valor:25.00, prazo:7};
 
         

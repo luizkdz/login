@@ -262,8 +262,20 @@ app.get("/cadastrar", (req,res) => {
 app.get("/produtos", async (req,res) => {
     
     try{
-        const localidade = req.query.localidade;
-        const [produtos] = await db.query("SELECT p.id, p.nome,p.preco, p.descricao, p.preco_parcelado, p.parcelas_máximas, p.preco_pix, p.desconto,f.valor, (SELECT i.url FROM imagens_produto i WHERE i.produto_id = p.id LIMIT 1) AS url, ROUND(COALESCE(AVG(a.nota),0),1) AS media_avaliacoes, COUNT(a.nota) as total_avaliacoes FROM produtos p LEFT JOIN avaliacoes a ON p.id = a.produto_id LEFT JOIN frete f ON p.id = f.produto_id and f.localidade= ? GROUP BY p.id, p.nome, p.preco, p.descricao, p.preco_parcelado,  p.parcelas_máximas, p.preco_pix, p.desconto;",[localidade]);
+        const localidade = req.query.localidade || '';
+        const [produtos] = await db.query(`SELECT 
+    p.id, p.nome, p.preco, p.descricao, p.preco_parcelado, 
+    p.parcelas_máximas, p.preco_pix, p.desconto, 
+    f.valor, 
+    (SELECT i.url FROM imagens_produto i WHERE i.produto_id = p.id LIMIT 1) AS url, 
+    ROUND(COALESCE(AVG(a.nota), 0), 1) AS media_avaliacoes, 
+    COUNT(a.nota) AS total_avaliacoes 
+FROM produtos p
+LEFT JOIN avaliacoes a ON p.id = a.produto_id
+LEFT JOIN frete f ON p.id = f.produto_id 
+WHERE f.localidade = ? or f.localidade is null 
+GROUP BY p.id, p.nome, p.preco, p.descricao, p.preco_parcelado,  
+         p.parcelas_máximas, p.preco_pix, p.desconto, f.valor;`,[localidade]);
         if(produtos.length === 0 ){
         return res.status(400).json({message: "Não existem produtos cadastrados"});
     }
@@ -386,5 +398,38 @@ app.get("/produto/:id", async (req, res) => {
     }
 });
 
+app.get("/obter-localidade",autenticarToken, async (req,res) => { 
+
+    try{
+        const [resultado] = await db.query("SELECT localidade from usuarios where id = ?",[req.usuarioId])
+
+        if(resultado.length > 0 && resultado[0].localidade){
+           const localidadeBanco = resultado[0].localidade;
+            return res.json({localidade:localidadeBanco});
+        }
+        const localidadeCookies = req.cookies.localidade || "Insira seu cep"
+        res.json({localidade:localidadeCookies })
+    }
+    catch(err){
+        console.log("Erro ao obter localidade", err);
+        res.json({localidade: "Insira seu cep"});
+    }
+})
+
+app.post("/definir-localidade", async (req,res) => {
+    try{
+        const {localidade} = req.body;
+
+        if(!localidade){
+            return res.status(400).json({message: "Localidade não fornecida"});
+        }
+        res.cookie("localidade", localidade, {maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly:false})
+        res.json({message : "Localidade atualizada no cookie", localidade});
+    }
+    catch(err){
+        console.log("Erro ao definir localidade", err);
+        res.status(500).json({message:"Erro ao definir localidade"});
+    }
+})
 
 app.listen(port, () => {console.log("servidor rodando na porta " + `${port}`)});

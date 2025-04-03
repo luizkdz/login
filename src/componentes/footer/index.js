@@ -52,6 +52,8 @@ function Footer() {
             <a href="https://www.flaticon.com/free-icons/star" title="star icons">Star icons created by Freepik - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Heykiyou - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/person" title="person icons">Person icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/phone" title="phone icons">Phone icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/zip-code" title="zip code icons">Zip code icons created by bearicons - Flaticon</a>
             <p>&copy; 2025 Login ltda</p>
             </div>
         </footer>

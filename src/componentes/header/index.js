@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import './styles.css';
 import { useNavigate } from 'react-router-dom';
+import { useCep } from '../../context/CepContext';
+import ModalCep from '../modalCep/ModalCep';
+import { calcularFretePorCep } from '../../utils/calcularFretePorCep';
 
 const categorias = [
   {
@@ -158,12 +161,27 @@ const chunkArray = (arr, size) => {
 
 
 function Header({props}) {
+
+
     const [nome, setNome] = useState("");
     const navigate = useNavigate();
     const [menuAberto, setMenuAberto] = useState(false);
+    const [localidade, setLocalidade] = useState("Insira seu CEP");
+    const [mostrarModal, setMostrarModal] = useState(false);
+    const {cep} = useCep();
+    const [valorFrete, setValorFrete] = useState("");
+    const [prazo, setPrazo] = useState("");
     const toggleMenu = () => {
         setMenuAberto(!menuAberto);
     };
+
+    const abrirModal = () => {
+      setMostrarModal(true);
+    }
+    const fecharModal = () => {
+      setMostrarModal(false);
+    }
+
 
     const refreshAccessToken = async () => {
         try{
@@ -206,9 +224,19 @@ function Header({props}) {
       useEffect(() => {
         const fetchData = async () => {
           await pickName();
+        }
+        const obterLocalidade = async () => {
+          try {
+            const resposta = await axios.get("http://localhost:5000/obter-localidade",{withCredentials:true});
+            setLocalidade(resposta.data.localidade);
+            
+          }
+          catch(err){
+            console.log("Erro ao obter localidade", err);
+          }
         };
         
-      
+        obterLocalidade();
         fetchData();
       }, []);
     
@@ -224,11 +252,7 @@ function Header({props}) {
         }
         navigate('/');
       }
-    
-      
-
-      
-
+  
     return (
         <header>
           <div className="nav-todo">
@@ -250,11 +274,22 @@ function Header({props}) {
                         <div className="input-wrapper">
                             <input className="input-pesquisa" placeholder="Buscar produtos e marcas" />
                             <img className="icone-lupa" src="/images/lupa.png" alt="Buscar" />
+                            
                             <div className="nome-usuario">
                             </div>
                         </div>
                              
                     )}
+                    <div className = "container-localidade">
+                    <div className="ofertas-para" onClick={abrirModal} style={{ color: "white" , cursor: "pointer"}}>
+                      <img src = "/images/localizacao-branco.png" className="imagem-localizacao-branco"/>
+                    <div className="ofertas-cep">
+                        <p>Ofertas para:<br/>{cep ? cep : localidade ? localidade : "Insira seu CEP"}</p>
+                        
+                      </div>
+                      </div>
+                          {mostrarModal && <ModalCep fecharModalCep={fecharModal} calcularFretePorCep={calcularFretePorCep}  setLocalidade={setLocalidade}  setValorFrete={setValorFrete}  setPrazo={setPrazo}  />}
+                            </div>
                     {props && (
                         <div className="container-usuario">
                           <div className="usuario-setinha">
@@ -393,5 +428,6 @@ function Header({props}) {
         </header>
     );
 }
+
 
 export default Header;
