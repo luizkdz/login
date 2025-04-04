@@ -20,8 +20,8 @@ function CardPaginaBuscaProduto({oferta, onClick}){
     }
 
     useEffect( () => {
-        calcularFretePorCep(cep,oferta.id, setLocalidade, setValorFrete, setPrazo);
-    },[cep,oferta.id])
+        calcularFretePorCep(oferta.id,cep, setLocalidade, setValorFrete, setPrazo);
+    },[cep,oferta.produto_id])
     
 
     return (
@@ -49,7 +49,7 @@ function CardPaginaBuscaProduto({oferta, onClick}){
                     <p className="paragrafo-card">em {oferta.parcelas_máximas}x de R${calcularPrecoParcelado(oferta.preco_parcelado, oferta.parcelas_máximas)}</p>
                     <p className="paragrafo-preco-card"><strong>{oferta.preco_pix}</strong> no Pix</p>
                     <p className="paragrafo-desconto">{calcularDesconto(oferta.desconto)}</p>
-                    <p className="paragrafo-card">R${oferta.valor_frete}</p>
+                    <p className="paragrafo-card">R${valorFrete.toFixed(2)}</p>
                 </div>
                 </div>
             </div>

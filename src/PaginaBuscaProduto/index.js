@@ -51,7 +51,7 @@ function PaginaBuscaProduto() {
     useEffect( () => {
       if (cep && produtos.length > 0) {
           produtos.forEach((produto) => {
-              calcularFretePorCep(produto.id, cep, setLocalidade, setValor, setPrazo);
+              calcularFretePorCep(produto.produto_id, cep, setLocalidade, setValor, setPrazo);
           });
       }
   }, [cep, produtos]);
