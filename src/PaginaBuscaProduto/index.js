@@ -7,6 +7,8 @@ import CardPaginaBuscaProduto from '../componentes/card-pagina-busca-produto';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { calcularPrecoParcelado } from '../utils/calcularPrecoParcelado';
+import { useCep } from '../context/CepContext';
+import { calcularFretePorCep } from '../utils/calcularFretePorCep';
 
 const filtros = [
     { titulo: 'Categoria', itens: ['Elétrica', 'Manual', 'Pneumática', 'Acessórios', 'Compressor'], isCheckBox: false },
@@ -24,10 +26,15 @@ const filtros = [
 function PaginaBuscaProduto() {
 
     const [produtos,setProdutos] = useState([]);
+    const {cep} = useCep();
+    const [localidade,setLocalidade] = useState("");
+    const [setValor] = useState("");
+    const [setPrazo] = useState("");
+
 
     const fetchProducts = async () => {
         try{
-          const resposta = await axios.get(`http://localhost:5000/produtos?localidade=${encodeURIComponent("Belo Horizonte")}`);
+          const resposta = await axios.get(`http://localhost:5000/produtos?localidade=${encodeURIComponent(localidade)}`);
             setProdutos(resposta.data);
         }
         catch(err){
@@ -35,10 +42,19 @@ function PaginaBuscaProduto() {
         }
 
     }
+    
 
     useEffect(() => {
         fetchProducts();
     },[])
+
+    useEffect( () => {
+      if (cep && produtos.length > 0) {
+          produtos.forEach((produto) => {
+              calcularFretePorCep(produto.id, cep, setLocalidade, setValor, setPrazo);
+          });
+      }
+  }, [cep, produtos]);
     const [indice,setIndice] = useState(0);
     const produtosPorPagina = 8;
     const[paginaAtual, setPaginaAtual] = useState(1);

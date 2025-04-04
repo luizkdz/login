@@ -1,18 +1,27 @@
 import './styles.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { calcularPrecoParcelado } from '../../utils/calcularPrecoParcelado';
 import { calcularEstrelas } from '../../utils/calcularEstrelas';
 import { calcularDesconto } from '../../utils/calcularDesconto';
 import { calcularFrete } from '../../utils/calcularFrete';
+import { calcularFretePorCep } from '../../utils/calcularFretePorCep';
+import { useCep } from '../../context/CepContext';
+
 function CardPaginaBuscaProduto({oferta, onClick}){
 
     const [imagemCoracao, setImagemCoracao] = useState("/images/coracao-branco.png");
-
+    const {cep} = useCep();
+    const [localidade, setLocalidade] = useState("");
+    const [valorFrete, setValorFrete] = useState("");
+    const [prazo, setPrazo] = useState("");
     const mudarImagemCoracao = () => {
         setImagemCoracao((imagem) => 
             imagem === "/images/coracao-branco.png" ? "/images/heart.png"  : "/images/coracao-branco.png")
     }
 
+    useEffect( () => {
+        calcularFretePorCep(cep,oferta.id, setLocalidade, setValorFrete, setPrazo);
+    },[cep,oferta.id])
     
 
     return (
@@ -40,7 +49,7 @@ function CardPaginaBuscaProduto({oferta, onClick}){
                     <p className="paragrafo-card">em {oferta.parcelas_máximas}x de R${calcularPrecoParcelado(oferta.preco_parcelado, oferta.parcelas_máximas)}</p>
                     <p className="paragrafo-preco-card"><strong>{oferta.preco_pix}</strong> no Pix</p>
                     <p className="paragrafo-desconto">{calcularDesconto(oferta.desconto)}</p>
-                    <p className="paragrafo-card">{calcularFrete(oferta.valor)}</p>
+                    <p className="paragrafo-card">R${oferta.valor_frete}</p>
                 </div>
                 </div>
             </div>

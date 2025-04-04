@@ -9,6 +9,7 @@ import cookieParser from "cookie-parser";
 import crypto from "crypto";
 import session from "express-session";
 import passport from "../server/passport.js";
+import axios from "axios";
 
 dotenv.config();
 
@@ -266,16 +267,27 @@ app.get("/produtos", async (req,res) => {
         const [produtos] = await db.query(`SELECT 
     p.id, p.nome, p.preco, p.descricao, p.preco_parcelado, 
     p.parcelas_máximas, p.preco_pix, p.desconto, 
-    f.valor, 
+    COALESCE(MIN(f.valor), MIN(f_default.valor), 0) AS valor_frete, 
     (SELECT i.url FROM imagens_produto i WHERE i.produto_id = p.id LIMIT 1) AS url, 
     ROUND(COALESCE(AVG(a.nota), 0), 1) AS media_avaliacoes, 
-    COUNT(a.nota) AS total_avaliacoes 
-FROM produtos p
-LEFT JOIN avaliacoes a ON p.id = a.produto_id
-LEFT JOIN frete f ON p.id = f.produto_id 
-WHERE f.localidade = ? or f.localidade is null 
+    COUNT(a.nota) AS total_avaliacoes  
+FROM produtos p 
+LEFT JOIN avaliacoes a ON p.id = a.produto_id 
+LEFT JOIN ( 
+    -- Busca o menor frete para a cidade informada 
+    SELECT produto_id, MIN(valor) AS valor  
+    FROM frete  
+    WHERE cidade = ? 
+    GROUP BY produto_id 
+) f ON p.id = f.produto_id 
+LEFT JOIN ( 
+    -- Caso não tenha frete para a cidade informada, busca o menor frete disponível 
+    SELECT produto_id, MIN(valor) AS valor  
+    FROM frete  
+    GROUP BY produto_id 
+) f_default ON p.id = f_default.produto_id  
 GROUP BY p.id, p.nome, p.preco, p.descricao, p.preco_parcelado,  
-         p.parcelas_máximas, p.preco_pix, p.desconto, f.valor;`,[localidade]);
+         p.parcelas_máximas, p.preco_pix, p.desconto;`,[localidade]);
         if(produtos.length === 0 ){
         return res.status(400).json({message: "Não existem produtos cadastrados"});
     }
@@ -326,7 +338,7 @@ app.get("/produto/:id", async (req, res) => {
 
     const [avaliacoes] = await db.query("select nota,comentario,usuario_id from avaliacoes where produto_id = ?",[id]);
 
-    const [frete] = await db.query("select localidade, valor, prazo from frete where produto_id = ?",[id]);
+    const [frete] = await db.query("select cidade, valor, prazo from frete where produto_id = ?",[id]);
 
     const [variacoes] = await db.query("select nome, valor from variacoes_produto where produto_id = ?",[id]);
 
@@ -429,6 +441,49 @@ app.post("/definir-localidade", async (req,res) => {
     catch(err){
         console.log("Erro ao definir localidade", err);
         res.status(500).json({message:"Erro ao definir localidade"});
+    }
+})
+
+const normalizarTexto = (texto) => {
+    return texto
+      .normalize("NFD") // separa acentos de letras
+      .replace(/[\u0300-\u036f]/g, "") // remove acentos
+      .trim()
+      .toLowerCase();
+  };
+
+const buscaFretePorProduto = async (produto_id, cidade) => {
+    const cidadeNormalizada = normalizarTexto(cidade);
+    const [resultado] = await db.query(`
+        SELECT valor, prazo FROM frete
+        WHERE produto_id = ?
+        AND LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(TRIM(cidade), 
+          'ã','a'),'á','a'),'â','a'),'é','e'),'ê','e'),'í','i')) = ?
+      `, [produto_id, cidadeNormalizada]);
+    console.log('O resultado é ',resultado[0]);
+    return resultado.length > 0 ? resultado[0] : {valor:25.00, prazo: 7};
+}
+
+app.get("/calcular-frete/:cep/:produto_id", async (req,res) => {
+    try{
+        const {cep, produto_id} = req.params;
+        const resposta = await axios.get(`https://viacep.com.br/ws/${cep}/json`);
+        const cidade = resposta.data.localidade;
+
+        if(!cidade){
+            return res.status(400).json({message: "Localidade não encontrada para esse cep"})
+        }
+        const frete = await buscaFretePorProduto(produto_id,cidade);
+
+        res.json({
+            cidade,
+            valor: frete?.valor ?? null,
+            prazo: frete?.prazo ?? null
+        });
+    }
+    catch(err){
+        console.error("Erro ao calcular frete por cidade");
+        res.status(500).json({message: "Erro interno ao calcular frete"});
     }
 })
 

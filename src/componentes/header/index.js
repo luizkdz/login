@@ -160,7 +160,7 @@ const chunkArray = (arr, size) => {
  
 
 
-function Header({props}) {
+function Header({props, produto}) {
 
 
     const [nome, setNome] = useState("");
@@ -288,7 +288,7 @@ function Header({props}) {
                         
                       </div>
                       </div>
-                          {mostrarModal && <ModalCep fecharModalCep={fecharModal} calcularFretePorCep={calcularFretePorCep}  setLocalidade={setLocalidade}  setValorFrete={setValorFrete}  setPrazo={setPrazo}  />}
+                          {mostrarModal && <ModalCep fecharModalCep={fecharModal} produtoId={produto?.id} calcularFretePorCep={calcularFretePorCep}  setLocalidade={setLocalidade}  setValorFrete={setValorFrete}  setPrazo={setPrazo}  />}
                             </div>
                     {props && (
                         <div className="container-usuario">

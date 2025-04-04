@@ -10,12 +10,12 @@ import { useCep } from '../context/CepContext';
 import ModalCep from '../componentes/modalCep/ModalCep';
 
 function PaginaProduto(){
-    const { id} = useParams();
+    const {id} = useParams();
     const [produto,setProduto] = useState(null);
     const [imagemSelecionada, setImagemSelecionada] = useState("");
     const [localidade, setLocalidade] = useState("Insira seu cep");
-    const [valorFrete, setValorFrete] = useState("Consulte Condições");
-    const [prazo, setPrazo] = useState("15");
+    const [valorFrete, setValorFrete] = useState(null);
+    const [prazo, setPrazo] = useState(null);
     const {cep} = useCep();
     const [mostrarModalCep, setMostrarModalCep] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -34,31 +34,32 @@ function PaginaProduto(){
         
         setMostrarModalCep(false);
     };
-    const buscarProduto = async () => {
-        try{
-            const resposta = await axios.get(`http://localhost:5000/produto/${id}`);
-            setProduto(resposta.data.produto);
-            setImagemSelecionada(resposta.data.produto.imagens[0]);
-        }
-        catch(err){
-            console.log("Erro ao buscar produto");
-        }
-    }
     useEffect(() => {
-        const buscarDados = async () => {
-            await buscarProduto();
-        if(cep && cep.length === 8) {
-            try{
-            await calcularFretePorCep(cep, setLocalidade, setValorFrete, setPrazo);
-            }
-           catch(err){
-            console.error("Erro ao calcular frete", err);
-           }
+        const buscarProduto = async () => {
+          try {
+            const resposta = await axios.get(`http://localhost:5000/produto/${id}`);
+            const produtoBuscado = resposta.data.produto;
+            setProduto(produtoBuscado);
+            setImagemSelecionada(produtoBuscado.imagens[0]);
+          } catch (err) {
+            console.error("Erro ao buscar produto", err);
+          }
+        };
+      
+        buscarProduto();
+      }, [id]);
+      
+      useEffect(() => {
+        if (produto && cep && cep.length === 8) {
+          calcularFretePorCep(
+            produto.produto_id,
+            cep,
+            setLocalidade,
+            setValorFrete,
+            setPrazo
+          );
         }
-        }
-        buscarDados();  
-    },[cep])
-
+      }, [produto, cep]);
     const calcularEstrelas = (avaliacao) => {
         const totalEstrelas = 5;
         const inteira = Math.floor(avaliacao);
@@ -79,7 +80,7 @@ function PaginaProduto(){
 
     return (
         <div>
-            <Header props/>
+            <Header props produto={produto}/>
             <div className="secao-pagina-produto">
             <div className="container-produto">
             {produto ? (
@@ -127,7 +128,7 @@ function PaginaProduto(){
                             <img src= "/images/localizacao.png" className="icone-localizacao-card-cep"/>
                             
                             <div className="cep-indicador"><div className="cep-cidade" style={{ gap: localidade !== "Insira seu cep" ? "50px" : "0px" }}>
-                                <p>{cep}</p><p>{localidade === "Insira seu cep" ? "Insira seu cep" : localidade}</p>
+                                <p>{cep}</p><p>{localidade === "Insira seu cep" ? "" : localidade}</p>
                                 </div>
                             {loading && <span className="loading-indicator"></span>}</div>
                             <a className="botao-alterar"onClick={abrirModalCep}>Alterar</a>
@@ -140,7 +141,7 @@ function PaginaProduto(){
                     
                     </div>
                     {mostrarModalCep && (
-                                <ModalCep fecharModalCep = {fecharModalCep} calcularFretePorCep={calcularFretePorCep} setLocalidade={setLocalidade} setPrazo={setPrazo} setValorFrete={setValorFrete}/>
+                                <ModalCep fecharModalCep = {fecharModalCep} calcularFretePorCep={calcularFretePorCep} setLocalidade={setLocalidade} setPrazo={setPrazo} setValorFrete={setValorFrete} produtoId = {produto?.id}/>
                             )}
                     <div className="container-card-frete">
                         <div className="empty"></div>
@@ -148,12 +149,12 @@ function PaginaProduto(){
                         <div className="container-imagem-texto">
                         <img src="/images/caminhao.png" className="imagem-caminhao-frete"/>
                         <div className="texto-frete">
-                        <p>Receba em até {prazo} dias úteis</p>
+                        <p>Receba em até {prazo === null ? "Indisponível" : `${prazo}`} dias úteis</p>
                         <p>Após pagamento confirmado</p>
                         <p className="texto-prazo">Os prazos de entrega são contabilizados a partir da confirmação do pagamento e podem sofrer variações caso haja a compra de mais de uma unidade do mesmo produto.</p>
                         </div>
                         </div>
-                        <p className="preco-frete"> {valorFrete !== "Consulte Condições" ? `R$${valorFrete}` : <img src="/images/zip-code.png" className="imagem-zip-code" />}</p> 
+                        <p className="preco-frete"> {valorFrete === null ? "Indisponível" : `R$ ${valorFrete}`}</p> 
                                             
                         </div>
                         

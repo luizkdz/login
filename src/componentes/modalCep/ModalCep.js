@@ -2,7 +2,7 @@ import { useState } from "react";
 import './styles.css';
 import axios from "axios";
 import { useCep } from "../../context/CepContext";
-const ModalCep = ({ fecharModalCep, calcularFretePorCep, setLocalidade, setValorFrete, setPrazo }) => {
+const ModalCep = ({ fecharModalCep, calcularFretePorCep, setLocalidade, setValorFrete, setPrazo,produtoId }) => {
     const {setCep} = useCep();
     const [tempCep, setTempCep] = useState("");
 
@@ -26,7 +26,7 @@ const ModalCep = ({ fecharModalCep, calcularFretePorCep, setLocalidade, setValor
 
             // Atualiza estados no componente pai
             setCep(tempCep);
-            await calcularFretePorCep(tempCep, setLocalidade, setValorFrete, setPrazo);
+            await calcularFretePorCep(produtoId,tempCep, setLocalidade, setValorFrete, setPrazo);
 
             fecharModalCep();
         } catch (err) {
