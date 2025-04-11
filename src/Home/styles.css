@@ -1,0 +1,40 @@
+body{
+    padding:0;
+    margin: 0;
+
+}
+
+
+.card{
+    width:250px;
+    height:470px;
+
+}
+
+.container-login{
+    gap:20px;
+    display:flex;
+    flex-direction: column;
+}
+.container-card{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    
+    
+}
+.pagina-toda{
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    
+}
+
+.container-links{
+    display:flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap:20px;
+}

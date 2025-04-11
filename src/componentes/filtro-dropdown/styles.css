@@ -1,0 +1,87 @@
+.card-categoria-pagina-busca-produto{
+    width:400px;
+    box-sizing: border-box;
+    border: 2px solid white;
+    border-radius: 3%;
+    padding:20px;
+    background-color: #111111;
+    display:flex;
+    flex-direction: column;
+    gap:10px;
+    cursor:pointer;
+}
+
+.card-categoria-pagina-busca-produto p{
+    color:white;
+}
+.card-categoria-pagina-busca-produto a{
+    color:white;
+}
+
+.secao-busca-produto{
+    gap:30px;
+    display:flex;
+    flex-direction:column;
+    padding-left:50px;
+    padding-top:30px;
+}
+
+.container-input-nome{
+    
+    cursor:pointer;
+    display:flex;
+    gap:20px;
+}
+
+.input-checkbox{
+    cursor:pointer;
+    width:20px;
+    height:24px;
+}
+
+.container-estrelas{
+    display:flex;
+    justify-content: flex-start
+}
+
+
+.secao-ferramentas{
+    display:flex;
+}
+
+.imagem-texto-card{
+    display:flex;
+    align-items: center;
+}
+
+.secao-categoria-produtos{
+    margin:30px;
+}
+
+.card-produtos{
+
+    box-sizing: border-box;
+    border: 2px solid #f0f0f0;
+}
+
+.imagem-secao-card-produtos{
+    width:200px;
+    height:200px;
+}
+
+.container-texto-card{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.nome-atributo{
+    cursor:pointer;
+    display:flex;
+    justify-content: space-between;
+}
+
+.item-dropdown{
+    display:flex;
+}
+

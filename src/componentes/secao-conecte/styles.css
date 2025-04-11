@@ -1,0 +1,72 @@
+.secao-conecte{
+    
+    width:100vw;
+    display:flex;
+    justify-content: center;
+}
+
+.card-conecte{
+    box-sizing: border-box;
+    border: 2px solid #111111;
+    border-radius: 12px;
+    background-color: #111111;
+    display:flex;
+    padding:20px;
+    flex-direction: row;
+    width:75vw;
+}
+.imagem-email{
+    width: 120px;
+}
+
+.container-nome-email{
+    margin-right:20px;
+    width:100%;
+    justify-content: flex-end;
+    align-items: center;
+    display:flex;
+    flex-direction: row;
+    gap:40px;
+    
+}
+
+.input-nome{
+    height:30px;
+}
+.input-email{
+    height:30px;
+}
+
+.input-nome,
+.input-email {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 200px; /* Ajuste conforme necessário */
+}
+.botao-cadastrar{
+    height:40px;
+    padding: 10px 15px;
+    background-color: white;
+    color: #111111;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.botao-cadastrar:hover {
+    background-color: #0056b3;
+}
+
+.container-contato{
+    margin-left:30px;
+}
+
+.container-contato h2{
+    color:white;
+}
+
+.container-contato p{
+    color:white;
+}

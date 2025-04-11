@@ -1,0 +1,98 @@
+.imagem-banner{
+    width:70vw;
+    height:250px;
+}
+
+.banner-container{
+    display:flex;
+    justify-content: center;
+    position: relative;
+
+}
+
+.banner-container:hover .seta-esquerda,
+.banner-container:hover .seta-direita {
+    opacity: 1; /* Torna visível ao passar o mouse */
+    visibility: visible;
+}
+
+.seta-esquerda{
+    opacity:0;
+    
+    height:250px;
+    background-color: transparent;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.seta-direita{
+    height: 250px   ;
+    opacity: 0;
+    background-color: transparent;
+    color: white;
+    border: none;
+    cursor: pointer;
+    
+    
+
+}
+
+.indicadores {
+    left:50%;
+    top:85%;
+    position:absolute;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.bolinha {
+    width: 12px;
+    height: 12px;
+    margin: 5px;
+    background-color: rgba(203, 194, 194, 0.823);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.bolinha.ativa {
+    background-color: aqua
+}
+
+.indicadores{
+    background-color: transparent;
+}
+
+.setinha-esquerda-banner {
+    width:50px;
+    height:50px;
+}
+
+.secao-banner{
+    display:flex;
+}
+
+.setinha-direita-banner{
+    width:50px;
+    height:50px;
+}
+
+.fade-in-banner {
+    opacity: 0;
+    transform: scale(0.95);
+    animation: fadeScaleInBanner 0.7s ease-in-out forwards;
+}
+
+@keyframes fadeScaleInBanner {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

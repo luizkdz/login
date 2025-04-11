@@ -1,0 +1,91 @@
+.oferta-nome{
+    font-size: 14px;
+}
+
+.container-titulo-exibicao-produtos{
+    margin-top:20px;
+    display:flex;
+    justify-content: space-between;
+}
+
+.secao-mostrar-produtos{
+    margin-top:20px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.imagem-card-produto-pagina-busca{
+    
+    width:220px;
+    height:200px;
+}
+
+.card-produto-pagina-busca{
+    cursor:pointer;
+    padding:10px;
+    height:500px;
+    box-sizing:border-box;
+    border: 2px solid #f0f0f0;
+    border-radius: 10px;
+}
+
+.texto-card-produto-pagina-busca{
+    display:flex;
+    flex-direction: column;
+    gap:5px;
+}
+
+.paragrafo-desconto{
+    font-size:14px;
+    color:rgb(5, 187, 5)
+}
+
+.paragrafo-card{
+    font-size:14px;
+}
+
+.paragrafo-preco-card strong{
+    font-size: 28px;
+}
+
+.container-icone-frete{
+    display:flex;
+    justify-content: space-between;
+    margin-bottom:5px;
+}
+
+.icone-caminhao-frete{
+    width:20px;
+    height:20px;
+}
+
+.icone-coracao{
+    opacity: 0;
+    width:20px;
+    height:20px;
+}
+
+.card-produto-pagina-busca:hover .icone-coracao{
+    opacity: 1;
+}
+
+
+.card-icone-frete{
+    gap:2px;
+    padding:3px;
+    box-sizing: border-box;
+    border:2px solid #111111;
+    border-radius: 5px;
+    display:flex;
+    background-color: #111111;
+}
+.texto-entrega{
+    font-size:14px;
+    color:white;
+}
+
+.estrela-avaliacao{
+    width:25px;
+    height:20px;
+}

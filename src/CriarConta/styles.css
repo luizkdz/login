@@ -1,0 +1,25 @@
+.container-card{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    
+}
+
+.card{
+    width:250px;
+    height:470px;
+    display: flex;
+    flex-direction: column;
+}
+
+.container-criarConta{
+    gap:20px;
+    display:flex;
+    flex-direction: column;
+}
+
+.pagina-toda{
+    display:flex;
+    justify-content: center;
+}
