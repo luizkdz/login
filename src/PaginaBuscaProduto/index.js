@@ -104,9 +104,9 @@ Object.keys(novosFiltros).forEach((key) => {
 });
 
   filtrosURLObj = Object.fromEntries(filtrosURL.entries());
-  
+  const url = nomeProduto ? `http://localhost:5000/busca-produto/${nomeProduto}`: "http://localhost:5000/busca-produto";
       try{
-        const resposta = await axios.get("http://localhost:5000/opcoes-filtros", {params: {...filtrosURLObj,localidade}});
+        const resposta = await axios.get(url, {params: {...filtrosURLObj,localidade}});
         setProdutos(resposta.data);
       }
       catch(err){
@@ -157,6 +157,12 @@ Object.keys(novosFiltros).forEach((key) => {
         filtrosURL.set('precoMin', range[0].toString());
         filtrosURL.set('precoMax', range[1].toString());
       }
+      const ordenarPorParametro = searchParams.get('ordenarPor') || "maisVendidos";
+      if(ordenarPorParametro){
+      filtrosURL.set('ordenarPor', ordenarPorParametro);
+      setOrdenarPor(ordenarPorParametro);
+      }
+      console.log(`ordenar é`,ordenarPorParametro);
       const currentPage = searchParams.get('page') || 1;
       if(currentPage > 1){
         filtrosURL.set('page', currentPage);
@@ -169,7 +175,7 @@ Object.keys(novosFiltros).forEach((key) => {
         ,{params:filtrosURL});
           setProdutos(respostaProduto.data);
         } else {
-          const resposta = await axios.get(`http://localhost:5000/produtos?localidade=${encodeURIComponent(localidade)}`,{params:filtrosURL});
+          const resposta = await axios.get(`http://localhost:5000/busca-produto?localidade=${encodeURIComponent(localidade)}`,{params:filtrosURL});
           setProdutos(resposta.data);
         }
       } catch (err) {
@@ -195,14 +201,15 @@ Object.keys(novosFiltros).forEach((key) => {
         }
       });
     
-    
+      filtrosURL.set('ordenarPor',categoria);
       setSearchParams(filtrosURL); // Atualiza searchParams
       setFiltroSelecionado({ ...novosFiltros, ordenarPor: categoria });
-    
+
       // Agora a chamada para a API ocorre quando os filtros estão atualizados
-      const filtrosURLObj = Object.fromEntries(filtrosURL.entries());
+      filtrosURLObj = Object.fromEntries(filtrosURL.entries());
       try{
-        const resposta = await axios.get("http://localhost:5000/opcoes-filtros", {params:{...filtrosURLObj,localidade,ordenarPor:categoria}})
+        const url = nomeProduto ? `http://localhost:5000/busca-produto/${nomeProduto}`: "http://localhost:5000/busca-produto";
+        const resposta = await axios.get(url, {params:{...filtrosURLObj,localidade}})
         console.log("ordenar por:",categoria);
         setProdutos(resposta.data); 
       }
@@ -265,8 +272,6 @@ Object.keys(novosFiltros).forEach((key) => {
       fetchProducts();
   },[nomeProduto,localidade])
   
-
-
     const calcularPaginasVisiveis = () => {
         const metade = Math.floor(limitePaginasVisiveis / 2);
         let inicio, fim;
@@ -332,7 +337,7 @@ Object.keys(novosFiltros).forEach((key) => {
                     ...prev,
                     preco:{min:valor[0],max:valor[1]}
                 }))}} key={titulo} /> :
-                    <FiltroDropDown setTriggerFetch={setTriggerFetch} params={params} setPaginaAtual={setPaginaAtual} setSearchParams={setSearchParams}filtrosURL = {filtrosURL} filtrosURLObj={filtrosURLObj} range={range} key={titulo} searchParams={searchParams} atualizarFiltroArray={atualizarFiltroArray} filtroSelecionado={filtroSelecionado} localidade={localidade} ordenarPor={ordenarPor} setFiltroSelecionado={setFiltroSelecionado} chaveFiltro={chaveFiltro} titulo={titulo} itens={itens} isCheckBox={isCheckBox} setProdutos={setProdutos} />
+                    <FiltroDropDown nomeProduto={nomeProduto} setTriggerFetch={setTriggerFetch} params={params} setPaginaAtual={setPaginaAtual} setSearchParams={setSearchParams}filtrosURL = {filtrosURL} filtrosURLObj={filtrosURLObj} range={range} key={titulo} searchParams={searchParams} atualizarFiltroArray={atualizarFiltroArray} filtroSelecionado={filtroSelecionado} localidade={localidade} ordenarPor={ordenarPor} setFiltroSelecionado={setFiltroSelecionado} chaveFiltro={chaveFiltro} titulo={titulo} itens={itens} isCheckBox={isCheckBox} setProdutos={setProdutos} />
                 )})}
             </div>
             {produtosPaginados.length > 0 ? <div className="secao-categoria-produtos">

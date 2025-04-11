@@ -220,6 +220,7 @@
 }
 
 .li-categorias{
+    cursor: pointer;
     padding:10px;
     color:white;
 }

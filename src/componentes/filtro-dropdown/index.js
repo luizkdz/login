@@ -4,7 +4,7 @@ import './styles.css';
 import axios from "axios";
 import { calcularEstrelas } from "../../utils/calcularEstrelas";
 
-function FiltroDropDown({triggerFetch,setTriggerFetch,setFiltroAtualizado,setPaginaAtual,params,setSearchParams,range,searchParams,atualizarFiltroArray, titulo, itens, isCheckBox, filtroSelecionado, setFiltroSelecionado, chaveFiltro,localidade,ordenarPor,setProdutos,filtrosURL,filtrosURLObj}) {
+function FiltroDropDown({nomeProduto,setPaginaAtual,setSearchParams,range,searchParams, titulo, itens, isCheckBox, filtroSelecionado, setFiltroSelecionado, chaveFiltro,localidade,ordenarPor,setProdutos}) {
     const [dropdownVisivel, setdropdownVisivel] = useState(false);
     const toggleDropdown = () => {
     setdropdownVisivel(!dropdownVisivel);
@@ -82,7 +82,8 @@ const filtrosURLObj = Object.fromEntries(filtrosURL.entries());
 
   console.log(`Os filtros são :`,filtrosURLObj);
   console.log(`Avaliacao é:`,Array.isArray(filtrosURLObj.avaliacao));
-  const resposta = await axios.get("http://localhost:5000/opcoes-filtros", {
+  const url = nomeProduto ? `http://localhost:5000/busca-produto/${nomeProduto}`: "http://localhost:5000/busca-produto";
+  const resposta = await axios.get(url, {
     params: {
       ...filtrosURLObj,
       localidade,
