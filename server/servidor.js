@@ -397,35 +397,134 @@ app.get("/busca-produto/:nomeProduto", async (req,res) => {
         const localidade = req.query.localidade || '';
         const precoMin = req.query.precoMin;
         const precoMax = req.query.precoMax;
-        const [produtos] = await db.query(`SELECT 
-            p.id, p.nome, p.preco, p.descricao, p.preco_parcelado, 
-            p.parcelas_máximas, p.preco_pix, p.desconto, 
-            COALESCE(MIN(f.valor), MIN(f_default.valor), 0) AS valor_frete, 
-            (SELECT i.url FROM imagens_produto i WHERE i.produto_id = p.id LIMIT 1) AS url, 
-            ROUND(COALESCE(AVG(a.nota), 0), 1) AS media_avaliacoes, COUNT(p.id) OVER() as total_produtos,
-            COUNT(a.nota) AS total_avaliacoes  
-        FROM produtos p 
-        LEFT JOIN avaliacoes a ON p.id = a.produto_id 
-        LEFT JOIN ( 
-            -- Busca o menor frete para a cidade informada 
-            SELECT produto_id, MIN(valor) AS valor  
-            FROM frete  
-            WHERE cidade = ? 
-            GROUP BY produto_id 
-        ) f ON p.id = f.produto_id 
-        LEFT JOIN ( 
-            -- Caso não tenha frete para a cidade informada, busca o menor frete disponível 
-            SELECT produto_id, MIN(valor) AS valor  
-            FROM frete  
-            GROUP BY produto_id 
-        ) f_default ON p.id = f_default.produto_id
-        where p.nome LIKE ? 
-        GROUP BY p.id, p.nome, p.preco, p.descricao, p.preco_parcelado,  
-                 p.parcelas_máximas, p.preco_pix, p.desconto;`,[localidade, `%${nomeProduto}%`]);
-    if(produtos.length === 0){
+        const {preco,marcas,categoria,promocoes,entrega,avaliacao,vendidoPor,tipoCompra,tipoProduto, ordenarPor} = req.query;
+        const params = [localidade];
+        let query = `SELECT 
+    p.id, p.nome, p.preco, p.descricao, p.preco_parcelado, 
+    p.parcelas_máximas, p.preco_pix, p.desconto, 
+    COALESCE(MIN(f.valor), MIN(f_default.valor), 0) AS valor_frete, 
+    (SELECT i.url FROM imagens_produto i WHERE i.produto_id = p.id LIMIT 1) AS url, 
+    ROUND(COALESCE(AVG(a.nota), 0), 1) AS media_avaliacoes, COUNT(p.id) OVER() as total_produtos,
+    COUNT(a.nota) AS total_avaliacoes  
+FROM produtos p 
+LEFT JOIN avaliacoes a ON p.id = a.produto_id 
+LEFT JOIN ( 
+    -- Busca o menor frete para a cidade informada 
+    SELECT produto_id, MIN(valor) AS valor  
+    FROM frete  
+    WHERE cidade = ? 
+    GROUP BY produto_id 
+) f ON p.id = f.produto_id 
+LEFT JOIN ( 
+    -- Caso não tenha frete para a cidade informada, busca o menor frete disponível 
+    SELECT produto_id, MIN(valor) AS valor  
+    FROM frete  
+    GROUP BY produto_id 
+) f_default ON p.id = f_default.produto_id
+
+LEFT JOIN categorias c ON p.categoria_id = c.id
+LEFT JOIN tipo_compra tc ON p.tipo_compra_id = tc.id
+LEFT JOIN tipo_produto tp ON p.tipo_produto_id = tp.id
+LEFT JOIN produto_promocao pp ON p.id = pp.produto_id
+LEFT JOIN promocoes pr ON pr.id = pp.promocao_id
+LEFT JOIN entregas e ON p.entrega_id = e.id
+LEFT JOIN marcas m ON p.marca_id = m.id
+LEFT JOIN usuarios u on p.user_id = u.id
+ where 1=1
+`
+    if(precoMin && precoMax){
+            query+=` AND p.preco between ? AND ?`
+            params.push(precoMin,precoMax);
+        }
+    if(nomeProduto){
+        query+= ` AND p.nome like ?`
+        params.push(nomeProduto);
+    }
+        
+        if(categoria){
+            const categoriaArray = categoria.split(',');
+            query += ` AND c.nome IN (${categoriaArray.map(() => "?").join(", ")})`
+            params.push(...categoriaArray)
+        }
+        
+        if(marcas){
+            const marcasArray = marcas.split(',');
+            query += ` AND m.nome IN (${marcasArray.map(() => "?").join(", ")})`
+            params.push(...marcasArray);
+        }
+        
+        if(promocoes){
+            const promocoesArray = promocoes.split(',');
+            query += ` AND pr.nome IN (${promocoesArray.map(() => "?").join(", ")})`
+            params.push(...promocoesArray);
+        }
+        
+        if(entrega){
+            const entregaArray = entrega.split(',');
+            query += ` AND e.tipo_entrega IN (${entregaArray.map(() => "?").join(", ")})`
+            params.push(...entregaArray);
+        }
+        
+        if(avaliacao){
+            const avaliacaoArray = avaliacao.split(',');
+            query += ` AND ROUND(COALESCE(AVG(a.nota), 0), 1) IN (${avaliacaoArray.map(() => "?").join(", ")})`
+            params.push(...avaliacaoArray);
+        }
+        
+        if(vendidoPor){
+            const vendidoPorArray = vendidoPor.split(',');
+            query += ` AND u.nome IN (${vendidoPorArray.map(() => "?").join(", ")})`
+            params.push(...vendidoPorArray);
+        }
+        
+        if(tipoCompra){
+            const tipoCompraArray = tipoCompra.split(',');
+            query += ` AND tc.nome IN (${tipoCompraArray.map(() => "?").join(", ")})`
+            params.push(...tipoCompraArray);
+        }
+        
+        if(tipoProduto){
+            const tipoProdutoArray = tipoProduto.split(',');
+            query += ` AND tp.nome IN (${tipoProdutoArray.map(() => "?").join(", ")})`
+            params.push(...tipoProdutoArray);
+        }
+    query += ` GROUP BY p.id, p.nome, p.preco, p.descricao, p.preco_parcelado,  
+    p.parcelas_máximas, p.preco_pix, p.desconto, p.vendas`;
+
+
+    if (avaliacao) {
+        const conditions = avaliacao.map((nota) => {
+          return nota == 5 
+            ? `ROUND(COALESCE(AVG(a.nota), 0), 1) = ?` 
+            : `ROUND(COALESCE(AVG(a.nota), 0), 1) >= ?`
+        }).join(" OR ")
+      
+        query += ` HAVING ${conditions}` // sem o ")"
+        params.push(...avaliacao)
+      }
+    if(ordenarPor){
+        switch(ordenarPor){
+            case "maisVendidos": query += ` ORDER BY p.vendas desc`;
+            break;
+            case "maisAvaliados": query += ` ORDER BY media_avaliacoes DESC`;
+            break;
+            case "menorPreco" : query += ` ORDER BY p.preco asc`
+            break;
+            case "maiorPreco" : query += ` ORDER BY p.preco desc`
+            break;
+            case "lancamento" : query += ` ORDER BY p.created_at desc`
+            break;
+            default : query += ` ORDER BY p.nome asc`
+            break;
+
+        }
+    }
+    const [resultado] = await db.query(query,params);
+        
+    if(resultado.length === 0){
        return res.status(200).json([]);
     }
-    const produtosComParcelamento = produtos.map((produto) => {
+    const produtosComParcelamento = resultado.map((produto) => {
         const preco = produto.preco;
         const parcelas_maximas = produto.parcelas_maximas || 1;
         const opcoesParcelamento = [];
@@ -640,6 +739,7 @@ app.get("/calcular-frete/:cep/:produto_id", async (req,res) => {
 app.get("/opcoes-filtros", async (req,res) => {
     const localidade = req.query.localidade || '';
     const {preco,marcas,categoria,promocoes,entrega,avaliacao,vendidoPor,tipoCompra,tipoProduto, ordenarPor} = req.query;
+    const page = req.query.page ? parseInt(req.query.page) : 1;
     const precoMin = parseFloat(req.query.precoMin);
     const precoMax = parseFloat(req.query.precoMax);
     console.log(`O preco min123`,precoMin,`O preco max123`,precoMax);
@@ -713,12 +813,6 @@ if(entrega){
     params.push(...entregaArray);
 }
 
-if(avaliacao){
-    const avaliacaoArray = avaliacao.split(',');
-    query += ` AND ROUND(COALESCE(AVG(a.nota), 0), 1) IN (${avaliacaoArray.map(() => "?").join(", ")})`
-    params.push(...avaliacaoArray);
-}
-
 if(vendidoPor){
     const vendidoPorArray = vendidoPor.split(',');
     query += ` AND u.nome IN (${vendidoPorArray.map(() => "?").join(", ")})`
@@ -737,18 +831,20 @@ if(tipoProduto){
     params.push(...tipoProdutoArray);
 }
 
+
     query += ` GROUP BY p.id, p.nome, p.preco, p.descricao, p.preco_parcelado,  
     p.parcelas_máximas, p.preco_pix, p.desconto, p.vendas`;
 
     if (avaliacao) {
-        const conditions = avaliacao.map((nota) => {
+        const avaliacaoArray = avaliacao.split(',');
+        const conditions = avaliacaoArray.map((nota) => {
           return nota == 5 
             ? `ROUND(COALESCE(AVG(a.nota), 0), 1) = ?` 
             : `ROUND(COALESCE(AVG(a.nota), 0), 1) >= ?`
         }).join(" OR ")
       
         query += ` HAVING ${conditions}` // sem o ")"
-        params.push(...avaliacao)
+        params.push(...avaliacaoArray);
       }
     if(ordenarPor){
         switch(ordenarPor){

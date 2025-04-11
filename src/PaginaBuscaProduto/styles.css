@@ -43,6 +43,8 @@
 }
 
 .paginacao{
+    width:100%;
+    align-items: center;
     margin-top:20px;
     display:flex;
     gap:20px;
@@ -87,4 +89,12 @@
 
 .nome-categoria {
     font-size:24px;
+}
+
+.secao-categoria-produtos{
+    width:100%;
+}
+
+.botao-direita-paginas:disabled {
+    opacity: 0;
 }

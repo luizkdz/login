@@ -27,7 +27,7 @@ function FiltroPrecoRange({range, setRange, onClick,onChange, min,max,searchPara
     return (
         <div className="card-categoria-pagina-busca-produto" >
             <div className="titulo-range-preco-setinha" onClick={togglePreco} >
-            <p>Preço</p><img src={precoVisivel === false ? "/images/setinha-dropdown.png" : "images/setinha-cima-dropdown.png"} className="imagem-setinha-filtro"/></div>
+            <p>Preço</p><img src={precoVisivel === false ? "/images/setinha-dropdown.png" : "/images/setinha-cima-dropdown.png"} className="imagem-setinha-filtro"/></div>
             {precoVisivel ? 
             <div className="container-preco">
             <div className="container-minimo-maximo">

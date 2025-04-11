@@ -32,6 +32,7 @@ function PaginaBuscaProduto() {
   const params = new URLSearchParams(searchParams);
   const filtrosURL = new URLSearchParams(searchParams);
   let filtrosURLObj = Object.fromEntries(filtrosURL.entries());
+  const [triggerFetch, setTriggerFetch] = useState(false);
   
   const atualizarFiltro = (nomeFiltro,valor) => {
     const atual = searchParams.get(nomeFiltro);
@@ -91,8 +92,14 @@ function PaginaBuscaProduto() {
 
 Object.keys(novosFiltros).forEach((key) => {
   const filtro = novosFiltros[key];
-  if (filtro && filtro.length > 0) {
+  // Verifique se o filtro é um array antes de tentar usar join
+  if (Array.isArray(filtro) && filtro.length > 0) {
     filtrosURL.set(key, filtro.join(','));
+  } else if (filtro && filtro.length > 0) {
+    // Se não for um array, mas ainda tiver um valor válido (string, por exemplo)
+    filtrosURL.set(key, filtro);
+  } else {
+    filtrosURL.delete(key); // Exclui o filtro se não houver valor
   }
 });
 
@@ -118,6 +125,8 @@ Object.keys(novosFiltros).forEach((key) => {
     const tipo = location.state?.tipo;
     const [range, setRange] = useState([0,0]);
 
+    
+
     const fetchFiltros = async () => {
       try{
         const resposta = await axios.get("http://localhost:5000/filtros");
@@ -142,12 +151,15 @@ Object.keys(novosFiltros).forEach((key) => {
     }
 
     const fetchProducts = async () => {
-
-      
+      const filtrosURL = new URLSearchParams();
 
       if (range[0] && range[1]) {
         filtrosURL.set('precoMin', range[0].toString());
         filtrosURL.set('precoMax', range[1].toString());
+      }
+      const currentPage = searchParams.get('page') || 1;
+      if(currentPage > 1){
+        filtrosURL.set('page', currentPage);
       }
       console.log('Filtros aplicados:', filtrosURL);
       try {
@@ -166,25 +178,33 @@ Object.keys(novosFiltros).forEach((key) => {
     }
 
     const handleOrdenarPor = async (categoria) => {
-      let novosFiltros = {...filtroSelecionado}
-
+      const filtrosURL = new URLSearchParams();
+      let novosFiltros = { ...filtroSelecionado };
+    
       if (range[0] && range[1]) {
         filtrosURL.set('precoMin', range[0].toString());
         filtrosURL.set('precoMax', range[1].toString());
       }
+    
       Object.keys(novosFiltros).forEach((key) => {
         const filtro = novosFiltros[key];
-        if (filtro && filtro.length > 0) {
+        if (Array.isArray(filtro) && filtro.length > 0) {
           filtrosURL.set(key, filtro.join(','));
+        } else if (typeof filtro === 'string' && filtro.length > 0) {
+          filtrosURL.set(key, filtro);
         }
       });
-      
-        filtrosURLObj = Object.fromEntries(filtrosURL.entries());
     
+    
+      setSearchParams(filtrosURL); // Atualiza searchParams
+      setFiltroSelecionado({ ...novosFiltros, ordenarPor: categoria });
+    
+      // Agora a chamada para a API ocorre quando os filtros estão atualizados
+      const filtrosURLObj = Object.fromEntries(filtrosURL.entries());
       try{
         const resposta = await axios.get("http://localhost:5000/opcoes-filtros", {params:{...filtrosURLObj,localidade,ordenarPor:categoria}})
-        setProdutos(resposta.data);
-        atualizarFiltro("ordenarPor",categoria);
+        console.log("ordenar por:",categoria);
+        setProdutos(resposta.data); 
       }
       catch(err){
         console.error(`Erro ao ordernar por ${categoria}`);
@@ -195,7 +215,7 @@ Object.keys(novosFiltros).forEach((key) => {
     fetchFiltros();
   },[])
   useEffect(() => {
-    const page= searchParams.get('page');
+    const page= searchParams.get('page') || 1;;
     const precoMin = searchParams.get('precoMin');
     const precoMax = searchParams.get('precoMax');
     if(page){
@@ -224,9 +244,7 @@ Object.keys(novosFiltros).forEach((key) => {
       }
     }
   }, [filtros]);
-  useEffect(() => {
-    fetchProducts();
-},[nomeProduto,localidade])
+  
 
 
     const [indice,setIndice] = useState(0);
@@ -242,6 +260,12 @@ Object.keys(novosFiltros).forEach((key) => {
     const produtosPaginados = produtos.slice(indiceInicial,indiceFinal);
 
     const limitePaginasVisiveis = 5;
+
+    useEffect(() => {
+      fetchProducts();
+  },[nomeProduto,localidade])
+  
+
 
     const calcularPaginasVisiveis = () => {
         const metade = Math.floor(limitePaginasVisiveis / 2);
@@ -308,7 +332,7 @@ Object.keys(novosFiltros).forEach((key) => {
                     ...prev,
                     preco:{min:valor[0],max:valor[1]}
                 }))}} key={titulo} /> :
-                    <FiltroDropDown params={params} setSearchParams={setSearchParams}filtrosURL = {filtrosURL} filtrosURLObj={filtrosURLObj} range={range} key={titulo} searchParams={searchParams} atualizarFiltroArray={atualizarFiltroArray} filtroSelecionado={filtroSelecionado} localidade={localidade} ordenarPor={ordenarPor} setFiltroSelecionado={setFiltroSelecionado} chaveFiltro={chaveFiltro} titulo={titulo} itens={itens} isCheckBox={isCheckBox} setProdutos={setProdutos} />
+                    <FiltroDropDown setTriggerFetch={setTriggerFetch} params={params} setPaginaAtual={setPaginaAtual} setSearchParams={setSearchParams}filtrosURL = {filtrosURL} filtrosURLObj={filtrosURLObj} range={range} key={titulo} searchParams={searchParams} atualizarFiltroArray={atualizarFiltroArray} filtroSelecionado={filtroSelecionado} localidade={localidade} ordenarPor={ordenarPor} setFiltroSelecionado={setFiltroSelecionado} chaveFiltro={chaveFiltro} titulo={titulo} itens={itens} isCheckBox={isCheckBox} setProdutos={setProdutos} />
                 )})}
             </div>
             {produtosPaginados.length > 0 ? <div className="secao-categoria-produtos">
@@ -363,6 +387,7 @@ Object.keys(novosFiltros).forEach((key) => {
   <p>Não foram encontrados produtos.</p>
 )}
                     </div>
+                    </div>
                     <div className="secao-paginacao">
                         <div className="container-paginacao">
                             <div className="paginacao">
@@ -389,6 +414,7 @@ Object.keys(novosFiltros).forEach((key) => {
 
       
       {calcularPaginasVisiveis().map((num) => (
+        
         <button
           key={num}
           onClick={() => {setPaginaAtual(num);atualizarFiltro("page",num);}}
@@ -396,6 +422,7 @@ Object.keys(novosFiltros).forEach((key) => {
         >
           {num}
         </button>
+        
       ))}
 
       
@@ -409,7 +436,7 @@ Object.keys(novosFiltros).forEach((key) => {
       )}
 
       
-      {paginaAtual < 10 && (<button
+      {paginaAtual < 10 && (<button className="botao-direita-paginas"
 
         onClick={() => {setPaginaAtual((prev) => Math.min(totalPaginas, prev + 1));atualizarFiltro("page",paginaAtual+1)}}
         disabled={paginaAtual === totalPaginas}
@@ -419,7 +446,7 @@ Object.keys(novosFiltros).forEach((key) => {
  </div>
                         </div>
                     </div>
-                    </div>
+                    
 
             </div> : <div className="nao-foram-encontrados-produtos">
               <h1>Sua busca por {nomeProduto} não encontrou resultado algum :(</h1>
