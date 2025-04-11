@@ -21,13 +21,23 @@ const handleCheckboxChange = async (item) => {
       })}
     }
     else{
+
       novosFiltros = ({...filtroSelecionado,
         [chaveFiltro] : [...filtroSelecionado[chaveFiltro], item]});
+      if(chaveFiltro === 'categoria'){
+      novosFiltros = ({...filtroSelecionado,
+        [chaveFiltro] : [item]
+      })
+      }
     }
 
     setFiltroSelecionado(novosFiltros);
     
     const filtrosURL = new URLSearchParams();
+
+    if (novosFiltros[chaveFiltro] && novosFiltros[chaveFiltro].length > 0) {
+      filtrosURL.set(chaveFiltro, novosFiltros[chaveFiltro][0]); // Sempre usa o primeiro item da categoria
+    }
 
     Object.entries(novosFiltros).forEach(([filtro, valores]) => {
       if (valores.length > 0) {

@@ -17,7 +17,7 @@ function PaginaBuscaProduto() {
   const [filtroSelecionado, setFiltroSelecionado] = useState({
     preco: { min: 15, max: 4000 },  // mantém o objeto para intervalo de preço
     marcas: [],                    // array
-    categoria: [],                 // array (mude de string para array se for possível escolher múltiplas categorias)
+    categoria: "",                 // array (mude de string para array se for possível escolher múltiplas categorias)
     promocoes: [],                 // array
     entrega: [],                   // array
     avaliacao: [],                 // array (se for múltiplas avaliações, mude para array de notas)
