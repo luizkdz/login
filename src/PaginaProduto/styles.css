@@ -370,3 +370,7 @@
 .botao-alterar:hover{
     color: #551A8B;
 }
+
+body.modal-aberto {
+    overflow: hidden;
+  }

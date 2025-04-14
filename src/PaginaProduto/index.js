@@ -8,6 +8,8 @@ import { calcularPrecoParcelado } from '../utils/calcularPrecoParcelado';
 import { calcularFretePorCep } from '../utils/calcularFretePorCep';
 import { useCep } from '../context/CepContext';
 import ModalCep from '../componentes/modalCep/ModalCep';
+import { useCarrinho } from '../context/carrinhoContext';
+import ModalCarrinho from '../componentes/modalCarrinho/index.js';
 
 function PaginaProduto(){
     const {id} = useParams();
@@ -19,7 +21,9 @@ function PaginaProduto(){
     const {cep} = useCep();
     const [mostrarModalCep, setMostrarModalCep] = useState(false);
     const [loading, setLoading] = useState(false);
-
+    const [modalCarrinho, setModalCarrinho] = useState(false);
+    
+    const {obterCarrinho, editarQuantidadeItemCarrinho, excluirItemCarrinho, carrinhoItens,setCarrinhoItens, adicionarAoCarrinho} = useCarrinho();
 
     const abrirModalCep = () => {
         setLoading(true);
@@ -60,6 +64,24 @@ function PaginaProduto(){
           );
         }
       }, [produto, cep]);
+
+    useEffect(() => {
+        const fetchCarrinho = async () => {
+            const dadosCarrinho = await obterCarrinho();
+            setCarrinhoItens(dadosCarrinho);
+        }
+        fetchCarrinho();
+        
+    },[setCarrinhoItens]);
+
+    const abrirModalCarrinho = () => {
+        document.body.classList.add("modal-aberto");
+        setModalCarrinho(true);
+    }
+    const fecharModalCarrinho = () => {
+        document.body.classList.remove("modal-aberto");
+        setModalCarrinho(false);
+    }
     const calcularEstrelas = (avaliacao) => {
         const totalEstrelas = 5;
         const inteira = Math.floor(avaliacao);
@@ -119,10 +141,10 @@ function PaginaProduto(){
                             <p>{produto.preco}</p>
                             <p>{produto.produto_parcelas_máximas}x de R${calcularPrecoParcelado(produto.produto_preco_parcelado,produto.produto_parcelas_máximas)}</p>                           
                             </div>
-                        </div>
+                        </div>  
                         <div className="container-botoes">
                         <button className="botao-comprar-agora"><img src="/images/shopping-bag.png" className="imagem-bolsa"/>Comprar agora</button>
-                        <button className="botao-adicionar-carrinho"><img src="/images/carrinho-de-compras.png" className="imagem-carrinho-botao"/>Adicionar ao carrinho</button>
+                        <button className="botao-adicionar-carrinho" onClick={() => {adicionarAoCarrinho(id,1);abrirModalCarrinho() }}><img src="/images/carrinho-de-compras.png" className="imagem-carrinho-botao"/>Adicionar ao carrinho</button>
                         <div className="card-cep">
                             <div className="container-imagem-cep">
                             <img src= "/images/localizacao.png" className="icone-localizacao-card-cep"/>
@@ -143,6 +165,11 @@ function PaginaProduto(){
                     {mostrarModalCep && (
                                 <ModalCep fecharModalCep = {fecharModalCep} calcularFretePorCep={calcularFretePorCep} setLocalidade={setLocalidade} setPrazo={setPrazo} setValorFrete={setValorFrete} produtoId = {produto?.id}/>
                             )}
+                    {modalCarrinho && (
+                        
+                        <ModalCarrinho/>
+                        
+                    )}
                     <div className="container-card-frete">
                         <div className="empty"></div>
                     <div className="card-frete">

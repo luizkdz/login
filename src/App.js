@@ -3,8 +3,10 @@ import Rotas from "./routes/index.js"; // Importando o arquivo de rotas
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { CepProvider } from "./context/CepContext.js";
 import './App.css';
+import { CarrinhoProvider } from "./context/carrinhoContext.js";
 function App() {
   return (
+    <CarrinhoProvider>
     <CepProvider>
     <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID}>
     <Router>
@@ -12,6 +14,7 @@ function App() {
     </Router>
     </GoogleOAuthProvider>
     </CepProvider>
+    </CarrinhoProvider>
   );
 }
 

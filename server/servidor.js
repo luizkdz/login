@@ -792,4 +792,103 @@ app.get("/carregarCategorias",async (req,res) => {
     }
 })
 
+app.get("/cart", async (req,res) => {
+    try{
+    const {userId} = req.query;
+    const params = [];
+    let query = `
+        SELECT ci.id, ci.cart_id, ci.produto_id, ci.quantidade, p.nome as produto_nome, p.preco,p.desconto,
+        ip.url as imagem_produto,m.nome as marca_nome, u.nome as usuario_nome_dono_produto
+        from cart_items ci
+        left join imagens_produto ip on ip.produto_id = p.id
+        left join carts c on ci.cart_id = c.id
+        left join usuarios u_dono_produto on u_dono_produto.id = p.user_id
+        left join usuarios u_carrinho on u_carrinho.id= c.user_id
+        left join produtos p on p.id = ci.produto_id
+        left join marcas m on p.marca_id = m.id
+        where 1=1
+         `
+
+    if(userId){
+    query += ` AND c.usuario_id = ?`
+    params.push(userId);
+    }
+
+    query += ` GROUP BY ci.id, ci.cart_id, ci.produto_id, ci.quantidade,produto_nome,p.preco,p.desconto,
+        imagem_produto, marca_nome,usuario_nome`
+    
+    const [resultado] = await db.query(query,params);
+
+    return res.status(200).json(resultado);
+    }
+    catch(err){
+    return res.status(400).json({message:"Não foi possível retornar os itens do carrinho",err});
+    }
+})
+app.post("/cart" , autenticarToken, async (req,res) => {
+    const {produtoId, quantidade} = req.body;
+    const userId = req.usuarioId;
+    try{
+
+        const [carrinho] = await db.query("SELECT id from carts where usuario_id = ?",[userId]);
+
+        let cartId;
+        if(carrinho.length > 0){
+            cartId = carrinho[0].id;
+        }
+        else{
+            const [novoCarrinho] = await db.query(`INSERT INTO carts (usuario_id) values (?)`, userId);
+            cartId = novoCarrinho[0].id;
+        }
+
+    const itemJaExiste = await db.query(`SELECT * from cart_items where cart_id = ? AND produto_id = ?`,[cartId,produtoId]);
+
+    if(itemJaExiste.length > 0){
+        await db.query(`UPDATE cart_items SET quantidade = quantidade + ? where cart_id = ? AND produto_id = ?`,[quantidade || 1 ,cartId,produtoId]);
+    }
+    else{
+        await db.query(`INSERT INTO cart_items (cart_id, produto_id, quantidade) values (? , ? , ?)`,[cartId,produtoId,quantidade || 1])
+    }
+        res.status(200).json({message: "O item foi adicionado ao carrinho"});
+    }
+    catch(err){
+        return res.status(400).json({message:"Não foi possível adicionar o item ao carrinho"});
+    }
+    
+})
+
+app.put("/cart/:itemId", async (req,res) => {
+    const {itemId} = req.params;
+    const {quantidade} = req.body;
+
+    try{
+        await db.query(`UPDATE cart_items SET quantidade = quantidade + ? where id = ?`,[quantidade,itemId]);
+        return res.status(200).json({message: "Carrinho atualizado com sucesso"});
+    }
+    catch(err){
+        return res.status(400).json({message:"Não foi possível atualizar o carrinho"});
+    }
+    
+})
+
+app.delete("/cart/:itemId", async (req,res) => {
+    const {itemId} = req.params;
+    const {userId} = req.body;
+    try{
+        const [cart] = await db.query(`SELECT id from carts where usuario_id = ?`,userId);
+
+        if(!cart){
+            return res.status(400).json({message:"Carrinho não encontrado para o usuario"})
+        }
+
+        await db.query(`DELETE FROM cart_items where id = ? AND cart_id = ?`,[itemId,cart.id]);
+        return res.status(200).json({message:"O item foi deletado do carrinho com sucesso"});
+    }
+    catch(err){
+        return res.status(400).json({message:"Não foi possível remover o item do carrinho"});
+    }
+})
+
+
+
 app.listen(port, () => {console.log("servidor rodando na porta " + `${port}`)});
