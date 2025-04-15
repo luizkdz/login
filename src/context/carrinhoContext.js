@@ -26,7 +26,7 @@ const adicionarAoCarrinho = async (produtoId,quantidade) => {
             quantidade
         },{withCredentials:true});
         console.log(`A resposta é :`, resposta);
-        setCarrinhoItens((prev = []) => {
+        setCarrinhoItens((prev) => {
         const existente = prev.find((item) => { return item.produto_id === produtoId})
         if(existente){
         return prev.map((item) => {
@@ -45,7 +45,7 @@ const adicionarAoCarrinho = async (produtoId,quantidade) => {
 
 const excluirItemCarrinho = async (itemId) => {
     try{
-        await axios.delete(`/cart/${itemId}`)
+        await axios.delete(`http://localhost:5000/cart/${itemId}`,{withCredentials:true})
         setCarrinhoItens((prev) => {return prev.filter((item) => {return item.id !== itemId })});
     }
     catch(err){

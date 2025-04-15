@@ -43,7 +43,7 @@ app.use(express.json());
 
 app.use(cors({
     origin: "http://localhost:3000",
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST","DELETE","PUT"],
     credentials: true,
     allowedHeaders: ["Content-type", "Authorization"]
 }));
@@ -60,7 +60,7 @@ export const db = mysql.createPool({
 });
 
 const gerarTokens = async (usuarioId) => {
-    const accessToken = jwt.sign({usuarioId} , "segredo_seguranca", {expiresIn:"1m"});
+    const accessToken = jwt.sign({usuarioId} , "segredo_seguranca", {expiresIn:"15m"});
     const refreshToken = jwt.sign({usuarioId}, "segredo_seguranca", {expiresIn:"7d"});
 
     await db.query("INSERT INTO refresh_tokens (usuario_id, token) VALUES (?, ?)" , [usuarioId, refreshToken]);
@@ -138,7 +138,7 @@ app.post("/renovarsessao" , async (req,res) => {
         const newAccessToken = jwt.sign(
             { usuarioId: decoded.usuarioId },
             "segredo_seguranca",
-            { expiresIn: "1m" }
+            { expiresIn: "15m" }
         );
         res.cookie("accessToken", newAccessToken,{
             httpOnly:true,
@@ -254,11 +254,6 @@ app.post("/esqueci-minha-senha",async (req,res) => {
     }
 })
 
-
-
-app.get("/cadastrar", (req,res) => {
-    
-});
 
 app.get("/produtos", async (req,res) => {
     
@@ -797,14 +792,14 @@ app.get("/cart", async (req,res) => {
     const {userId} = req.query;
     const params = [];
     let query = `
-        SELECT ci.id, ci.cart_id, ci.produto_id, ci.quantidade, p.nome as produto_nome, p.preco,p.desconto,
-        ip.url as imagem_produto,m.nome as marca_nome, u.nome as usuario_nome_dono_produto
+        SELECT ci.id, ci.cart_id, ci.produto_id, ci.quantidade, p.nome as produto_nome, p.preco,p.preco_pix,p.desconto,
+        ip.url as imagem_produto,m.nome as marca_nome, u_dono_produto.nome as usuario_nome_dono_produto
         from cart_items ci
+        left join produtos p on p.id = ci.produto_id
         left join imagens_produto ip on ip.produto_id = p.id
         left join carts c on ci.cart_id = c.id
         left join usuarios u_dono_produto on u_dono_produto.id = p.user_id
-        left join usuarios u_carrinho on u_carrinho.id= c.user_id
-        left join produtos p on p.id = ci.produto_id
+        left join usuarios u_carrinho on u_carrinho.id= c.usuario_id
         left join marcas m on p.marca_id = m.id
         where 1=1
          `
@@ -814,8 +809,8 @@ app.get("/cart", async (req,res) => {
     params.push(userId);
     }
 
-    query += ` GROUP BY ci.id, ci.cart_id, ci.produto_id, ci.quantidade,produto_nome,p.preco,p.desconto,
-        imagem_produto, marca_nome,usuario_nome`
+    query += ` GROUP BY ci.id, ci.cart_id, ci.produto_id, ci.quantidade,produto_nome,p.preco,p.preco_pix,p.desconto,
+        imagem_produto, marca_nome,usuario_nome_dono_produto`
     
     const [resultado] = await db.query(query,params);
 
@@ -841,15 +836,15 @@ app.post("/cart" , autenticarToken, async (req,res) => {
             cartId = novoCarrinho[0].id;
         }
 
-    const itemJaExiste = await db.query(`SELECT * from cart_items where cart_id = ? AND produto_id = ?`,[cartId,produtoId]);
-
+    const [itemJaExiste] = await db.query(`SELECT * from cart_items where cart_id = ? AND produto_id = ?`,[cartId,produtoId]);
+    console.log(`CartId ProdutoId Quantidade`,cartId, produtoId, quantidade)
     if(itemJaExiste.length > 0){
         await db.query(`UPDATE cart_items SET quantidade = quantidade + ? where cart_id = ? AND produto_id = ?`,[quantidade || 1 ,cartId,produtoId]);
     }
     else{
         await db.query(`INSERT INTO cart_items (cart_id, produto_id, quantidade) values (? , ? , ?)`,[cartId,produtoId,quantidade || 1])
     }
-        res.status(200).json({message: "O item foi adicionado ao carrinho"});
+        return res.status(200).json({message: "O item foi adicionado ao carrinho"});
     }
     catch(err){
         return res.status(400).json({message:"Não foi possível adicionar o item ao carrinho"});
@@ -871,17 +866,17 @@ app.put("/cart/:itemId", async (req,res) => {
     
 })
 
-app.delete("/cart/:itemId", async (req,res) => {
+app.delete("/cart/:itemId",autenticarToken, async (req,res) => {
     const {itemId} = req.params;
-    const {userId} = req.body;
+    const userId = req.usuarioId;
     try{
         const [cart] = await db.query(`SELECT id from carts where usuario_id = ?`,userId);
 
-        if(!cart){
+        if(cart.length === 0){
             return res.status(400).json({message:"Carrinho não encontrado para o usuario"})
         }
-
-        await db.query(`DELETE FROM cart_items where id = ? AND cart_id = ?`,[itemId,cart.id]);
+        const cartId = cart[0].id;
+        await db.query(`DELETE FROM cart_items where id = ? AND cart_id = ?`,[itemId,cartId]);
         return res.status(200).json({message:"O item foi deletado do carrinho com sucesso"});
     }
     catch(err){

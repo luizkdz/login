@@ -22,9 +22,20 @@ function PaginaProduto(){
     const [mostrarModalCep, setMostrarModalCep] = useState(false);
     const [loading, setLoading] = useState(false);
     const [modalCarrinho, setModalCarrinho] = useState(false);
+    const [modalUnidades,setModalUnidades] = useState(false);
+    const [quantidadeSelecionada, setQuantidadeSelecionada] = useState(1);
+    const [mostrarOpcoes, setMostrarOpcoes] = useState(false);
+    const [valorQuantidade, setValorQuantidade] = useState("mais");
     
     const {obterCarrinho, editarQuantidadeItemCarrinho, excluirItemCarrinho, carrinhoItens,setCarrinhoItens, adicionarAoCarrinho} = useCarrinho();
 
+    const selecionarQuantidade = (quantidade) => {
+        setQuantidadeSelecionada(Number(quantidade));
+        setMostrarOpcoes(false);
+    }
+
+    
+    
     const abrirModalCep = () => {
         setLoading(true);
         setTimeout(() => {
@@ -34,6 +45,12 @@ function PaginaProduto(){
         
     };
 
+    const abrirModalUnidadesProduto = () => {
+        setModalUnidades(true);
+    }
+    const fecharModalUnidadesProduto = () => {
+        setModalUnidades(false);
+    };
     const fecharModalCep = () => {
         
         setMostrarModalCep(false);
@@ -65,14 +82,6 @@ function PaginaProduto(){
         }
       }, [produto, cep]);
 
-    useEffect(() => {
-        const fetchCarrinho = async () => {
-            const dadosCarrinho = await obterCarrinho();
-            setCarrinhoItens(dadosCarrinho);
-        }
-        fetchCarrinho();
-        
-    },[setCarrinhoItens]);
 
     const abrirModalCarrinho = () => {
         document.body.classList.add("modal-aberto");
@@ -141,10 +150,34 @@ function PaginaProduto(){
                             <p>{produto.preco}</p>
                             <p>{produto.produto_parcelas_máximas}x de R${calcularPrecoParcelado(produto.produto_preco_parcelado,produto.produto_parcelas_máximas)}</p>                           
                             </div>
-                        </div>  
+                        </div>
+                        <div className="container-selecao-unidades">
+                        <div className="container-quantidade-foto-dropdown">
+                        <p style ={{cursor:"pointer"}} onClick={() => setMostrarOpcoes(!mostrarOpcoes)}>Quantidade: {quantidadeSelecionada !== "mais" ? `${quantidadeSelecionada} unidade${quantidadeSelecionada !== "1" ? "s" : ""}` : "Selecione a quantidade" }</p><img src={mostrarOpcoes ? "/images/setinha-cima-dropdown-preta.png" : "/images/setinha-dropdown-preta.png"} className="imagem-botao-dropdown-quantidade"/>
+                        </div>
+                            {mostrarOpcoes && (
+                            <div className="selecao-unidades">
+                            <p onClick={() => selecionarQuantidade(1)}>1 unidade</p>
+                            <p onClick={() => selecionarQuantidade(2)}>2 unidades</p>
+                            <p onClick={() => selecionarQuantidade(3)}>3 unidades</p>
+                            <p onClick={() => selecionarQuantidade(4)}>4 unidades</p>
+                            <p onClick={() => selecionarQuantidade(5)}>5 unidades</p>
+                            <p onClick={() => selecionarQuantidade(6)}>6 unidades</p>
+                            <p on onMouseLeave = {() => setModalUnidades(false)}onClick={() => {selecionarQuantidade("mais");setMostrarOpcoes(true);setModalUnidades(true)}}>{modalUnidades ? <div>
+                               <p>Quantidade:</p>
+                               <form onSubmit={(e) => {e.preventDefault(); selecionarQuantidade(valorQuantidade)}}>
+                               <input type='number' className="input-valorQuantidade" style={{padding:"13px 12px"}} value = {valorQuantidade === "mais" ? "" :valorQuantidade} onChange={(e) => setValorQuantidade(e.target.value)} />
+                               <button disabled={valorQuantidade === "mais" || valorQuantidade === ""} className="botao-valor-quantidade" type="submit">Aplicar</button>
+                               </form>
+                            </div> : "Mais que 6 unidades"} </p>
+            
+                            </div>
+                        )}
+                                            </div>
+                            
                         <div className="container-botoes">
                         <button className="botao-comprar-agora"><img src="/images/shopping-bag.png" className="imagem-bolsa"/>Comprar agora</button>
-                        <button className="botao-adicionar-carrinho" onClick={() => {adicionarAoCarrinho(id,1);abrirModalCarrinho() }}><img src="/images/carrinho-de-compras.png" className="imagem-carrinho-botao"/>Adicionar ao carrinho</button>
+                        <button className="botao-adicionar-carrinho" onClick={() => {adicionarAoCarrinho(id,quantidadeSelecionada);abrirModalCarrinho() }}><img src="/images/carrinho-de-compras.png" className="imagem-carrinho-botao"/>Adicionar ao carrinho</button>
                         <div className="card-cep">
                             <div className="container-imagem-cep">
                             <img src= "/images/localizacao.png" className="icone-localizacao-card-cep"/>
@@ -167,7 +200,7 @@ function PaginaProduto(){
                             )}
                     {modalCarrinho && (
                         
-                        <ModalCarrinho/>
+                        <ModalCarrinho fecharModalCarrinho={fecharModalCarrinho} quantidadeSelecionada={quantidadeSelecionada}/>
                         
                     )}
                     <div className="container-card-frete">

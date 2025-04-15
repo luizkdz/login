@@ -55,6 +55,10 @@ function Footer() {
             <a href="https://www.flaticon.com/free-icons/phone" title="phone icons">Phone icons created by Freepik - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/zip-code" title="zip code icons">Zip code icons created by bearicons - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/up-and-down-arrow" title="up and down arrow icons">Up and down arrow icons created by Rahul Kaklotar - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/close" title="close icons">Close icons created by joalfa - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/verified-badge-emoji" title="verified badge emoji icons">Verified badge emoji icons created by icon wind - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/minus" title="minus icons">Minus icons created by Pixel perfect - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/plus" title="plus icons">Plus icons created by hirschwolf - Flaticon</a>
             <p>&copy; 2025 Login ltda</p>
             </div>
         </footer>

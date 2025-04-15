@@ -5,6 +5,7 @@ import PaginaInicial from '../PaginaInicial/index.js';
 import EsqueciSenha from '../Esqueci-Senha/index.js';
 import PaginaProduto from '../PaginaProduto/index.js';
 import PaginaBuscaProduto from "../PaginaBuscaProduto/index.js";
+import PaginaCarrinho from "../PaginaCarrinho/index.js";
 
 function Rotas() {
   return (
@@ -16,6 +17,7 @@ function Rotas() {
       <Route path="/produto/:id" element = {<PaginaProduto/>}></Route>
       <Route path="/busca-produto" element = {<PaginaBuscaProduto/>}></Route>
       <Route path="/busca-produto/:nomeProduto" element = {<PaginaBuscaProduto/>}></Route>
+      <Route path="/carrinho" element ={<PaginaCarrinho/>}></Route>
     </Routes>
   );
 }
