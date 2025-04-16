@@ -55,14 +55,16 @@ const excluirItemCarrinho = async (itemId) => {
 const editarQuantidadeItemCarrinho = async (novaQuantidade,itemId) => {
     try{
         await axios.put(`http://localhost:5000/cart/${itemId}`,{
-        quantidade:novaQuantidade
+        quantidade:Number(novaQuantidade)
         });
         setCarrinhoItens((prev) => {
             return prev.map((item) => {
                 return item.id === itemId ? {...item, quantidade:novaQuantidade} : item;
             })
         });
+        console.log(typeof novaQuantidade);
     }
+    
     catch(err){
         console.error("Não foi possivel editar a quantidade de item no carrinho");
     }

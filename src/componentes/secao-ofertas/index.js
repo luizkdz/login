@@ -5,7 +5,7 @@ function SecaoOfertas() {
 
 
     return (
-        <Carousel titulo= "Explore nossos produtos"/>
+        <Carousel itensPassados="4" />
         )
 }
 

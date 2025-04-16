@@ -16,7 +16,7 @@ function PaginaProduto(){
     const [produto,setProduto] = useState(null);
     const [imagemSelecionada, setImagemSelecionada] = useState("");
     const [localidade, setLocalidade] = useState("Insira seu cep");
-    const [valorFrete, setValorFrete] = useState(null);
+    let [valorFrete, setValorFrete] = useState(null);
     const [prazo, setPrazo] = useState(null);
     const {cep} = useCep();
     const [mostrarModalCep, setMostrarModalCep] = useState(false);
@@ -214,7 +214,7 @@ function PaginaProduto(){
                         <p className="texto-prazo">Os prazos de entrega são contabilizados a partir da confirmação do pagamento e podem sofrer variações caso haja a compra de mais de uma unidade do mesmo produto.</p>
                         </div>
                         </div>
-                        <p className="preco-frete"> {valorFrete === null ? "Indisponível" : `R$ ${valorFrete}`}</p> 
+                        <p className="preco-frete"> {valorFrete === null ? "Indisponível" : `R$ ${valorFrete.toFixed(2)}`}</p> 
                                             
                         </div>
                         

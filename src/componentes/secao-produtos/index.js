@@ -1,9 +1,9 @@
-import Carousel from "../carousel/index.js";
+import Carousel from "../carousel";
 
 
 function SessaoProdutos() { 
     return (
-            <Carousel titulo="Em Oferta"/>
+            <Carousel itensPassados={4} titulo="Explore nossos produtos"/>
     );
 }
 

@@ -1,55 +1,59 @@
-.secao-produtos{
-    justify-content: center;
-    display:flex;
-    align-items: center;
-}
 
-
-.container-cards-produtos{
-    justify-content: center;
-    display:flex;
-}
-
-.container-produtos{
-    margin-top:20px;
-    width: 70vw;
-}
-
-.carousel-container {
-    
-    display:flex;
-    overflow: hidden;
-}
-
-.carousel {
-    gap:50px;
+.carousel-wrapper {
     display: flex;
-    
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+  }
+.container-carousel-carrinho{
+    align-items: center;
+    width:100%;
+    display:flex;
+    flex-direction: column;
 }
-
-
-.carousel-item {
-    width: 205px;
-    height:400px;
-    
-}
-
-.carousel-btn {
-    z-index: 10;
-    cursor:pointer;
-    background-color:transparent;
-    border:none;
-}
-
-.carousel-btn:disabled .imagem-setinha-esquerda{
-    opacity: 0;
-}
-.carousel-btn:disabled .imagem-setinha-direita{
-    opacity: 0;
-}
-
-.carousel-item:hover{
+  
+  
+  .carousel-track {
+    display: flex;
+    transition: transform 0.4s ease-in-out;
+    width: max-content;
+  }
+  
+  .card-carousel-carrinho {
+    flex: 0 0 250px; /* 2 cards por vez = 50% */
     box-sizing: border-box;
-    border: 2px solid #F0F0F0;
+    display:flex;
+    flex-direction: column;
+    gap:10px;
+    
+    
+    margin-right: 10px;
+    background: #fff;
     border-radius: 12px;
+  }
+
+.card-carousel-carrinho:hover{
+    border: 2px solid #F0F0F0;
+}
+  
+  .botao-carousel {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+  }
+  
+  .imagem-carousel {
+    
+    width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+  }
+
+.titulo-produtos-carousel{
+    padding:20px;
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
 }

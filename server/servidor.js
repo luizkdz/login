@@ -687,22 +687,20 @@ app.post("/definir-localidade", async (req,res) => {
     }
 })
 
-const normalizarTexto = (texto) => {
-    return texto
-      .normalize("NFD") // separa acentos de letras
-      .replace(/[\u0300-\u036f]/g, "") // remove acentos
-      .trim()
-      .toLowerCase();
-  };
-
 const buscaFretePorProduto = async (produto_id, cidade) => {
-    const cidadeNormalizada = normalizarTexto(cidade);
-    const [resultado] = await db.query(`
-        SELECT valor, prazo FROM frete
-        WHERE produto_id = ?
-        AND LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(TRIM(cidade), 
-          'ã','a'),'á','a'),'â','a'),'é','e'),'ê','e'),'í','i')) = ?
-      `, [produto_id, cidadeNormalizada]);
+    const params = [produto_id,cidade,produto_id,produto_id,cidade,produto_id];
+    let query = `SELECT 
+        COALESCE(
+    (SELECT valor FROM frete WHERE produto_id = ? AND cidade = ? ORDER BY valor ASC LIMIT 1),
+    (SELECT valor FROM frete WHERE produto_id = ? ORDER BY valor ASC LIMIT 1)
+  ) AS menor_valor_frete,
+        COALESCE(
+    (SELECT prazo FROM frete WHERE produto_id = ? AND cidade = ? ORDER BY valor ASC LIMIT 1),
+    (SELECT prazo FROM frete WHERE produto_id = ? ORDER BY valor ASC LIMIT 1)
+  ) AS menor_prazo_frete;`
+
+    const [resultado] = await db.query(query,params);
+
     console.log('O resultado é ',resultado[0]);
     return resultado.length > 0 ? resultado[0] : {valor:25.00, prazo: 7};
 }
@@ -720,8 +718,8 @@ app.get("/calcular-frete/:cep/:produto_id", async (req,res) => {
 
         res.json({
             cidade,
-            valor: frete?.valor ?? null,
-            prazo: frete?.prazo ?? null
+            valor: frete?.menor_valor_frete ?? null,
+            prazo: frete?.menor_prazo_frete ?? null
         });
     }
     catch(err){
@@ -789,18 +787,34 @@ app.get("/carregarCategorias",async (req,res) => {
 
 app.get("/cart", async (req,res) => {
     try{
+    const localidade = req.query.localidade || '';
     const {userId} = req.query;
-    const params = [];
+    const params = [localidade];
     let query = `
         SELECT ci.id, ci.cart_id, ci.produto_id, ci.quantidade, p.nome as produto_nome, p.preco,p.preco_pix,p.desconto,
-        ip.url as imagem_produto,m.nome as marca_nome, u_dono_produto.nome as usuario_nome_dono_produto
+        (SELECT url FROM imagens_produto 
+        WHERE produto_id = p.id 
+        LIMIT 1
+        ) AS imagem_produto,
+         COALESCE(MIN(f.valor), MIN(f_default.valor), 0) AS valor_frete 
+        ,m.nome as marca_nome, u_dono_produto.nome as usuario_nome_dono_produto
         from cart_items ci
         left join produtos p on p.id = ci.produto_id
-        left join imagens_produto ip on ip.produto_id = p.id
         left join carts c on ci.cart_id = c.id
         left join usuarios u_dono_produto on u_dono_produto.id = p.user_id
         left join usuarios u_carrinho on u_carrinho.id= c.usuario_id
         left join marcas m on p.marca_id = m.id
+        LEFT JOIN ( 
+            SELECT produto_id, MIN(valor) AS valor  
+        FROM frete  
+        WHERE cidade = ? 
+        GROUP BY produto_id 
+)       f ON p.id = f.produto_id 
+LEFT JOIN ( 
+    SELECT produto_id, MIN(valor) AS valor  
+    FROM frete  
+    GROUP BY produto_id 
+) f_default ON p.id = f_default.produto_id
         where 1=1
          `
 
@@ -810,7 +824,7 @@ app.get("/cart", async (req,res) => {
     }
 
     query += ` GROUP BY ci.id, ci.cart_id, ci.produto_id, ci.quantidade,produto_nome,p.preco,p.preco_pix,p.desconto,
-        imagem_produto, marca_nome,usuario_nome_dono_produto`
+        marca_nome,usuario_nome_dono_produto`
     
     const [resultado] = await db.query(query,params);
 
@@ -857,7 +871,7 @@ app.put("/cart/:itemId", async (req,res) => {
     const {quantidade} = req.body;
 
     try{
-        await db.query(`UPDATE cart_items SET quantidade = quantidade + ? where id = ?`,[quantidade,itemId]);
+        await db.query(`UPDATE cart_items SET quantidade = ? where id = ?`,[Number(quantidade),itemId]);
         return res.status(200).json({message: "Carrinho atualizado com sucesso"});
     }
     catch(err){

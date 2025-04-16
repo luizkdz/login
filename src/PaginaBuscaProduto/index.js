@@ -11,6 +11,7 @@ import { useCep } from '../context/CepContext';
 import { calcularFretePorCep } from '../utils/calcularFretePorCep';
 import { useParams } from 'react-router-dom';
 import FiltroPrecoRange from '../componentes/filtroRangePreco';
+import Carousel from '../componentes/carousel';
 
 function PaginaBuscaProduto() {
 
@@ -124,7 +125,6 @@ Object.keys(novosFiltros).forEach((key) => {
     const location = useLocation();
     const tipo = location.state?.tipo;
     const [range, setRange] = useState([0,0]);
-
     
 
     const fetchFiltros = async () => {
@@ -271,6 +271,12 @@ Object.keys(novosFiltros).forEach((key) => {
     useEffect(() => {
       fetchProducts();
   },[nomeProduto,localidade])
+
+  useEffect(() => {
+    
+  })
+
+  
   
     const calcularPaginasVisiveis = () => {
         const metade = Math.floor(limitePaginasVisiveis / 2);
@@ -344,29 +350,7 @@ Object.keys(novosFiltros).forEach((key) => {
                 <div className="titulo-categoria-produtos">
             {tipo === "busca" ? <h1 className="resultado-pesquisa">Resultados para {nomeProduto.slice(0,20)}</h1> : ""}
             <h1 className= "resultado-pesquisa">Os mais vendidos da categoria</h1>
-            <div className="container-botao-carousel">
-            <div className="container-card-produtos">
-            <button className="botao-voltar" onClick={voltar}><img src="/images/setinha-esquerda.png" className="imagem-setinha-esquerda"/></button>
-                <div className="imagem-texto-card" key={indice} >
-                   {produtos.slice(indice, indice + 2).map((oferta,index) => {
-                    return (
-                    <div className="card-produto-busca-produto fade-in" key={index} onClick={() => {redirectProduct(oferta.id)}}>
-                        <img src={oferta.url} className="imagem-secao-card-produtos"/>
-                            <div className="container-texto-card-produto">
-                                <p className="oferta-nome">{oferta.nome.length > 255 ? oferta.nome.slice(0, 252) + "..." : oferta.nome}</p>
-                                <p>R$ {oferta.preco}</p>
-                                <p>em {oferta.parcelas_máximas}x de R$ {calcularPrecoParcelado(oferta.preco_parcelado, oferta.parcelas_máximas)}</p>
-                                <p><strong>R${oferta.preco_pix}</strong> no Pix</p>
-                        </div>
-                        </div>
-                    )
-                   })} 
-                    
-
-                </div>
-                <button className="botao-avancar" onClick={avancar}><img src="/images/setinha-direita.png" className="imagem-setinha-direita"/></button>
-                </div>
-            </div>
+            <Carousel produtos={produtos} setProdutos = {setProdutos} itensPassados={2}/>
             </div>
                 <div className="secao-exibicao-produtos">
                     <div className="container-titulo-exibicao-produtos">
