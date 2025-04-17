@@ -898,6 +898,89 @@ app.delete("/cart/:itemId",autenticarToken, async (req,res) => {
     }
 })
 
+app.get("/itens-salvos", autenticarToken, async(req,res) => {
+    const userId = req.usuarioId
+    const params = [];
+    let query = `SELECT produto_id,nome, url, quantidade,preco,created_at from itens_salvos
+            where 1=1`
+    
+    try{
+        if(userId){
+        query += ` AND usuario_id = ?`
+        params.push(userId);
+        }
 
+        query += ` ORDER BY created_at DESC`
+        const [resposta] = await db.query(query,params);
+
+        if(resposta.length === 0){
+        return res.status(200).json([]);
+        }
+
+        return res.status(200).json(resposta);
+    }
+    catch(err){
+        return res.status(500).json({message:"Erro interno do servidor",err});
+    }
+})
+
+app.post("/itens-salvos",autenticarToken, async (req,res) => {
+
+    const userId = req.usuarioId
+    const { produtoId } = req.body;
+    const params = [userId,produtoId,userId,produtoId];
+
+    const [itemJaExiste] = await db.query("SELECT * from itens_salvos where produto_id = ? and usuario_id = ?",[produtoId,userId]);
+    
+    if(itemJaExiste.length > 0){
+        try{
+            await db.query(`UPDATE itens_salvos isalvo
+                join cart_items ci on ci.produto_id = isalvo.produto_id
+                join carts c on c.id = ci.cart_id
+                set isalvo.quantidade = isalvo.quantidade + ci.quantidade
+                where isalvo.produto_id = ? and isalvo.usuario_id = ? and c.usuario_id = ?`,[produtoId,userId,userId])
+                return res.status(200).json({message:"O item foi atualizado com sucesso"});
+            }
+        catch(err){
+            return res.status(400).json({message: "Não foi possível atualizar a quantidade do item"});
+        }
+        
+    }
+    else{
+        try{
+            let query = `INSERT INTO itens_salvos (usuario_id,produto_id,nome,url,quantidade,preco)
+
+    SELECT ?,?, p.nome,(SELECT i.url FROM imagens_produto i WHERE i.produto_id = p.id LIMIT 1) AS url ,ci.quantidade,p.preco from 
+    cart_items ci left join produtos p on ci.produto_id = p.id
+    left join carts c on c.id = ci.cart_id
+    where c.usuario_id = ? and ci.produto_id = ?
+    `
+            const [resultado] = await db.query(query,params);
+            
+            if (resultado.affectedRows === 0) {
+                return res.status(400).json({ message: "Nada foi inserido" });
+              } 
+            return res.status(200).json({message:"O item foi inserido com sucesso"});
+        }
+        catch(err){
+            return res.status(500).json({message:"Erro interno do servidor"});
+        }
+    }
+    
+    
+})
+
+app.delete("/itens-salvos",autenticarToken, async (req,res) => {
+    const {produtoId} = req.body
+    const userId = req.usuarioId
+    console.log(`Produto id é:`,produtoId, userId);
+    try{
+        await db.query("DELETE FROM itens_salvos where produto_id = ? and usuario_id = ?",[produtoId,userId]);
+        res.status(200).json({message:"O produto foi deletado com sucesso"});
+    }
+    catch(err){
+        return res.status(500).json({message:"Erro interno do servidor"});
+    }
+})
 
 app.listen(port, () => {console.log("servidor rodando na porta " + `${port}`)});
