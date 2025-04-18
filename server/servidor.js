@@ -583,7 +583,7 @@ app.get("/produto/:id", async (req, res) => {
 
     const [frete] = await db.query("select cidade, valor, prazo from frete where produto_id = ?",[id]);
 
-    const [variacoes] = await db.query("select nome, valor from variacoes_produto where produto_id = ?",[id]);
+    const [cores] = await db.query("select valor from cores c join produtos_cor pc on c.id = pc.cor_id and pc.produto_id = ?",[id]);
 
     const [vendedores] = await db.query("select u.nome, u.created_at,ve.total_vendidos,ve.nota_entrega,ve.nota_atendimento from usuarios u join produtos p ON p.user_id = u.id left join vendedores_estatisticas ve on ve.user_id = u.id where p.id = ?",[id]);
 
@@ -637,8 +637,8 @@ app.get("/produto/:id", async (req, res) => {
             totalAvaliacoes,
             mediaAvaliacoes,
             totalComentarios,
+            cores,
             frete:frete.length ? frete : null,
-            variacoes,
             vendedores: vendedoresFormatados,
             usuariosComentarios: usuariosComentarios.map((comentario) => ({
                 ...comentario,

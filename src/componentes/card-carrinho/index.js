@@ -1,7 +1,7 @@
 import { useCarrinho } from '../../context/carrinhoContext';
 import './styles.css'
 import axios from 'axios';
-function CardCarrinho({item,precoTotal,precoTotalPix,adicionarItemSalvo}){
+function CardCarrinho({item,precoTotal,precoTotalPix,adicionarItemSalvo,mostrarModalAlterar,fetchItemSelecionado}){
     const {editarQuantidadeItemCarrinho,carrinhoItens,excluirItemCarrinho} = useCarrinho();
 
 
@@ -28,7 +28,7 @@ function CardCarrinho({item,precoTotal,precoTotalPix,adicionarItemSalvo}){
                     <div className="container-botoes-excluir-salvar-altera">
                         <p style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}} onClick={() => excluirItemCarrinho(item.id)}>Excluir</p>
                         <p onClick={() => {adicionarItemSalvo(item.produto_id); excluirItemCarrinho(item.id)}} style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}}>Salvar</p>
-                        <p style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}}>Alterar</p>
+                        <p onClick = {() => {mostrarModalAlterar();fetchItemSelecionado(item.produto_id, item.quantidade)}} style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}}>Alterar</p>
                         <p style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}}>Comprar Agora</p>
                         </div>
                     

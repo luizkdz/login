@@ -258,6 +258,8 @@
 }
 
 .imagem-texto-preco-alterar{
+    background-color: #f5f5f5;
+    gap:20px;
     height:100%;
     display:flex;
     flex-direction: column;
@@ -272,7 +274,7 @@
 }
 
 .titulo-alterar{
-    padding:34px;
+    padding-left:34px;
 }
 
 .container-input-alterar{
@@ -289,11 +291,11 @@
 .botao-atualizar-alterar{
     position:absolute;
     bottom: 10%;
-    right:14%;
+    right:9%;
     width:280px;
     height:48px;
     margin:25px;
-    padding:15px;
+    padding:16px;
     background-color:#111111;
     color:white;
 }
@@ -324,3 +326,19 @@
     
     z-index: 10;
   }
+
+.imagem-produto-alterar{
+    width:276px;
+    height:276px;
+}
+
+.botao-detalhe-do-produto{
+    display:flex;
+    justify-content: center;
+}
+
+.botao-fechar-alterar{
+    margin-bottom:20px;
+    display:flex;
+    justify-content: end;
+}

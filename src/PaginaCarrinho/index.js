@@ -8,7 +8,9 @@ import Carousel from '../componentes/carousel/index.js';
 import axios from 'axios';
 import CardCarrinho from '../componentes/card-carrinho/index.js';
 import CardProdutoSalvo from '../componentes/card-produto-salvo/index.js';
+import InputProdutoAlterar from '../componentes/inputProdutoAlterar/index.js';
 
+    
 
 function PaginaCarrinho() {
 
@@ -20,8 +22,27 @@ function PaginaCarrinho() {
     const [quantidadeSelecionada, setQuantidadeSelecionada] = useState(1);
     const [modalUnidades,setModalUnidades] = useState(false);
     const [valorQuantidade, setValorQuantidade] = useState("mais");
+    const [mostrarModalAlterar, setMostrarModalAlterar] = useState(false);
+    const [itemSelecionado, setItemSelecionado] = useState([]);
+    const [nomeValor, setNomeValor] = useState("");    
+
+    const fetchItemSelecionado =async (itemId,quantidade) => {
+        const resposta = await axios.get(`http://localhost:5000/produto/${itemId}`)
+        setItemSelecionado(resposta.data.produto);
+        setNomeValor(resposta.data.produto.cores?.[0]?.valor || "Escolha uma opção");
+        setQuantidadeSelecionada(quantidade);
+    }
+
+    const handleMostrarModalAlterar = () => {
+        setMostrarModalAlterar(!mostrarModalAlterar);
+    }
     const selecionarQuantidade = (quantidade) => {
         setQuantidadeSelecionada(Number(quantidade));
+        setMostrarOpcoes(false);
+    }
+
+    const selecionarNomeValor = (valor) => {
+        setNomeValor(valor);
         setMostrarOpcoes(false);
     }
 
@@ -123,7 +144,7 @@ const handleSelecionarAlterar = () =>{
 
                 return (
                     <div className="card-carrinho">
-                    <CardCarrinho item = {item} precoTotal={precoTotal} precoTotalPix={precoTotalPix} setItensSalvos={setItensSalvos} carregarItensSalvos={carregarItensSalvos} adicionarItemSalvo={adicionarItemSalvo}/>
+                    <CardCarrinho  fetchItemSelecionado={fetchItemSelecionado} mostrarModalAlterar={handleMostrarModalAlterar} item = {item} precoTotal={precoTotal} precoTotalPix={precoTotalPix} setItensSalvos={setItensSalvos} carregarItensSalvos={carregarItensSalvos} adicionarItemSalvo={adicionarItemSalvo}/>
                     
                     <div className="container-preco-frete">
                         <p>Frete</p>
@@ -211,60 +232,59 @@ const handleSelecionarAlterar = () =>{
         
         </div>
         </div>
+        {mostrarModalAlterar && (
         <div className="secao-alterar">
             <div className="container-alterar">
                 <div className="imagem-texto-preco-alterar">
-                    <img src = ""/>
-                    <p>Nome Produto</p>
-                    <p>Preco</p>
+                
+            
+                    <img src = {itemSelecionado.imagens?.[0]} className="imagem-produto-alterar"/>
+                    <p style={{fontSize:"20px"}}>{itemSelecionado.produto_nome}</p>
+                    <p style={{fontSize:"24px"}}>R${itemSelecionado.produto_preco}</p>
+                    <div className="botao-detalhe-do-produto">
                     <a href="#">Ver detalhe do produto</a>
+                    </div>
                 </div>
                 <div className="titulo-inputs-alterar">
+                <div className="botao-fechar-alterar">
+                <img onClick={() => handleMostrarModalAlterar()}src = "/images/close.png" className= "imagem-fechar-modal" />
+                </div>
                 <p className="titulo-alterar" >Escolha os detalhes deste produto</p>
-                <div className="container-input-alterar">
-                <p>Cor:</p>
-                        <div className="container-quantidade-foto-dropdown-alterar">
-                        <p style ={{cursor:"pointer"}} onClick={() => setMostrarOpcoes(!mostrarOpcoes)}> {quantidadeSelecionada !== "mais" ? `${quantidadeSelecionada} unidade${quantidadeSelecionada !== "1" ? "s" : ""}` : "Selecione a quantidade" }</p><img src={mostrarOpcoes ? "/images/setinha-cima-dropdown-preta.png" : "/images/setinha-dropdown-preta.png"} className="imagem-botao-dropdown-quantidade"/>
-                        </div>
-                            {mostrarOpcoes && (
-                            <div className="selecao-input-cor">
-                            <p onClick={() => selecionarQuantidade(1)}>1 unidade</p>
-                            <p onClick={() => selecionarQuantidade(2)}>2 unidades</p>
-                            <p onClick={() => selecionarQuantidade(3)}>3 unidades</p>
-                            <p onClick={() => selecionarQuantidade(4)}>4 unidades</p>
-                            <p onClick={() => selecionarQuantidade(5)}>5 unidades</p>
-                            <p onClick={() => selecionarQuantidade(6)}>6 unidades</p>
-                            <p on onMouseLeave = {() => setModalUnidades(false)}onClick={() => {selecionarQuantidade("mais");setMostrarOpcoes(true);setModalUnidades(true)}}>{modalUnidades ? <div>
-                               <p>Quantidade:</p>
-                               <form onSubmit={(e) => {e.preventDefault(); selecionarQuantidade(valorQuantidade)}}>
-                               <input type='number' className="input-valorQuantidade" style={{padding:"13px 12px"}} value = {valorQuantidade === "mais" ? "" :valorQuantidade} onChange={(e) => setValorQuantidade(e.target.value)} />
-                               <button disabled={valorQuantidade === "mais" || valorQuantidade === ""} className="botao-valor-quantidade" type="submit">Aplicar</button>
-                               </form>
-                            </div> : "Mais que 6 unidades"} </p>
-            
-                            </div>
-                        )}
-                                            </div>
+                    {Object.entries(itemSelecionado).map(([nome,opcoes]) => {
+                         const atributosSuportados = [
+                            "cores",
+                            "voltagem",
+                            "generos",
+                            "tamanho",
+                            "material",
+                            "estampas",
+                            "pesos",
+                            "dimensoes",
+                            "quantidade"
+                          ];
+
+                        if(atributosSuportados.includes(nome)){
+                            return (
+                                <InputProdutoAlterar nome={nome} mostrarOpcoes={mostrarOpcoes} setMostrarOpcoes = {setMostrarOpcoes} setMostrarOpcoesSegundoInput={setMostrarOpcoesSegundoInput} selecionarNomeValor = {selecionarNomeValor} nomeValor={nomeValor} itemSelecionado={itemSelecionado}/>
+                            )
+                        }
+                    })
+                        
+                    }
                                             <div className="container-input-alterar">
                                             <p>Quantidade:</p>
                         <div className="container-quantidade-foto-dropdown-alterar">
-                        <p style ={{cursor:"pointer"}} onClick={() => handleMostrarOpcoesSegundoInput()}>{quantidadeSelecionada !== "mais" ? `${quantidadeSelecionada} unidade${quantidadeSelecionada !== "1" ? "s" : ""}` : "Selecione a quantidade" }</p><img src={mostrarOpcoes ? "/images/setinha-cima-dropdown-preta.png" : "/images/setinha-dropdown-preta.png"} className="imagem-botao-dropdown-quantidade"/>
+                        <p style ={{cursor:"pointer"}} onClick={() => {handleMostrarOpcoesSegundoInput();setMostrarOpcoes(false)}}>{quantidadeSelecionada !== "mais" ? `${quantidadeSelecionada} unidade${quantidadeSelecionada !== 1 ? "s" : ""}` : "Selecione a quantidade" }</p><img src={mostrarOpcoes ? "/images/setinha-cima-dropdown-preta.png" : "/images/setinha-dropdown-preta.png"} className="imagem-botao-dropdown-quantidade"/>
                         </div>
                             {mostrarOpcoesSegundoInput && (
                             <div className="selecao-input-cor">
-                            <p onClick={() => selecionarQuantidade(1)}>1 unidade</p>
-                            <p onClick={() => selecionarQuantidade(2)}>2 unidades</p>
-                            <p onClick={() => selecionarQuantidade(3)}>3 unidades</p>
-                            <p onClick={() => selecionarQuantidade(4)}>4 unidades</p>
-                            <p onClick={() => selecionarQuantidade(5)}>5 unidades</p>
-                            <p onClick={() => selecionarQuantidade(6)}>6 unidades</p>
-                            <p on onMouseLeave = {() => setModalUnidades(false)}onClick={() => {selecionarQuantidade("mais");setMostrarOpcoes(true);setModalUnidades(true)}}>{modalUnidades ? <div>
-                               <p>Quantidade:</p>
-                               <form onSubmit={(e) => {e.preventDefault(); selecionarQuantidade(valorQuantidade)}}>
-                               <input type='number' className="input-valorQuantidade" style={{padding:"13px 12px"}} value = {valorQuantidade === "mais" ? "" :valorQuantidade} onChange={(e) => setValorQuantidade(e.target.value)} />
-                               <button disabled={valorQuantidade === "mais" || valorQuantidade === ""} className="botao-valor-quantidade" type="submit">Aplicar</button>
-                               </form>
-                            </div> : "Mais que 6 unidades"} </p>
+                            {Array.from({length: itemSelecionado.produto_estoque}, (_,index) => {
+                                return (
+                                <div key={index}>
+                                    <p onClick={() => {selecionarQuantidade(index + 1);handleMostrarOpcoesSegundoInput()}}>{index !== 0 ? index + 1 + ` unidades` : index + 1 + ` unidade`}</p>
+                               </div>
+                               )
+                            })}
             
                             </div>
                         )}
@@ -272,7 +292,7 @@ const handleSelecionarAlterar = () =>{
                     <button className="botao-atualizar-alterar">Atualizar</button>
                 </div>
             </div>
-        </div>
+        </div>)}
         <Footer/>           
         </div>
     )

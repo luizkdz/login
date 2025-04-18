@@ -132,9 +132,12 @@ function PaginaProduto(){
                     </div>
                     <div className="container-preco-avaliacao">
                         <p>{calcularEstrelas(produto.mediaAvaliacoes)} {produto.mediaAvaliacoes} ({produto.totalAvaliacoes}) <a href="#">Avaliar Produto</a></p>
-                        <p>{produto.variacoes && produto.variacoes.length > 0 ? `${produto.variacoes[0].nome}: ${produto.variacoes[0].valor}` : ""}
+                        <p><p>Cores: {produto.cores.map((cor) => { return ( 
+                            <p>{cor.valor}</p>
+                            )})}</p>
 </p>
                         <img className="imagem-container-preco" src={produto.imagens[0]}></img>
+                        
                         <p>Vendido e entregue por <a style={{ color: "black" }} href="#">{produto.vendedores[0].nome}</a></p>
                         <p>Nossa loja garante sua compra <a href="#">Saiba mais</a></p>
                         <p>R$ {produto.produto_preco}</p>
