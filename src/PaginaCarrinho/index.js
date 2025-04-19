@@ -17,7 +17,7 @@ function PaginaCarrinho() {
     const [mostrarProdutosSalvos,setMostrarProdutosSalvos] = useState(false);
     const [itensSalvos, setItensSalvos] = useState([]);
     const [selecionarAlterar, setSelecionarAlterar] = useState(false);
-    const [mostrarOpcoes, setMostrarOpcoes] = useState(false);
+    const [mostrarOpcoes, setMostrarOpcoes] = useState(null);
     const [mostrarOpcoesSegundoInput, setMostrarOpcoesSegundoInput] = useState(false);
     const [quantidadeSelecionada, setQuantidadeSelecionada] = useState(1);
     const [modalUnidades,setModalUnidades] = useState(false);
@@ -25,7 +25,11 @@ function PaginaCarrinho() {
     const [mostrarModalAlterar, setMostrarModalAlterar] = useState(false);
     const [itemSelecionado, setItemSelecionado] = useState([]);
     const [nomeValor, setNomeValor] = useState("");    
+    const [mostrarInputAtributo, setMostrarInputAtributo] = useState("");
 
+    const handleMostrarInputAtributo = (nome) => {
+        setMostrarInputAtributo(nome);
+    }
     const fetchItemSelecionado =async (itemId,quantidade) => {
         const resposta = await axios.get(`http://localhost:5000/produto/${itemId}`)
         setItemSelecionado(resposta.data.produto);
@@ -93,6 +97,14 @@ const handleSelecionarAlterar = () =>{
         }
     };
 
+    const handleAtualizarProdutoCarrinho = async () => {
+        try{
+            await axios.put()
+        }
+        catch(err){
+            console.error("Erro ao atualizar o produto do carrinho");
+        }
+    }
     
 
     useEffect(() => {
@@ -252,21 +264,46 @@ const handleSelecionarAlterar = () =>{
                 <p className="titulo-alterar" >Escolha os detalhes deste produto</p>
                     {Object.entries(itemSelecionado).map(([nome,opcoes]) => {
                          const atributosSuportados = [
-                            "cores",
+                            "cor",
                             "voltagem",
                             "generos",
                             "tamanho",
-                            "material",
+                            "materiais",
                             "estampas",
                             "pesos",
                             "dimensoes",
-                            "quantidade"
                           ];
 
                         if(atributosSuportados.includes(nome)){
                             return (
-                                <InputProdutoAlterar nome={nome} mostrarOpcoes={mostrarOpcoes} setMostrarOpcoes = {setMostrarOpcoes} setMostrarOpcoesSegundoInput={setMostrarOpcoesSegundoInput} selecionarNomeValor = {selecionarNomeValor} nomeValor={nomeValor} itemSelecionado={itemSelecionado}/>
-                            )
+                                <div>
+                                    <p onClick={() => {handleMostrarInputAtributo(nome);
+                                        const itemNoCarrinho = carrinhoItens.find((item) => {return item.produto_id === itemSelecionado.produto_id});
+                                    if(itemNoCarrinho){
+                                        const valorSelecionado = itemNoCarrinho[`${nome}Id`];
+                                        setNomeValor(valorSelecionado);
+                                    }
+                                }}>{nome}</p>
+                                </div>)
+                        }
+                    })
+                        
+                    }
+                    {Object.entries(itemSelecionado).map(([nome,opcoes]) => {
+                         const atributosSuportados = [
+                            "cor",
+                            "voltagem",
+                            "generos",
+                            "tamanho",
+                            "materiais",
+                            "estampas",
+                            "pesos",
+                            "dimensoes",
+                          ];
+
+                        if(atributosSuportados.includes(nome) && mostrarInputAtributo === nome){
+                            return (
+                                <InputProdutoAlterar nome={nome} mostrarOpcoes={mostrarOpcoes} setMostrarOpcoes = {setMostrarOpcoes} setMostrarOpcoesSegundoInput={setMostrarOpcoesSegundoInput} selecionarNomeValor = {selecionarNomeValor} nomeValor={nomeValor} itemSelecionado={itemSelecionado}/>)
                         }
                     })
                         
@@ -289,7 +326,7 @@ const handleSelecionarAlterar = () =>{
                             </div>
                         )}
                                             </div>          
-                    <button className="botao-atualizar-alterar">Atualizar</button>
+                    <button onClick={() => {handleAtualizarProdutoCarrinho()}}className="botao-atualizar-alterar">Atualizar</button>
                 </div>
             </div>
         </div>)}

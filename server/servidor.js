@@ -583,7 +583,9 @@ app.get("/produto/:id", async (req, res) => {
 
     const [frete] = await db.query("select cidade, valor, prazo from frete where produto_id = ?",[id]);
 
-    const [cores] = await db.query("select valor from cores c join produtos_cor pc on c.id = pc.cor_id and pc.produto_id = ?",[id]);
+    const [cor] = await db.query("select c.id , c.valor from cores c join produtos_cor pc on c.id = pc.cor_id and pc.produto_id = ?",[id]);
+
+    const [materiais] = await db.query("select m.id, m.valor from material m join produtos_materiais pm on m.id = pm.material_id and pm.produto_id = ?",[id]);
 
     const [vendedores] = await db.query("select u.nome, u.created_at,ve.total_vendidos,ve.nota_entrega,ve.nota_atendimento from usuarios u join produtos p ON p.user_id = u.id left join vendedores_estatisticas ve on ve.user_id = u.id where p.id = ?",[id]);
 
@@ -637,7 +639,8 @@ app.get("/produto/:id", async (req, res) => {
             totalAvaliacoes,
             mediaAvaliacoes,
             totalComentarios,
-            cores,
+            cor,
+            materiais,
             frete:frete.length ? frete : null,
             vendedores: vendedoresFormatados,
             usuariosComentarios: usuariosComentarios.map((comentario) => ({
@@ -791,40 +794,88 @@ app.get("/cart", async (req,res) => {
     const {userId} = req.query;
     const params = [localidade];
     let query = `
-        SELECT ci.id, ci.cart_id, ci.produto_id, ci.quantidade, p.nome as produto_nome, p.preco,p.preco_pix,p.desconto,
-        (SELECT url FROM imagens_produto 
-        WHERE produto_id = p.id 
-        LIMIT 1
+    SELECT 
+        ci.id, 
+        ci.cart_id, 
+        ci.produto_id, 
+        ci.quantidade, 
+        p.nome AS produto_nome, 
+        p.preco, 
+        p.preco_pix, 
+        p.desconto,
+        GROUP_CONCAT(DISTINCT co.id) AS cores_ids,
+        GROUP_CONCAT(DISTINCT co.valor) AS cores,
+        GROUP_CONCAT(DISTINCT d.largura ORDER BY d.largura) AS larguras,
+        GROUP_CONCAT(DISTINCT d.altura ORDER BY d.altura) AS alturas,
+        GROUP_CONCAT(DISTINCT d.comprimento ORDER BY d.comprimento) AS comprimentos,
+        GROUP_CONCAT(DISTINCT es.valor) AS estampas,
+        GROUP_CONCAT(DISTINCT g.valor) AS generos,  -- Agrupando generos
+    GROUP_CONCAT(DISTINCT ma.valor) AS materiais,  -- Agrupando materiais
+    GROUP_CONCAT(DISTINCT pe.valor) AS pesos,  -- Agrupando pesos
+    GROUP_CONCAT(DISTINCT ta.valor) AS tamanhos,  -- Agrupando tamanhos
+    GROUP_CONCAT(DISTINCT vo.valor) AS voltagens,
+        (
+            SELECT url 
+            FROM imagens_produto 
+            WHERE produto_id = p.id 
+            LIMIT 1
         ) AS imagem_produto,
-         COALESCE(MIN(f.valor), MIN(f_default.valor), 0) AS valor_frete 
-        ,m.nome as marca_nome, u_dono_produto.nome as usuario_nome_dono_produto
-        from cart_items ci
-        left join produtos p on p.id = ci.produto_id
-        left join carts c on ci.cart_id = c.id
-        left join usuarios u_dono_produto on u_dono_produto.id = p.user_id
-        left join usuarios u_carrinho on u_carrinho.id= c.usuario_id
-        left join marcas m on p.marca_id = m.id
-        LEFT JOIN ( 
-            SELECT produto_id, MIN(valor) AS valor  
+        COALESCE(MIN(f.valor), MIN(f_default.valor), 0) AS valor_frete,
+        m.nome AS marca_nome, 
+        u_dono_produto.nome AS usuario_nome_dono_produto
+    FROM cart_items ci
+    LEFT JOIN produtos p ON p.id = ci.produto_id
+    LEFT JOIN cart_item_cores cic ON cic.cart_item_id = ci.id
+    LEFT JOIN cores co ON co.id = cic.cor_id
+    LEFT JOIN cart_item_dimensoes cid ON cid.cart_item_id = ci.id
+    LEFT JOIN dimensoes d ON d.id = cid.dimensao_id
+    LEFT JOIN cart_item_materiais cim ON cim.cart_item_id = ci.id
+    LEFT JOIN material ma ON ma.id = cim.material_id
+    LEFT JOIN cart_item_pesos cip ON cip.cart_item_id = ci.id
+    LEFT JOIN pesos pe ON pe.id = cip.peso_id
+    LEFT JOIN cart_item_generos cig ON cig.cart_item_id = ci.id
+    LEFT JOIN generos g ON g.id = cig.genero_id
+    LEFT JOIN cart_item_estampas cie ON cie.cart_item_id = ci.id
+    LEFT JOIN estampas es ON es.id = cie.estampa_id
+    LEFT JOIN cart_item_tamanhos cit ON cit.cart_item_id = ci.id
+    LEFT JOIN tamanhos ta ON ta.id = cit.tamanho_id
+    LEFT JOIN cart_item_voltagens civ ON civ.cart_item_id = ci.id
+    LEFT JOIN voltagens vo ON vo.id = civ.voltagem_id
+    LEFT JOIN carts c ON ci.cart_id = c.id
+    LEFT JOIN usuarios u_dono_produto ON u_dono_produto.id = p.user_id
+    LEFT JOIN usuarios u_carrinho ON u_carrinho.id = c.usuario_id
+    LEFT JOIN marcas m ON p.marca_id = m.id
+    LEFT JOIN ( 
+        SELECT produto_id, MIN(valor) AS valor  
         FROM frete  
         WHERE cidade = ? 
         GROUP BY produto_id 
-)       f ON p.id = f.produto_id 
-LEFT JOIN ( 
-    SELECT produto_id, MIN(valor) AS valor  
-    FROM frete  
-    GROUP BY produto_id 
-) f_default ON p.id = f_default.produto_id
-        where 1=1
-         `
+    ) f ON p.id = f.produto_id
+    LEFT JOIN ( 
+        SELECT produto_id, MIN(valor) AS valor  
+        FROM frete  
+        GROUP BY produto_id 
+    ) f_default ON p.id = f_default.produto_id
+    WHERE 1 = 1
+`;
 
     if(userId){
     query += ` AND c.usuario_id = ?`
     params.push(userId);
     }
 
-    query += ` GROUP BY ci.id, ci.cart_id, ci.produto_id, ci.quantidade,produto_nome,p.preco,p.preco_pix,p.desconto,
-        marca_nome,usuario_nome_dono_produto`
+    query += ` GROUP BY 
+    ci.id, 
+    ci.cart_id, 
+    ci.produto_id, 
+    ci.quantidade, 
+    p.nome, 
+    p.preco, 
+    p.preco_pix, 
+    p.desconto, 
+    m.nome, 
+    u_dono_produto.nome
+    `
     
     const [resultado] = await db.query(query,params);
 
@@ -835,7 +886,7 @@ LEFT JOIN (
     }
 })
 app.post("/cart" , autenticarToken, async (req,res) => {
-    const {produtoId, quantidade} = req.body;
+    const {produtoId, quantidade, corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId} = req.body;
     const userId = req.usuarioId;
     try{
 
@@ -850,13 +901,89 @@ app.post("/cart" , autenticarToken, async (req,res) => {
             cartId = novoCarrinho[0].id;
         }
 
-    const [itemJaExiste] = await db.query(`SELECT * from cart_items where cart_id = ? AND produto_id = ?`,[cartId,produtoId]);
-    console.log(`CartId ProdutoId Quantidade`,cartId, produtoId, quantidade)
+    const [itemJaExiste] = await db.query(`SELECT * from cart_items where cart_id = ? AND produto_id = ?
+        AND (cores_ids = ? OR (cores_ids IS NULL AND ? IS NULL)) AND (voltagemId = ? OR (voltagemId IS NULL AND ? IS NULL)) AND (dimensoesId = ? OR (dimensoesId IS NULL AND ? IS NULL))
+
+AND (pesosId = ? OR (pesosId IS NULL AND ? IS NULL)) AND (generoId = ? OR (generoId IS NULL AND ? IS NULL)) AND (estampasId = ? OR (estampasId IS NULL AND ? IS NULL)) 
+AND (tamanhosId = ? OR (tamanhosId IS NULL AND ? IS NULL)) AND (materiaisId = ? OR (materiaisId IS NULL AND ? IS NULL))`,[cartId, produtoId,
+    corId, corId,
+    voltagemId, voltagemId,
+    dimensoesId, dimensoesId,
+    pesosId, pesosId,
+    generoId, generoId,
+    estampasId, estampasId,
+    tamanhosId, tamanhosId,
+    materiaisId, materiaisId
+  ]);
+
+    let cartItemId;
     if(itemJaExiste.length > 0){
-        await db.query(`UPDATE cart_items SET quantidade = quantidade + ? where cart_id = ? AND produto_id = ?`,[quantidade || 1 ,cartId,produtoId]);
+        await db.query(`UPDATE cart_items SET quantidade = quantidade + ?
+WHERE cart_id = ? AND produto_id = ?
+  AND (cores_ids = ? OR (cores_ids IS NULL AND ? IS NULL))
+  AND (voltagemId = ? OR (voltagemId IS NULL AND ? IS NULL))
+  AND (dimensoesId = ? OR (dimensoesId IS NULL AND ? IS NULL))
+  AND (pesosId = ? OR (pesosId IS NULL AND ? IS NULL))
+  AND (generoId = ? OR (generoId IS NULL AND ? IS NULL))
+  AND (estampasId = ? OR (estampasId IS NULL AND ? IS NULL))
+  AND (tamanhosId = ? OR (tamanhosId IS NULL AND ? IS NULL))
+  AND (materiaisId = ? OR (materiaisId IS NULL AND ? IS NULL))`,
+  [quantidade || 1, cartId, produtoId,
+    corId, corId,
+    voltagemId, voltagemId,
+    dimensoesId, dimensoesId,
+    pesosId, pesosId,
+    generoId, generoId,
+    estampasId, estampasId,
+    tamanhosId, tamanhosId,
+    materiaisId, materiaisId]);
+        cartItemId = itemJaExiste[0].id;
     }
     else{
-        await db.query(`INSERT INTO cart_items (cart_id, produto_id, quantidade) values (? , ? , ?)`,[cartId,produtoId,quantidade || 1])
+        const [novoItem] = await db.query(`
+            INSERT INTO cart_items (
+              cart_id, produto_id, quantidade,
+              cores_ids, voltagemId, dimensoesId,
+              pesosId, generoId, estampasId,
+              tamanhosId, materiaisId
+            ) VALUES (?, ?, ?,
+                      ?, ?, ?,
+                      ?, ?, ?,
+                      ?, ?)
+          `, [
+            cartId, produtoId, quantidade || 1,
+            corId, voltagemId, dimensoesId,
+            pesosId, generoId, estampasId,
+            tamanhosId, materiaisId
+          ]);
+        cartItemId = novoItem.insertId;
+        console.log(cartItemId);
+        console.log(cartId);
+    if(corId) {
+        await db.query(`INSERT INTO cart_item_cores (cart_item_id, cor_id) values (? , ?)`,[cartItemId,corId]);
+    }
+    if(voltagemId) {
+        await db.query(`INSERT INTO cart_item_voltagens (cart_item_id, voltagem_id) values (? , ?)`,[cartItemId,voltagemId]);
+    }
+    if(dimensoesId) {
+        await db.query(`INSERT INTO cart_item_dimensoes (cart_item_id, dimensao_id) values (? , ?)`,[cartItemId,dimensoesId]);
+    }
+    if(estampasId) {
+        await db.query(`INSERT INTO cart_item_estampas (cart_item_id, estampa_id) values (? , ?)`,[cartItemId,estampasId]);
+    }
+    if(generoId) {
+        await db.query(`INSERT INTO cart_item_generos (cart_item_id, genero_id) values (? , ?)`,[cartItemId,generoId]);
+    }
+    if(materiaisId) {
+        await db.query(`INSERT INTO cart_item_materiais (cart_item_id, material_id) values (? , ?)`,[cartItemId,materiaisId]);
+    }
+    if(pesosId) {
+        await db.query(`INSERT INTO cart_item_pesos (cart_item_id, peso_id) values (? , ?)`,[cartItemId,pesosId]);
+    }
+    if(tamanhosId) {
+        await db.query(`INSERT INTO cart_item_tamanhos (cart_item_id, tamanho_id) values (? , ?)`,[cartItemId,tamanhosId]);
+    }
+
     }
         return res.status(200).json({message: "O item foi adicionado ao carrinho"});
     }
@@ -868,10 +995,36 @@ app.post("/cart" , autenticarToken, async (req,res) => {
 
 app.put("/cart/:itemId", async (req,res) => {
     const {itemId} = req.params;
-    const {quantidade} = req.body;
+    const {quantidade, corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId} = req.body;
 
     try{
         await db.query(`UPDATE cart_items SET quantidade = ? where id = ?`,[Number(quantidade),itemId]);
+        
+        if(corId) {
+            await db.query(`UPDATE cart_item_cores SET cor_id = ? where cart_item_id = ? `,[corId,itemId]);
+        }
+        if(voltagemId) {
+            await db.query(`UPDATE cart_item_voltagens SET voltagem_id = ? where cart_item_id = ?`,[voltagemId,itemId]);
+        }
+        if(dimensoesId) {
+            await db.query(`UPDATE cart_item_dimensoes SET dimensao_id = ? where cart_item_id = ?`,[dimensoesId,itemId]);
+        }
+        if(estampasId) {
+            await db.query(`UPDATE cart_item_estampas SET estampa_id = ? where cart_item_id = ?`,[estampasId,itemId]);
+        }
+        if(generoId) {
+            await db.query(`UPDATE cart_item_generos SET genero_id = ? where cart_item_id = ?`,[generoId,itemId]);
+        }
+        if(materiaisId) {
+            await db.query(`UPDATE cart_item_materiais SET material_id = ? where cart_item_id = ?`,[materiaisId,itemId]);
+        }
+        if(pesosId) {
+            await db.query(`UPDATE cart_item_pesos SET peso_id = ? where cart_item_id = ? `,[pesosId,itemId]);
+        }
+        if(tamanhosId) {
+            await db.query(`UPDATE cart_item_tamanhos SET tamanho_id = ? where cart_item_id = ?`,[tamanhosId,itemId]);
+        }
+     
         return res.status(200).json({message: "Carrinho atualizado com sucesso"});
     }
     catch(err){

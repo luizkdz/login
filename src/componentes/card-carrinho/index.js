@@ -25,6 +25,7 @@ function CardCarrinho({item,precoTotal,precoTotalPix,adicionarItemSalvo,mostrarM
                     <img src={item.imagem_produto} className="imagem-produto-pagina-carrinho"/>
                     <div className="container-texto-botoes">
                     <p>{item.produto_nome}</p>
+                    <p>Cor:{item.cores}</p>
                     <div className="container-botoes-excluir-salvar-altera">
                         <p style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}} onClick={() => excluirItemCarrinho(item.id)}>Excluir</p>
                         <p onClick={() => {adicionarItemSalvo(item.produto_id); excluirItemCarrinho(item.id)}} style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}}>Salvar</p>

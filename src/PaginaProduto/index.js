@@ -26,6 +26,10 @@ function PaginaProduto(){
     const [quantidadeSelecionada, setQuantidadeSelecionada] = useState(1);
     const [mostrarOpcoes, setMostrarOpcoes] = useState(false);
     const [valorQuantidade, setValorQuantidade] = useState("mais");
+    const [corSelecionada, setCorSelecionada] = useState(null);
+    const [corHover, setCorHover] = useState(null);
+    const [corCarrinho,setCorCarrinho] = useState(null);
+    const corParaExibir = corHover || corSelecionada;
     
     const {obterCarrinho, editarQuantidadeItemCarrinho, excluirItemCarrinho, carrinhoItens,setCarrinhoItens, adicionarAoCarrinho} = useCarrinho();
 
@@ -62,6 +66,8 @@ function PaginaProduto(){
             const produtoBuscado = resposta.data.produto;
             setProduto(produtoBuscado);
             setImagemSelecionada(produtoBuscado.imagens[0]);
+            setCorSelecionada(produtoBuscado.cor?.[0].valor);
+            setCorCarrinho(produtoBuscado.cor?.[0].id)
           } catch (err) {
             console.error("Erro ao buscar produto", err);
           }
@@ -127,15 +133,13 @@ function PaginaProduto(){
 ))}
                     
                     </div>
+                    
                     <div className="container-imagem-pagina-produto">
                     <img className="imagem-pagina-produto" src={imagemSelecionada} alt={produto.nome} />
                     </div>
                     <div className="container-preco-avaliacao">
                         <p>{calcularEstrelas(produto.mediaAvaliacoes)} {produto.mediaAvaliacoes} ({produto.totalAvaliacoes}) <a href="#">Avaliar Produto</a></p>
-                        <p><p>Cores: {produto.cores.map((cor) => { return ( 
-                            <p>{cor.valor}</p>
-                            )})}</p>
-</p>
+                        
                         <img className="imagem-container-preco" src={produto.imagens[0]}></img>
                         
                         <p>Vendido e entregue por <a style={{ color: "black" }} href="#">{produto.vendedores[0].nome}</a></p>
@@ -154,6 +158,19 @@ function PaginaProduto(){
                             <p>{produto.produto_parcelas_máximas}x de R${calcularPrecoParcelado(produto.produto_preco_parcelado,produto.produto_parcelas_máximas)}</p>                           
                             </div>
                         </div>
+                        <p>Cor: {corParaExibir} 
+                            <div className="container-card-cor">
+                            {produto.cor?.map((cor) => { return (
+                                <div onClick={() => {setCorSelecionada(cor.valor);setCorCarrinho(cor.id);
+                                    console.log(`Cor id é`,cor.id);
+                                }}
+                                onMouseEnter={() => setCorHover(cor.valor)}
+                                onMouseLeave={() => setCorHover(null)} className="card-valor-cor">
+                            <p>{cor.valor}</p>
+                            </div>
+                            
+                            )})}
+                            </div></p>
                         <div className="container-selecao-unidades">
                         <div className="container-quantidade-foto-dropdown">
                         <p style ={{cursor:"pointer"}} onClick={() => setMostrarOpcoes(!mostrarOpcoes)}>Quantidade: {quantidadeSelecionada !== "mais" ? `${quantidadeSelecionada} unidade${quantidadeSelecionada !== "1" ? "s" : ""}` : "Selecione a quantidade" }</p><img src={mostrarOpcoes ? "/images/setinha-cima-dropdown-preta.png" : "/images/setinha-dropdown-preta.png"} className="imagem-botao-dropdown-quantidade"/>
@@ -180,7 +197,7 @@ function PaginaProduto(){
                             
                         <div className="container-botoes">
                         <button className="botao-comprar-agora"><img src="/images/shopping-bag.png" className="imagem-bolsa"/>Comprar agora</button>
-                        <button className="botao-adicionar-carrinho" onClick={() => {adicionarAoCarrinho(id,quantidadeSelecionada);abrirModalCarrinho() }}><img src="/images/carrinho-de-compras.png" className="imagem-carrinho-botao"/>Adicionar ao carrinho</button>
+                        <button className="botao-adicionar-carrinho" onClick={() => {adicionarAoCarrinho(id,quantidadeSelecionada,corCarrinho);abrirModalCarrinho() }}><img src="/images/carrinho-de-compras.png" className="imagem-carrinho-botao"/>Adicionar ao carrinho</button>
                         <div className="card-cep">
                             <div className="container-imagem-cep">
                             <img src= "/images/localizacao.png" className="icone-localizacao-card-cep"/>
