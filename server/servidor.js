@@ -1054,7 +1054,27 @@ app.delete("/cart/:itemId",autenticarToken, async (req,res) => {
 app.get("/itens-salvos", autenticarToken, async(req,res) => {
     const userId = req.usuarioId
     const params = [];
-    let query = `SELECT produto_id,nome, url, quantidade,preco,created_at from itens_salvos
+    let query = `SELECT it.produto_id,it.nome, it.url, it.quantidade,it.preco,it.created_at,
+    v.valor as voltagem_valor,t.valor as tamanho_valor,p.valor as peso_valor,m.valor as material_valor ,g.valor as genero_valor,e.valor as estampa_valor,d.largura,d.altura,d.comprimento,
+    c.valor as cor_valor
+    from itens_salvos it
+    left join itens_salvos_voltagens isv on isv.item_salvo_id = it.id
+    left join voltagens v on v.id = isv.voltagem_id
+    left join itens_salvos_tamanhos ist on ist.item_salvo_id = it.id
+    left join tamanhos t on t.id = ist.tamanho_id
+    left join itens_salvos_pesos isp on isp.item_salvo_id = it.id
+    left join pesos p on p.id = isp.peso_id
+    left join itens_salvos_materiais ism on ism.item_salvo_id = it.id
+    left join material m on m.id = ism.material_id
+    left join itens_salvos_genero isg on isg.item_salvo_id = it.id
+    left join generos g on g.id = isg.genero_id
+    left join itens_salvos_estampas ise on ise.item_salvo_id = it.id
+    left join estampas e on e.id = ise.estampa_id
+    left join itens_salvos_dimensoes isd on isd.item_salvo_id = it.id
+    left join dimensoes d on d.id = isd.dimensao_id
+    left join itens_salvos_cores isc on isc.item_salvo_id = it.id
+    left join cores c on c.id = isc.cor_id
+
             where 1=1`
     
     try{
@@ -1080,10 +1100,43 @@ app.get("/itens-salvos", autenticarToken, async(req,res) => {
 app.post("/itens-salvos",autenticarToken, async (req,res) => {
 
     const userId = req.usuarioId
-    const { produtoId } = req.body;
-    const params = [userId,produtoId,userId,produtoId];
+    const { produtoId, corId , voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId} = req.body;
+    const params = [
+        userId, produtoId, userId, produtoId,
+        corId, corId,
+        voltagemId, voltagemId,
+        dimensoesId, dimensoesId,
+        pesosId, pesosId,
+        generoId, generoId,
+        estampasId, estampasId,
+        tamanhosId, tamanhosId,
+        materiaisId, materiaisId
+      ];
 
-    const [itemJaExiste] = await db.query("SELECT * from itens_salvos where produto_id = ? and usuario_id = ?",[produtoId,userId]);
+    const [itemJaExiste] = await db.query(`
+        SELECT * 
+        FROM itens_salvos 
+        WHERE produto_id = ? 
+        AND usuario_id = ? 
+        AND (cor_id = ? OR cor_id IS NULL)
+        AND (voltagem_id = ? OR voltagem_id IS NULL)
+        AND (dimensoes_id = ? OR dimensoes_id IS NULL)
+        AND (pesos_id = ? OR pesos_id IS NULL)
+        AND (genero_id = ? OR genero_id IS NULL)
+        AND (estampas_id = ? OR estampas_id IS NULL)
+        AND (tamanhos_id = ? OR tamanhos_id IS NULL)
+        AND (materiais_id = ? OR materiais_id IS NULL)
+    `, [
+        userId, produtoId, userId, produtoId,
+        corId,
+        voltagemId,
+        dimensoesId,
+        pesosId,
+        generoId,
+        estampasId,
+        tamanhosId,
+        materiaisId
+      ]);
     
     if(itemJaExiste.length > 0){
         try{
@@ -1091,7 +1144,26 @@ app.post("/itens-salvos",autenticarToken, async (req,res) => {
                 join cart_items ci on ci.produto_id = isalvo.produto_id
                 join carts c on c.id = ci.cart_id
                 set isalvo.quantidade = isalvo.quantidade + ci.quantidade
-                where isalvo.produto_id = ? and isalvo.usuario_id = ? and c.usuario_id = ?`,[produtoId,userId,userId])
+                where isalvo.produto_id = ? and isalvo.usuario_id = ? and c.usuario_id = ?
+                AND (isalvo.cor_id = ? OR isalvo.cor_id IS NULL)
+    AND (isalvo.voltagem_id = ? OR isalvo.voltagem_id IS NULL)
+    AND (isalvo.dimensoes_id = ? OR isalvo.dimensoes_id IS NULL)
+    AND (isalvo.pesos_id = ? OR isalvo.pesos_id IS NULL)
+    AND (isalvo.genero_id = ? OR isalvo.genero_id IS NULL)
+    AND (isalvo.estampas_id = ? OR isalvo.estampas_id IS NULL)
+    AND (isalvo.tamanhos_id = ? OR isalvo.tamanhos_id IS NULL)
+    AND (isalvo.materiais_id = ? OR isalvo.materiais_id IS NULL)
+                `,[
+                    produtoId, userId, userId,
+                    corId,
+                    voltagemId,
+                    dimensoesId,
+                    pesosId,
+                    generoId,
+                    estampasId,
+                    tamanhosId,
+                    materiaisId
+                ])
                 return res.status(200).json({message:"O item foi atualizado com sucesso"});
             }
         catch(err){
@@ -1101,14 +1173,49 @@ app.post("/itens-salvos",autenticarToken, async (req,res) => {
     }
     else{
         try{
-            let query = `INSERT INTO itens_salvos (usuario_id,produto_id,nome,url,quantidade,preco)
+            let itemSalvo;
+            let query = `INSERT INTO itens_salvos (usuario_id,produto_id,nome,url,quantidade,preco,cor_id,voltagem_id,dimensoes_id,pesos_id,genero_id,estampas_id,tamanhos_id,materiais_id)
 
-    SELECT ?,?, p.nome,(SELECT i.url FROM imagens_produto i WHERE i.produto_id = p.id LIMIT 1) AS url ,ci.quantidade,p.preco from 
+    SELECT ?,?, p.nome,(SELECT i.url FROM imagens_produto i WHERE i.produto_id = p.id LIMIT 1) AS url ,ci.quantidade,p.preco,ci.cores_ids,ci.voltagemId,ci.dimensoesId,ci.pesosId,ci.generoId,ci.estampasId,ci.tamanhosId,ci.materiaisId from 
     cart_items ci left join produtos p on ci.produto_id = p.id
     left join carts c on c.id = ci.cart_id
     where c.usuario_id = ? and ci.produto_id = ?
+    AND (ci.cores_ids = ? OR ci.cores_ids IS NULL)
+  AND (ci.voltagemId = ? OR ci.voltagemId IS NULL)
+  AND (ci.dimensoesId = ? OR ci.dimensoesId IS NULL)
+  AND (ci.pesosId = ? OR ci.pesosId IS NULL)
+  AND (ci.generoId = ? OR ci.generoId IS NULL)
+  AND (ci.estampasId = ? OR ci.estampasId IS NULL)
+  AND (ci.tamanhosId = ? OR ci.tamanhosId IS NULL)
+  AND (ci.materiaisId = ? OR ci.materiaisId IS NULL);
     `
+            console.log(params);
             const [resultado] = await db.query(query,params);
+            
+            console.log(`resultado do insert` , resultado);
+            itemSalvo = resultado.insertId;
+            console.log(`Item salvo é`,itemSalvo);
+            
+            await db.query(`INSERT INTO itens_salvos_cores (item_salvo_id, cor_id)
+VALUES (?, ?)`,[itemSalvo,corId]);
+
+            await db.query(`INSERT INTO itens_salvos_voltagens (item_salvo_id, voltagem_id)
+VALUES (?, ?)`,[itemSalvo,voltagemId])
+
+            await db.query(`INSERT INTO itens_salvos_dimensoes (item_salvo_id, dimensao_id)
+VALUES (?, ?)`,[itemSalvo,dimensoesId]);
+
+            await db.query(`INSERT INTO itens_salvos_tamanhos (item_salvo_id, tamanho_id)
+    VALUES (?, ?)`,[itemSalvo,tamanhosId]);
+    await db.query(`INSERT INTO itens_salvos_pesos (item_salvo_id, peso_id)
+        VALUES (?, ?)`,[itemSalvo,pesosId]);
+        await db.query(`INSERT INTO itens_salvos_materiais (item_salvo_id, material_id)
+VALUES (?, ?)`,[itemSalvo,materiaisId]);
+await db.query(`INSERT INTO itens_salvos_genero (item_salvo_id, genero_id)
+    VALUES (?, ?)`,[itemSalvo,generoId]);
+    await db.query(`INSERT INTO itens_salvos_estampas (item_salvo_id, estampa_id)
+        VALUES (?, ?)`,[itemSalvo,estampasId]);
+
             
             if (resultado.affectedRows === 0) {
                 return res.status(400).json({ message: "Nada foi inserido" });

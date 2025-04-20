@@ -75,9 +75,18 @@ const handleSelecionarAlterar = () =>{
         }
     }
     
-    const adicionarItemSalvo = async (produtoId) => {
+    const adicionarItemSalvo = async (produtoId, corId = null, voltagemId = null, dimensoesId = null, pesosId = null, generoId = null, estampasId = null, tamanhosId = null, materiaisId = null) => {
         try{
-            await axios.post("http://localhost:5000/itens-salvos",{ produtoId },{withCredentials:true});
+            await axios.post("http://localhost:5000/itens-salvos",{ produtoId,
+                corId,
+                voltagemId,
+                dimensoesId,
+                pesosId,
+                generoId,
+                estampasId,
+                tamanhosId,
+                materiaisId
+             },{withCredentials:true});
             await carregarItensSalvos();
         }
         catch(err){

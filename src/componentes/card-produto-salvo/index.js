@@ -26,6 +26,7 @@ function CardProdutoSalvo({item,precoTotal,precoTotalPix,adicionarItemSalvo,excl
                     <img src={item.url} className="imagem-produto-itens-salvos"/>
                     <div className="container-texto-botoes">
                     <p>{item.nome.length > 20 ? item.nome.slice(0,17) + "..." : item.nome}</p>
+                    <p>{item.cor_valor}</p>
                     <div className="container-botoes-excluir-salvar-altera">
                         <p style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}} onClick={() => excluirItemSalvo(item.produto_id)}>Excluir</p>
                         <p style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}} onClick={() => {adicionarAoCarrinho(item.produto_id,item.quantidade); excluirItemSalvo(item.produto_id); obterCarrinho()}}>Adicionar ao carrinho</p>
