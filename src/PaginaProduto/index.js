@@ -27,9 +27,59 @@ function PaginaProduto(){
     const [mostrarOpcoes, setMostrarOpcoes] = useState(false);
     const [valorQuantidade, setValorQuantidade] = useState("mais");
     const [corSelecionada, setCorSelecionada] = useState(null);
-    const [corHover, setCorHover] = useState(null);
-    const [corCarrinho,setCorCarrinho] = useState(null);
-    const corParaExibir = corHover || corSelecionada;
+    const [materialSelecionado, setMaterialSelecionado] = useState(null);
+    const [voltagemSelecionada, setVoltagemSelecionada] = useState(null);
+    const [generoSelecionado, setGeneroSelecionado] = useState(null);
+    const [tamanhoSelecionado, setTamanhoSelecionado] = useState(null);
+    const [estampaSelecionada, setEstampaSelecionada] = useState(null);
+    const [pesoSelecionado, setPesoSelecionado] = useState(null);
+    const [dimensoesSelecionada, setDimensoesSelecionada] = useState(null);
+
+    const atributos = [
+        { chave: 'cor', nome: 'Cor' },
+        { chave: 'voltagem', nome: 'Voltagem' },
+        { chave: 'dimensao', nome: 'Dimensões' },
+        { chave: 'peso', nome: 'Pesos' },
+        { chave: 'genero', nome: 'Gênero' },
+        { chave: 'estampa', nome: 'Estampas' },
+        { chave: 'tamanho', nome: 'Tamanhos' },
+        { chave: 'material', nome: 'Materiais' },
+      ];
+
+      const [selecoes, setSelecoes] = useState({
+        cor: null,
+        voltagem: null,
+        dimensao: null,
+        peso: null,
+        genero: null,
+        estampa: null,
+        tamanho: null,
+        material: null,
+      });
+
+      const [hover, setHover] = useState({
+        cor: null,
+        voltagem: null,
+        dimensao: null,
+        peso: null,
+        genero: null,
+        estampa: null,
+        tamanho: null,
+        material: null,
+      });
+    
+      const handleSelecao = (atributo, valor) => {
+        setSelecoes((prevSelecoes) => ({
+          ...prevSelecoes,
+          [atributo]: valor,
+        }));
+      };
+      const handleHover = (atributo, valor) => {
+        setHover((prevHover) => ({
+          ...prevHover,
+          [atributo]: valor,
+        }));
+      };
     
     const {obterCarrinho, editarQuantidadeItemCarrinho, excluirItemCarrinho, carrinhoItens,setCarrinhoItens, adicionarAoCarrinho} = useCarrinho();
 
@@ -67,7 +117,13 @@ function PaginaProduto(){
             setProduto(produtoBuscado);
             setImagemSelecionada(produtoBuscado.imagens[0]);
             setCorSelecionada(produtoBuscado.cor?.[0].valor);
-            setCorCarrinho(produtoBuscado.cor?.[0].id)
+            setMaterialSelecionado(produtoBuscado?.materiais?.[0].id);
+            setVoltagemSelecionada(produtoBuscado?.voltagem?.[0].id);
+            setGeneroSelecionado(produtoBuscado?.genero?.[0].id);
+            setTamanhoSelecionado(produtoBuscado?.tamanho?.[0].id);
+            setEstampaSelecionada(produtoBuscado?.estampa?.[0].id);
+            setPesoSelecionado(produtoBuscado?.peso?.[0].id);
+            setDimensoesSelecionada(produtoBuscado?.dimensoes?.[0].id);
           } catch (err) {
             console.error("Erro ao buscar produto", err);
           }
@@ -158,19 +214,73 @@ function PaginaProduto(){
                             <p>{produto.produto_parcelas_máximas}x de R${calcularPrecoParcelado(produto.produto_preco_parcelado,produto.produto_parcelas_máximas)}</p>                           
                             </div>
                         </div>
-                        <p>Cor: {corParaExibir} 
                             <div className="container-card-cor">
-                            {produto.cor?.map((cor) => { return (
-                                <div onClick={() => {setCorSelecionada(cor.valor);setCorCarrinho(cor.id);
-                                    console.log(`Cor id é`,cor.id);
-                                }}
-                                onMouseEnter={() => setCorHover(cor.valor)}
-                                onMouseLeave={() => setCorHover(null)} className="card-valor-cor">
-                            <p>{cor.valor}</p>
+                            <div className="card-variacao">
+                            {Object.entries(produto).map(([nome, opcoes]) => {
+                                const atributosSuportados = [
+                                    "cor",
+                                    "voltagem",
+                                    "generos",
+                                    "tamanho",
+                                    "materiais",
+                                    "estampas",
+                                    "pesos",
+                                    "dimensoes",
+                                ];
+
+
+                                
+                                if (atributosSuportados.includes(nome) && Array.isArray(opcoes) && opcoes.length > 0) {
+                                    const exibirHover = hover[nome] || selecoes[nome] || opcoes[0].valor
+                                    return (
+                                    <div className="card-variacao" key={nome}>
+                                        {nome.charAt(0).toUpperCase() + nome.slice(1)}: {exibirHover}
+                                        <div className={`container-card-${nome}`}>
+                                        {opcoes?.map((item) => {
+                                            return (
+                                            <div
+                                                key={item.id}
+                                                onClick={() => {
+                                                
+                                                // Atualiza a seleção de atributos
+                                                ;setSelecoes((prevSelecoes) => ({
+                                                    ...prevSelecoes,
+                                                    [nome]: item.valor,
+                                                }));
+                                                if(nome === "cor")
+                                                setCorSelecionada(item.id);
+                                                if(nome === "materiais")
+                                                setMaterialSelecionado(item.id);
+                                                if(nome === "voltagem")
+                                                setVoltagemSelecionada(item.id);
+                                                if(nome === "generos")
+                                                setGeneroSelecionado(item.id);
+                                                if(nome === "tamanho")
+                                                setTamanhoSelecionado(item.id);
+                                                if(nome === "estampas")
+                                                setEstampaSelecionada(item.id);
+                                                if(nome === "pesos")
+                                                setPesoSelecionado(item.id);
+                                                if(nome === "dimensoes")
+                                                setDimensoesSelecionada(item.id);
+                                                // Log da seleção
+                                                console.log(`${nome} id é`, item.id);
+                                                }}
+                                                onMouseEnter={() => handleHover(nome,item.valor)}
+                                                onMouseLeave={() => handleHover(nome,null)}
+                                                className="card-valor-cor"
+                                            >
+                                                <p>{item.valor}</p>
+                                            </div>
+                                            );
+                                        })}
+                                        </div>
+                                    </div>
+                                    );
+                                }
+                                })}
                             </div>
-                            
-                            )})}
-                            </div></p>
+                            </div>
                         <div className="container-selecao-unidades">
                         <div className="container-quantidade-foto-dropdown">
                         <p style ={{cursor:"pointer"}} onClick={() => setMostrarOpcoes(!mostrarOpcoes)}>Quantidade: {quantidadeSelecionada !== "mais" ? `${quantidadeSelecionada} unidade${quantidadeSelecionada !== "1" ? "s" : ""}` : "Selecione a quantidade" }</p><img src={mostrarOpcoes ? "/images/setinha-cima-dropdown-preta.png" : "/images/setinha-dropdown-preta.png"} className="imagem-botao-dropdown-quantidade"/>
@@ -197,7 +307,7 @@ function PaginaProduto(){
                             
                         <div className="container-botoes">
                         <button className="botao-comprar-agora"><img src="/images/shopping-bag.png" className="imagem-bolsa"/>Comprar agora</button>
-                        <button className="botao-adicionar-carrinho" onClick={() => {adicionarAoCarrinho(id,quantidadeSelecionada,corCarrinho);abrirModalCarrinho() }}><img src="/images/carrinho-de-compras.png" className="imagem-carrinho-botao"/>Adicionar ao carrinho</button>
+                        <button className="botao-adicionar-carrinho" onClick={() => {console.log(`é`,produto.materiais[0].id);adicionarAoCarrinho(id,quantidadeSelecionada,corSelecionada,voltagemSelecionada,dimensoesSelecionada,pesoSelecionado,generoSelecionado,estampaSelecionada,tamanhoSelecionado,materialSelecionado);abrirModalCarrinho() }}><img src="/images/carrinho-de-compras.png" className="imagem-carrinho-botao"/>Adicionar ao carrinho</button>
                         <div className="card-cep">
                             <div className="container-imagem-cep">
                             <img src= "/images/localizacao.png" className="icone-localizacao-card-cep"/>

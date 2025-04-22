@@ -107,7 +107,7 @@ app.post("/login", async (req, res) => {
 
     res.cookie("accessToken", accessToken,{
         httpOnly:true,
-        maxAge: 1 * 60 * 1000,
+        maxAge: 1 * 60 * 1000 * 15,
         
     });
     res.cookie("refreshToken", refreshToken , {
@@ -142,7 +142,7 @@ app.post("/renovarsessao" , async (req,res) => {
         );
         res.cookie("accessToken", newAccessToken,{
             httpOnly:true,
-            maxAge: 1 * 60 * 1000,
+            maxAge: 1 * 60 * 1000 * 15,
         })
         return res.status(200).json({token:newAccessToken});
     }
@@ -805,14 +805,21 @@ app.get("/cart", async (req,res) => {
         p.desconto,
         GROUP_CONCAT(DISTINCT co.id) AS cores_ids,
         GROUP_CONCAT(DISTINCT co.valor) AS cores,
+        GROUP_CONCAT(DISTINCT d.id) as dimensoes_ids,
         GROUP_CONCAT(DISTINCT d.largura ORDER BY d.largura) AS larguras,
         GROUP_CONCAT(DISTINCT d.altura ORDER BY d.altura) AS alturas,
         GROUP_CONCAT(DISTINCT d.comprimento ORDER BY d.comprimento) AS comprimentos,
+        GROUP_CONCAT(DISTINCT es.id) as estampas_ids,
         GROUP_CONCAT(DISTINCT es.valor) AS estampas,
+        GROUP_CONCAT(DISTINCT g.id) as generos_ids,
         GROUP_CONCAT(DISTINCT g.valor) AS generos,  -- Agrupando generos
+        GROUP_CONCAT(DISTINCT ma.id) as materiais_ids,
     GROUP_CONCAT(DISTINCT ma.valor) AS materiais,  -- Agrupando materiais
+    GROUP_CONCAT(DISTINCT pe.id) as pesos_ids,
     GROUP_CONCAT(DISTINCT pe.valor) AS pesos,  -- Agrupando pesos
+    GROUP_CONCAT(DISTINCT ta.id) as tamanhos_ids,
     GROUP_CONCAT(DISTINCT ta.valor) AS tamanhos,  -- Agrupando tamanhos
+    GROUP_CONCAT(DISTINCT vo.id) as voltagem_ids,
     GROUP_CONCAT(DISTINCT vo.valor) AS voltagens,
         (
             SELECT url 
@@ -889,7 +896,8 @@ app.post("/cart" , autenticarToken, async (req,res) => {
     const {produtoId, quantidade, corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId} = req.body;
     const userId = req.usuarioId;
     try{
-
+        console.log(`materiaisId é`,materiaisId);
+        console.log(`corId é`, corId);
         const [carrinho] = await db.query("SELECT id from carts where usuario_id = ?",[userId]);
 
         let cartId;
@@ -900,62 +908,151 @@ app.post("/cart" , autenticarToken, async (req,res) => {
             const [novoCarrinho] = await db.query(`INSERT INTO carts (usuario_id) values (?)`, userId);
             cartId = novoCarrinho[0].id;
         }
+        const params = [];
+        let query = `SELECT * from cart_items where 1=1`
 
-    const [itemJaExiste] = await db.query(`SELECT * from cart_items where cart_id = ? AND produto_id = ?
-        AND (cores_ids = ? OR (cores_ids IS NULL AND ? IS NULL)) AND (voltagemId = ? OR (voltagemId IS NULL AND ? IS NULL)) AND (dimensoesId = ? OR (dimensoesId IS NULL AND ? IS NULL))
+        if(cartId){
+            query += ` AND cart_id = ?`
+            params.push(cartId);
+        }
+        if(produtoId){
+            query += ` AND produto_id = ?`
+            params.push(produtoId);
+        }
+        if(corId){
+            query += ` AND cores_ids = ?`
+            params.push(corId);
+        }
+        if(voltagemId){
+            query += ` AND voltagemId = ?`
+            params.push(voltagemId);
+        }
+        if(dimensoesId){
+            query += ` AND dimensoesId = ?`
+            params.push(dimensoesId);
+        }
+        if(pesosId){
+            query += ` AND pesosId= ?`
+            params.push(pesosId);
+        }
+        if(generoId){
+            query += ` AND generoId = ?`
+            params.push(generoId);
+        }
+        if(estampasId){
+            query += ` AND estampasId = ?`
+            params.push(estampasId);
+        }
+        if(tamanhosId){
+            query += ` AND tamanhosId = ?`
+            params.push(tamanhosId);
+        }
+        if(materiaisId){
+            query += ` AND materiaisId = ?`
+            params.push(materiaisId);
+        }
 
-AND (pesosId = ? OR (pesosId IS NULL AND ? IS NULL)) AND (generoId = ? OR (generoId IS NULL AND ? IS NULL)) AND (estampasId = ? OR (estampasId IS NULL AND ? IS NULL)) 
-AND (tamanhosId = ? OR (tamanhosId IS NULL AND ? IS NULL)) AND (materiaisId = ? OR (materiaisId IS NULL AND ? IS NULL))`,[cartId, produtoId,
-    corId, corId,
-    voltagemId, voltagemId,
-    dimensoesId, dimensoesId,
-    pesosId, pesosId,
-    generoId, generoId,
-    estampasId, estampasId,
-    tamanhosId, tamanhosId,
-    materiaisId, materiaisId
-  ]);
+    const [itemJaExiste] = await db.query(query,params);
 
     let cartItemId;
+    const segundoParams = [Number(quantidade)];
+    let segundaQuery = `UPDATE cart_items SET quantidade = quantidade + ? where 1=1`;
+
+    if(cartId){
+        segundaQuery += ` AND cart_id = ?`
+        segundoParams.push(cartId);
+    }
+    
+    if(produtoId){
+        segundaQuery += ` AND produto_id = ?`
+        segundoParams.push(produtoId);
+    }
+    if(corId){
+        segundaQuery += ` AND cores_ids = ?`
+        segundoParams.push(corId);
+    }
+    if(voltagemId){
+        segundaQuery += ` AND voltagemId = ?`
+        segundoParams.push(voltagemId);
+    }
+    if(dimensoesId){
+        segundaQuery += ` AND dimensoesId = ?`
+        segundoParams.push(dimensoesId);
+    }
+    if(pesosId){
+        segundaQuery += ` AND pesosId = ?`
+        segundoParams.push(pesosId);
+    }
+    if(generoId){
+        segundaQuery += ` AND generoId = ?`
+        segundoParams.push(generoId);
+    }
+    if(estampasId){
+        segundaQuery += ` AND estampasId = ?`
+        segundoParams.push(estampasId);
+    }
+    if(tamanhosId){
+        segundaQuery += ` AND tamanhosId = ?`
+        segundoParams.push(tamanhosId);
+    }
+    if(materiaisId){
+        segundaQuery += ` AND materiaisId = ?`
+        segundoParams.push(materiaisId);
+    }
+
     if(itemJaExiste.length > 0){
-        await db.query(`UPDATE cart_items SET quantidade = quantidade + ?
-WHERE cart_id = ? AND produto_id = ?
-  AND (cores_ids = ? OR (cores_ids IS NULL AND ? IS NULL))
-  AND (voltagemId = ? OR (voltagemId IS NULL AND ? IS NULL))
-  AND (dimensoesId = ? OR (dimensoesId IS NULL AND ? IS NULL))
-  AND (pesosId = ? OR (pesosId IS NULL AND ? IS NULL))
-  AND (generoId = ? OR (generoId IS NULL AND ? IS NULL))
-  AND (estampasId = ? OR (estampasId IS NULL AND ? IS NULL))
-  AND (tamanhosId = ? OR (tamanhosId IS NULL AND ? IS NULL))
-  AND (materiaisId = ? OR (materiaisId IS NULL AND ? IS NULL))`,
-  [quantidade || 1, cartId, produtoId,
-    corId, corId,
-    voltagemId, voltagemId,
-    dimensoesId, dimensoesId,
-    pesosId, pesosId,
-    generoId, generoId,
-    estampasId, estampasId,
-    tamanhosId, tamanhosId,
-    materiaisId, materiaisId]);
+        await db.query(segundaQuery,segundoParams);
         cartItemId = itemJaExiste[0].id;
     }
     else{
-        const [novoItem] = await db.query(`
-            INSERT INTO cart_items (
-              cart_id, produto_id, quantidade,
-              cores_ids, voltagemId, dimensoesId,
-              pesosId, generoId, estampasId,
-              tamanhosId, materiaisId
-            ) VALUES (?, ?, ?,
-                      ?, ?, ?,
-                      ?, ?, ?,
-                      ?, ?)
-          `, [
-            cartId, produtoId, quantidade || 1,
-            corId, voltagemId, dimensoesId,
-            pesosId, generoId, estampasId,
-            tamanhosId, materiaisId
-          ]);
+        const columns = ["cart_id", "produto_id", "quantidade"]
+        const values = [cartId,produtoId,quantidade || 1]
+
+        if(corId){
+            columns.push("cores_ids")
+            values.push(corId);
+        }
+        if(voltagemId){
+            columns.push("voltagemId")
+            values.push(voltagemId);
+        }
+        
+        if (dimensoesId) {
+            columns.push("dimensoesId");
+            values.push(dimensoesId);
+        }
+        
+        if (pesosId) {
+            columns.push("pesosId");
+            values.push(pesosId);
+        }
+        
+        if (generoId) {
+            columns.push("generoId");
+            values.push(generoId);
+        }
+        
+        if (estampasId) {
+            columns.push("estampasId");
+            values.push(estampasId);
+        }
+        
+        if (tamanhosId) {
+            columns.push("tamanhosId");
+            values.push(tamanhosId);
+        }
+        
+        if (materiaisId) {
+            columns.push("materiaisId");
+            values.push(materiaisId);
+        }
+        
+        const placeholders = columns.map(() => "?").join(", ");
+        
+        const sql = `INSERT INTO cart_items (${columns.join(", ")})
+        values (${placeholders})`;
+        
+        const [novoItem] = await db.query(sql, values);
         cartItemId = novoItem.insertId;
         console.log(cartItemId);
         console.log(cartId);
@@ -993,12 +1090,60 @@ WHERE cart_id = ? AND produto_id = ?
     
 })
 
-app.put("/cart/:itemId", async (req,res) => {
+app.put("/cart/:itemId",autenticarToken, async (req,res) => {
     const {itemId} = req.params;
+    const userId = req.usuarioId;
     const {quantidade, corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId} = req.body;
 
     try{
-        await db.query(`UPDATE cart_items SET quantidade = ? where id = ?`,[Number(quantidade),itemId]);
+        const params = [Number(quantidade)];
+        let query = `UPDATE cart_items ci join carts c on ci.cart_id = c.id SET ci.quantidade = ?   
+        where 1=1 `
+        
+        if(itemId){
+            query+= ` AND ci.id = ?`
+            params.push(itemId);
+            
+        }
+        if(userId){
+            query+= ` AND c.usuario_id = ?`
+            params.push(userId);
+        }
+        if(corId){
+            query+= ` AND ci.cores_ids = ?`
+            params.push(corId);
+        }
+        
+        if(voltagemId){
+            query+= ` AND ci.voltagemId = ?`
+            params.push(voltagemId);
+        }
+        if(dimensoesId){
+            query+= ` AND ci.dimensoesId = ?`
+            params.push(dimensoesId);
+        }
+        if(pesosId){
+            query+= ` AND ci.pesosId = ?`
+            params.push(pesosId);
+        }
+        if(generoId){
+            query+= ` AND ci.generoId = ?`
+            params.push(generoId);
+        }
+        if(estampasId){
+            query+= ` AND ci.estampasId = ?`
+            params.push(estampasId);
+        }
+        if(tamanhosId){
+            query+= ` AND ci.tamanhosId = ?`
+            params.push(tamanhosId);
+        }
+        if(materiaisId){
+            query+= ` AND ci.materiaisId = ?`
+            params.push(materiaisId);
+        }
+
+        await db.query(query,params);
         
         if(corId) {
             await db.query(`UPDATE cart_item_cores SET cor_id = ? where cart_item_id = ? `,[corId,itemId]);
@@ -1035,6 +1180,7 @@ app.put("/cart/:itemId", async (req,res) => {
 
 app.delete("/cart/:itemId",autenticarToken, async (req,res) => {
     const {itemId} = req.params;
+    const {corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId} = req.body;
     const userId = req.usuarioId;
     try{
         const [cart] = await db.query(`SELECT id from carts where usuario_id = ?`,userId);
@@ -1043,7 +1189,50 @@ app.delete("/cart/:itemId",autenticarToken, async (req,res) => {
             return res.status(400).json({message:"Carrinho não encontrado para o usuario"})
         }
         const cartId = cart[0].id;
-        await db.query(`DELETE FROM cart_items where id = ? AND cart_id = ?`,[itemId,cartId]);
+        const params = [];
+        let query = `DELETE FROM cart_items where 1=1 `
+        if(itemId){
+            query+= ` AND produto_id = ?`
+            params.push(itemId);
+        }
+        if(cartId){
+            query += ` AND cart_id = ?`
+            params.push(cartId);
+        }
+        if(corId){
+            query += ` AND cores_ids = ?`
+            params.push(corId);
+        }
+        if(voltagemId){
+            query += ` AND voltagemId = ?`
+            params.push(voltagemId);
+        }
+        if(dimensoesId){
+            query += ` AND dimensoesId = ?`
+            params.push(dimensoesId);
+        }
+        if(pesosId){
+            query += ` AND pesosId = ?`
+            params.push(pesosId);
+        }
+        if(generoId){
+            query += ` AND generoId = ?`
+            params.push(generoId);
+        }
+        if(estampasId){
+            query += ` AND estampasId = ?`
+            params.push(estampasId);
+        }
+        if(tamanhosId){
+            query += ` AND tamanhosId = ?`
+            params.push(tamanhosId);
+        }
+        if(materiaisId){
+            query += ` AND materiaisId = ?`
+            params.push(materiaisId);
+        }
+
+            await db.query(query,params);
         return res.status(200).json({message:"O item foi deletado do carrinho com sucesso"});
     }
     catch(err){
@@ -1054,9 +1243,17 @@ app.delete("/cart/:itemId",autenticarToken, async (req,res) => {
 app.get("/itens-salvos", autenticarToken, async(req,res) => {
     const userId = req.usuarioId
     const params = [];
-    let query = `SELECT it.produto_id,it.nome, it.url, it.quantidade,it.preco,it.created_at,
+    let query = `SELECT it.id ,it.produto_id,it.nome, it.url, it.quantidade,it.preco,it.created_at,
     v.valor as voltagem_valor,t.valor as tamanho_valor,p.valor as peso_valor,m.valor as material_valor ,g.valor as genero_valor,e.valor as estampa_valor,d.largura,d.altura,d.comprimento,
-    c.valor as cor_valor
+    c.id as cor_id,
+    c.valor as cor_valor,
+    v.id as voltagem_id,
+    t.id as tamanho_id,
+    p.id as peso_id,
+    m.id as material_id,
+    g.id as genero_id,
+    e.id as estampas_id,
+    d.id as dimensoes_id
     from itens_salvos it
     left join itens_salvos_voltagens isv on isv.item_salvo_id = it.id
     left join voltagens v on v.id = isv.voltagem_id
@@ -1101,69 +1298,110 @@ app.post("/itens-salvos",autenticarToken, async (req,res) => {
 
     const userId = req.usuarioId
     const { produtoId, corId , voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId} = req.body;
-    const params = [
-        userId, produtoId, userId, produtoId,
-        corId, corId,
-        voltagemId, voltagemId,
-        dimensoesId, dimensoesId,
-        pesosId, pesosId,
-        generoId, generoId,
-        estampasId, estampasId,
-        tamanhosId, tamanhosId,
-        materiaisId, materiaisId
-      ];
+    const params = [];
 
-    const [itemJaExiste] = await db.query(`
-        SELECT * 
+    let query = ` SELECT * 
         FROM itens_salvos 
-        WHERE produto_id = ? 
-        AND usuario_id = ? 
-        AND (cor_id = ? OR cor_id IS NULL)
-        AND (voltagem_id = ? OR voltagem_id IS NULL)
-        AND (dimensoes_id = ? OR dimensoes_id IS NULL)
-        AND (pesos_id = ? OR pesos_id IS NULL)
-        AND (genero_id = ? OR genero_id IS NULL)
-        AND (estampas_id = ? OR estampas_id IS NULL)
-        AND (tamanhos_id = ? OR tamanhos_id IS NULL)
-        AND (materiais_id = ? OR materiais_id IS NULL)
-    `, [
-        userId, produtoId, userId, produtoId,
-        corId,
-        voltagemId,
-        dimensoesId,
-        pesosId,
-        generoId,
-        estampasId,
-        tamanhosId,
-        materiaisId
-      ]);
+        WHERE 1=1 `
     
+    if(produtoId){
+        query+=` AND produto_id = ?`
+        params.push(produtoId);
+    }
+
+    if(userId){
+        query+= ` AND usuario_id = ?`
+        params.push(userId)
+    }
+
+    if(corId){
+        query += ` AND cor_id = ?`
+        params.push(corId)
+    }
+    if(voltagemId){
+        query += ` AND voltagem_id = ?`
+        params.push(voltagemId)
+    }
+    if(dimensoesId){
+        query += ` AND dimensoes_id = ?`
+        params.push(dimensoesId)
+    }
+    if(pesosId){
+        query += ` AND pesos_id = ?`
+        params.push(pesosId)
+    }
+    if(generoId){
+        query += ` AND genero_id = ?`
+        params.push(generoId);
+    }
+    if(estampasId){
+        query += ` AND estampas_id = ?`
+        params.push(estampasId);
+    }
+    if(tamanhosId){
+        query += ` AND tamanhos_id = ?`
+        params.push(tamanhosId);
+    }
+    if(materiaisId){
+        query += ` AND materiais_id = ?`
+        params.push(materiaisId);
+    }
+
+    const [itemJaExiste] = await db.query(query,params);
+
     if(itemJaExiste.length > 0){
         try{
-            await db.query(`UPDATE itens_salvos isalvo
+            let segundaQuery = `UPDATE itens_salvos isalvo
                 join cart_items ci on ci.produto_id = isalvo.produto_id
                 join carts c on c.id = ci.cart_id
                 set isalvo.quantidade = isalvo.quantidade + ci.quantidade
-                where isalvo.produto_id = ? and isalvo.usuario_id = ? and c.usuario_id = ?
-                AND (isalvo.cor_id = ? OR isalvo.cor_id IS NULL)
-    AND (isalvo.voltagem_id = ? OR isalvo.voltagem_id IS NULL)
-    AND (isalvo.dimensoes_id = ? OR isalvo.dimensoes_id IS NULL)
-    AND (isalvo.pesos_id = ? OR isalvo.pesos_id IS NULL)
-    AND (isalvo.genero_id = ? OR isalvo.genero_id IS NULL)
-    AND (isalvo.estampas_id = ? OR isalvo.estampas_id IS NULL)
-    AND (isalvo.tamanhos_id = ? OR isalvo.tamanhos_id IS NULL)
-    AND (isalvo.materiais_id = ? OR isalvo.materiais_id IS NULL)
-                `,[
-                    produtoId, userId, userId,
-                    corId,
-                    voltagemId,
-                    dimensoesId,
-                    pesosId,
-                    generoId,
-                    estampasId,
-                    tamanhosId,
-                    materiaisId
-                ])
+                where 1=1 `
+
+            const segundoParams = [];
+            
+                if(produtoId){
+                    segundaQuery+=` AND isalvo.produto_id = ?`
+                    segundoParams.push(produtoId);
+                }
+                if(userId){
+                    segundaQuery+=` AND isalvo.usuario_id = ? and c.usuario_id = ?`
+                    segundoParams.push(userId,userId);
+                }
+                if(corId){
+                    segundaQuery+=` AND isalvo.cor_id = ?`
+                    segundoParams.push(corId);
+                }
+                if(voltagemId){
+                    segundaQuery+=` AND isalvo.voltagem_id = ?`
+                    segundoParams.push(voltagemId);
+                }
+                if(dimensoesId){
+                    segundaQuery+=` AND isalvo.dimensoes_id = ?`
+                    segundoParams.push(dimensoesId);
+                }
+                if(pesosId){
+                    segundaQuery+=` AND isalvo.pesos_id = ?`
+                    segundoParams.push(pesosId);
+                }
+                if(generoId){
+                    segundaQuery+= ` AND isalvo.genero_id = ?`
+                    segundoParams.push(generoId);
+                }
+                if(estampasId){
+                    segundaQuery+= ` AND isalvo.estampas_id = ?`
+                    segundoParams.push(estampasId);
+                }
+                if(tamanhosId){
+                    segundaQuery+= ` AND isalvo.tamanhos_id = ?`
+                    segundoParams.push(tamanhosId);
+                }
+                if(materiaisId){
+                    segundaQuery+=` AND isalvo.materiais_id = ?`
+                    segundoParams.push(materiaisId);
+                }
+
+                await db.query(segundaQuery,segundoParams);
+
                 return res.status(200).json({message:"O item foi atualizado com sucesso"});
             }
         catch(err){
@@ -1174,47 +1412,100 @@ app.post("/itens-salvos",autenticarToken, async (req,res) => {
     else{
         try{
             let itemSalvo;
-            let query = `INSERT INTO itens_salvos (usuario_id,produto_id,nome,url,quantidade,preco,cor_id,voltagem_id,dimensoes_id,pesos_id,genero_id,estampas_id,tamanhos_id,materiais_id)
+            const terceiroParams = [userId,produtoId];
+            let terceiraQuery = `INSERT INTO itens_salvos (usuario_id,produto_id,nome,url,quantidade,preco,cor_id,voltagem_id,dimensoes_id,pesos_id,genero_id,estampas_id,tamanhos_id,materiais_id)
 
     SELECT ?,?, p.nome,(SELECT i.url FROM imagens_produto i WHERE i.produto_id = p.id LIMIT 1) AS url ,ci.quantidade,p.preco,ci.cores_ids,ci.voltagemId,ci.dimensoesId,ci.pesosId,ci.generoId,ci.estampasId,ci.tamanhosId,ci.materiaisId from 
     cart_items ci left join produtos p on ci.produto_id = p.id
     left join carts c on c.id = ci.cart_id
-    where c.usuario_id = ? and ci.produto_id = ?
-    AND (ci.cores_ids = ? OR ci.cores_ids IS NULL)
-  AND (ci.voltagemId = ? OR ci.voltagemId IS NULL)
-  AND (ci.dimensoesId = ? OR ci.dimensoesId IS NULL)
-  AND (ci.pesosId = ? OR ci.pesosId IS NULL)
-  AND (ci.generoId = ? OR ci.generoId IS NULL)
-  AND (ci.estampasId = ? OR ci.estampasId IS NULL)
-  AND (ci.tamanhosId = ? OR ci.tamanhosId IS NULL)
-  AND (ci.materiaisId = ? OR ci.materiaisId IS NULL);
-    `
-            console.log(params);
-            const [resultado] = await db.query(query,params);
+    where 1=1`
+
+            if(userId){
+                terceiraQuery+= ` AND c.usuario_id = ?`
+                terceiroParams.push(userId);
+            }
+            if(produtoId){
+                terceiraQuery+= ` AND ci.produto_id = ?`
+                terceiroParams.push(produtoId);
+            }
+            if(corId){
+                terceiraQuery+= ` AND ci.cores_ids = ?`
+                terceiroParams.push(corId); 
+            }
+            if(voltagemId){
+                terceiraQuery+= ` AND ci.voltagemId = ?`
+                terceiroParams.push(voltagemId); 
+            }
+            if(dimensoesId){
+                terceiraQuery+= ` AND ci.dimensoesId = ?`
+                terceiroParams.push(dimensoesId);
+            }
+            if(pesosId){
+                terceiraQuery+= ` AND ci.pesosId = ?`
+                terceiroParams.push(pesosId);
+            }
+            if(generoId){
+                terceiraQuery+= ` AND ci.generoId = ?`
+                terceiroParams.push(generoId);
+            }
+            if(estampasId){
+                terceiraQuery+= ` AND ci.estampasId = ?`
+                terceiroParams.push(estampasId); 
+            }
+            if(tamanhosId){
+                terceiraQuery+= ` AND ci.tamanhosId = ?`
+                terceiroParams.push(tamanhosId); 
+            }
+            if(materiaisId){
+                terceiraQuery+= ` AND ci.materiaisId = ?` 
+                terceiroParams.push(materiaisId);
+            }
+
+
+            const [resultado] = await db.query(terceiraQuery,terceiroParams);
             
-            console.log(`resultado do insert` , resultado);
             itemSalvo = resultado.insertId;
-            console.log(`Item salvo é`,itemSalvo);
+            console.log(`item salvo é`,itemSalvo);
+            console.log(`materiais id é `,materiaisId);
+
+            if(corId){
+                await db.query(`INSERT INTO itens_salvos_cores (item_salvo_id, cor_id)
+                    VALUES (?, ?)`,[itemSalvo,corId]);
+            }
             
-            await db.query(`INSERT INTO itens_salvos_cores (item_salvo_id, cor_id)
-VALUES (?, ?)`,[itemSalvo,corId]);
-
-            await db.query(`INSERT INTO itens_salvos_voltagens (item_salvo_id, voltagem_id)
-VALUES (?, ?)`,[itemSalvo,voltagemId])
-
-            await db.query(`INSERT INTO itens_salvos_dimensoes (item_salvo_id, dimensao_id)
+            if(voltagemId){
+                await db.query(`INSERT INTO itens_salvos_voltagens (item_salvo_id, voltagem_id)
+                    VALUES (?, ?)`,[itemSalvo,voltagemId])
+            }
+            if(materiaisId){
+                await db.query(`INSERT INTO itens_salvos_materiais (item_salvo_id, material_id)
+                    VALUES (?, ?)`,[itemSalvo,materiaisId]);
+            }
+            
+            if(dimensoesId){
+                await db.query(`INSERT INTO itens_salvos_dimensoes (item_salvo_id, dimensao_id)
 VALUES (?, ?)`,[itemSalvo,dimensoesId]);
-
-            await db.query(`INSERT INTO itens_salvos_tamanhos (item_salvo_id, tamanho_id)
+            }
+            
+            if(tamanhosId){
+                await db.query(`INSERT INTO itens_salvos_tamanhos (item_salvo_id, tamanho_id)
     VALUES (?, ?)`,[itemSalvo,tamanhosId]);
-    await db.query(`INSERT INTO itens_salvos_pesos (item_salvo_id, peso_id)
+            }
+            
+            if(pesosId){
+                await db.query(`INSERT INTO itens_salvos_pesos (item_salvo_id, peso_id)
         VALUES (?, ?)`,[itemSalvo,pesosId]);
-        await db.query(`INSERT INTO itens_salvos_materiais (item_salvo_id, material_id)
-VALUES (?, ?)`,[itemSalvo,materiaisId]);
-await db.query(`INSERT INTO itens_salvos_genero (item_salvo_id, genero_id)
-    VALUES (?, ?)`,[itemSalvo,generoId]);
-    await db.query(`INSERT INTO itens_salvos_estampas (item_salvo_id, estampa_id)
-        VALUES (?, ?)`,[itemSalvo,estampasId]);
+            }
+    
+            if(generoId){
+                await db.query(`INSERT INTO itens_salvos_genero (item_salvo_id, genero_id)
+                VALUES (?, ?)`,[itemSalvo,generoId]);
+            }
+            if(estampasId){
+                await db.query(`INSERT INTO itens_salvos_estampas (item_salvo_id, estampa_id)
+                    VALUES (?, ?)`,[itemSalvo,estampasId]);
+            }
+                
 
             
             if (resultado.affectedRows === 0) {
@@ -1230,12 +1521,151 @@ await db.query(`INSERT INTO itens_salvos_genero (item_salvo_id, genero_id)
     
 })
 
+app.put("/itens-salvos/:itemId", autenticarToken, async (req,res) => {
+    const {itemId} = req.params;
+
+    const userId = req.usuarioId
+    
+    const {quantidade, corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId} = req.body;
+    console.log(req.body);
+    try{
+        const params = [Number(quantidade)];
+        let query = `UPDATE itens_salvos 
+            SET quantidade = ? 
+            WHERE 1=1`
+        if(userId){
+            query += ` AND usuario_id = ?`
+            params.push(userId);
+        }
+        if(itemId){
+            query += ` AND id = ?`
+            params.push(itemId);
+        }
+        if(corId){
+            query +=` AND cor_id = ?`
+            params.push(corId);
+        }
+        if(voltagemId){
+            query += ` AND voltagem_id = ?`
+            params.push(voltagemId);
+        }
+
+        if(dimensoesId){
+            query +=` AND dimensoes_id = ?`
+            params.push(corId);
+        }
+        if(pesosId){
+            query +=` AND pesos_id = ?`
+            params.push(corId);
+        }
+        if(generoId){
+            query +=` AND genero_id = ?`
+            params.push(corId);
+        }
+        if(estampasId){
+            query +=` AND estampas_id = ?`
+            params.push(corId);
+        }
+        if(tamanhosId){
+            query +=` AND tamanhos_id = ?`
+            params.push(corId);
+        }
+        if(materiaisId){
+            query +=` AND materiais_id = ?`
+            params.push(corId);
+        }
+
+        await db.query(query,params);
+        
+        if(corId) {
+            
+            await db.query(`UPDATE itens_salvos_cores SET cor_id = ? where item_salvo_id = ? `,[corId,itemId]);
+        }
+        if(voltagemId) {
+            await db.query(`UPDATE itens_salvos_voltagens SET voltagem_id = ? where item_salvo_id = ?`,[voltagemId,itemId]);
+        }
+        if(dimensoesId) {
+            await db.query(`UPDATE itens_salvos_dimensoes SET dimensao_id = ? where item_salvo_id = ?`,[dimensoesId,itemId]);
+        }
+        if(estampasId) {
+            await db.query(`UPDATE itens_salvos_estampas SET estampa_id = ? where item_salvo_id = ?`,[estampasId,itemId]);
+        }
+        if(generoId) {
+            await db.query(`UPDATE itens_salvos_generos SET genero_id = ? where item_salvo_id = ?`,[generoId,itemId]);
+        }
+        if(materiaisId) {
+            await db.query(`UPDATE itens_salvos_materiais SET material_id = ? where item_salvo_id = ?`,[materiaisId,itemId]);
+        }
+        if(pesosId) {
+            await db.query(`UPDATE itens_salvos_pesos SET peso_id = ? where item_salvo_id = ? `,[pesosId,itemId]);
+        }
+        if(tamanhosId) {
+            await db.query(`UPDATE itens_salvos_tamanhos SET tamanho_id = ? where item_salvo_id = ?`,[tamanhosId,itemId]);
+        }
+
+        return res.status(200).json({message:"Produto atualizado com sucesso"});
+     
+    }
+    catch(err){
+        
+        console.error("Não foi possivel atualizar o item");
+        return res.status(500).json({message:"Erro interno do servidor"});
+    }
+}  
+)
+
 app.delete("/itens-salvos",autenticarToken, async (req,res) => {
-    const {produtoId} = req.body
+    const {produtoId, corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId} = req.body
     const userId = req.usuarioId
     console.log(`Produto id é:`,produtoId, userId);
     try{
-        await db.query("DELETE FROM itens_salvos where produto_id = ? and usuario_id = ?",[produtoId,userId]);
+        const params = [];
+        let query =`DELETE FROM itens_salvos where 1=1`;
+        
+        if(produtoId){
+            query+= ` AND produto_id = ?`
+            params.push(produtoId);
+        }
+        if(userId){
+            query += ` AND usuario_id = ?`
+            params.push(userId);
+        }
+        if(corId){
+            query += ` AND cor_id = ?`
+            params.push(corId);
+        }
+        if(voltagemId){
+            query += ` AND voltagem_id = ?`
+            params.push(voltagemId);
+        }
+        if(dimensoesId){
+            query += ` AND dimensoes_id = ?`
+            params.push(dimensoesId);
+        }
+        if(pesosId){
+            query += ` AND pesos_id = ?`
+            params.push(pesosId);
+        }
+        if(generoId){
+            query += ` AND genero_id = ?`
+            params.push(generoId);
+        }
+        if(estampasId){
+            query += ` AND estampas_id = ?`
+            params.push(estampasId);
+        }
+        if(tamanhosId){
+            query += ` AND tamanhos_id = ?`
+            params.push(tamanhosId);
+        }
+        if(materiaisId){
+            query += ` AND materiais_id = ?`
+            params.push(materiaisId);
+        }
+
+        await db.query(query,params);
+
+
         res.status(200).json({message:"O produto foi deletado com sucesso"});
     }
     catch(err){

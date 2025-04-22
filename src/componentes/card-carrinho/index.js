@@ -1,7 +1,7 @@
 import { useCarrinho } from '../../context/carrinhoContext';
 import './styles.css'
 import axios from 'axios';
-function CardCarrinho({item,precoTotal,precoTotalPix,adicionarItemSalvo,mostrarModalAlterar,fetchItemSelecionado}){
+function CardCarrinho({item,precoTotal,precoTotalPix,adicionarItemSalvo,mostrarModalAlterar,fetchItemSelecionado,carregarItensSalvos}){
     const {editarQuantidadeItemCarrinho,carrinhoItens,excluirItemCarrinho} = useCarrinho();
 
 
@@ -25,17 +25,21 @@ function CardCarrinho({item,precoTotal,precoTotalPix,adicionarItemSalvo,mostrarM
                     <img src={item.imagem_produto} className="imagem-produto-pagina-carrinho"/>
                     <div className="container-texto-botoes">
                     <p>{item.produto_nome}</p>
-                    <p>Cor:{item.cores}</p>
+                    <div>
+                    <p>{item.cores ? `Cor:`+ item.cores : ""}</p>
+                    <p>{item.materiais ? `Material:` + item.materiais : ""}</p>
+                    </div>
+                     
                     <div className="container-botoes-excluir-salvar-altera">
-                        <p style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}} onClick={() => excluirItemCarrinho(item.id)}>Excluir</p>
-                        <p onClick={() => {adicionarItemSalvo(item.produto_id,1); excluirItemCarrinho(item.id)}} style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}}>Salvar</p>
+                        <p style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}} onClick={() => excluirItemCarrinho(item.produto_id,item.cores_ids,item.voltagem_ids,item.dimensoes_ids,item.pesos_ids,item.generos_ids,item.estampas_ids,item.tamanhos_ids,item.materiais_ids)}>Excluir</p>
+                        <p onClick={() => {adicionarItemSalvo(item.produto_id,item.cores_ids,item.voltagem_ids,item.dimensoes_ids,item.pesos_ids,item.generos_ids,item.estampas_ids,item.tamanhos_ids,item.materiais_ids); excluirItemCarrinho(item.produto_id,item.cores_ids,item.voltagem_ids,item.dimensoes_ids,item.pesos_ids,item.generos_ids,item.estampas_ids,item.tamanhos_ids,item.materiais_ids)}} style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}}>Salvar</p>
                         <p onClick = {() => {mostrarModalAlterar();fetchItemSelecionado(item.produto_id, item.quantidade)}} style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}}>Alterar</p>
                         <p style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}}>Comprar Agora</p>
                         </div>
                     
                     </div>
                     <div className="container-botao-alterar-quantidade">
-                    <img src={item.quantidade === 1 ? "/images/minus-grey.png" : "/images/minus.png"} className="botao-menos-quantidade" onClick={() => editarQuantidadeItemCarrinho(item.quantidade - 1, item.id)}/>
+                    <img src={item.quantidade === 1 ? "/images/minus-grey.png" : "/images/minus.png"} className="botao-menos-quantidade" onClick={() => editarQuantidadeItemCarrinho(item.quantidade - 1, item.id,item.cores_ids)}/>
                     <p>{item.quantidade}</p>
                     <img src = "/images/plus.png" className="botao-mais-quantidade" onClick={() => editarQuantidadeItemCarrinho(item.quantidade + 1, item.id)}/>
                     </div>

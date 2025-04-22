@@ -94,10 +94,19 @@ const handleSelecionarAlterar = () =>{
         }
     }
 
-    const excluirItemSalvo = async (item) => {
+    const excluirItemSalvo = async (item, corId = null, voltagemId = null, dimensoesId = null, pesosId = null, generoId = null, estampasId = null, tamanhosId = null, materiaisId = null) => {
         try {
             await axios.delete("http://localhost:5000/itens-salvos", {
-                data: { produtoId: item },
+                data: { produtoId: item,
+                    corId,
+                    voltagemId,
+                    dimensoesId,
+                    pesosId,
+                    generoId,
+                    estampasId,
+                    tamanhosId,
+                    materiaisId
+                },
                 withCredentials: true
             });
             await carregarItensSalvos();
@@ -105,6 +114,28 @@ const handleSelecionarAlterar = () =>{
             console.error("Não foi possível excluir o item salvo");
         }
     };
+
+
+    const atualizarItemSalvo = async (quantidade,itemId,corId = null,voltagemId = null, dimensoesId = null, pesosId = null,generoId = null, estampasId = null,tamanhosId = null, materiaisId = null) => {
+        try {
+            await axios.put(`http://localhost:5000/itens-salvos/${itemId}`,{
+                quantidade,
+                corId,
+                voltagemId,
+                dimensoesId,
+                pesosId,
+                generoId,
+                estampasId,
+                tamanhosId,
+                materiaisId
+            },{withCredentials:true});
+            await carregarItensSalvos();
+        } catch (err) {
+            console.error("Não foi possível excluir o item salvo");
+        }
+    };
+
+
 
     const handleAtualizarProdutoCarrinho = async () => {
         try{
@@ -122,7 +153,7 @@ const handleSelecionarAlterar = () =>{
 
     useEffect(() => {
         carregarItensSalvos();
-    },[])
+    },[itensSalvos])
 
     const calcularPrecoTotal = (item) => {
         return carrinhoItens.reduce((soma,item) => {
@@ -157,15 +188,14 @@ const handleSelecionarAlterar = () =>{
             
             {carrinhoItens.length > 0 ? carrinhoItens.map((item) => {
                 let precoTotal = parseFloat(item.quantidade) * parseFloat(item.preco)
-                console.log(item.quantidade);
-                console.log(item.preco);
+                
                 precoTotal = precoTotal.toFixed(2);
-                console.log(precoTotal);
+                
                 let precoTotalPix = parseFloat(item.quantidade) * parseFloat(item.preco_pix);
 
                 return (
                     <div className="card-carrinho">
-                    <CardCarrinho  fetchItemSelecionado={fetchItemSelecionado} mostrarModalAlterar={handleMostrarModalAlterar} item = {item} precoTotal={precoTotal} precoTotalPix={precoTotalPix} setItensSalvos={setItensSalvos} carregarItensSalvos={carregarItensSalvos} adicionarItemSalvo={adicionarItemSalvo}/>
+                    <CardCarrinho fetchItemSelecionado={fetchItemSelecionado} mostrarModalAlterar={handleMostrarModalAlterar} item = {item} precoTotal={precoTotal} precoTotalPix={precoTotalPix} setItensSalvos={setItensSalvos} carregarItensSalvos={carregarItensSalvos} adicionarItemSalvo={adicionarItemSalvo}/>
                     
                     <div className="container-preco-frete">
                         <p>Frete</p>
@@ -228,15 +258,14 @@ const handleSelecionarAlterar = () =>{
                 <div className="container-item-salvo">
                     {itensSalvos?.map((item) => {
                         let precoTotal = parseFloat(item.quantidade) * parseFloat(item.preco)
-                        console.log(item.quantidade);
-                        console.log(item.preco);
+                        
                         precoTotal = precoTotal.toFixed(2);
-                        console.log(precoTotal);
+
                         let precoTotalPix = parseFloat(item.quantidade) * parseFloat(item.preco);
                         return (
                             
                         
-                        <CardProdutoSalvo item = {item} obterCarrinho={obterCarrinho} precoTotal={precoTotal} excluirItemSalvo={excluirItemSalvo} precoTotalPix={precoTotalPix} setItensSalvos={setItensSalvos} carregarItensSalvos={carregarItensSalvos} adicionarItemSalvo={adicionarItemSalvo}/>
+                        <CardProdutoSalvo atualizarItemSalvo={atualizarItemSalvo} item = {item} obterCarrinho={obterCarrinho} precoTotal={precoTotal} excluirItemSalvo={excluirItemSalvo} precoTotalPix={precoTotalPix} setItensSalvos={setItensSalvos} carregarItensSalvos={carregarItensSalvos} adicionarItemSalvo={adicionarItemSalvo}/>
                     )})}
                     </div>
                         )}
