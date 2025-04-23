@@ -35,26 +35,15 @@ function PaginaProduto(){
     const [pesoSelecionado, setPesoSelecionado] = useState(null);
     const [dimensoesSelecionada, setDimensoesSelecionada] = useState(null);
 
-    const atributos = [
-        { chave: 'cor', nome: 'Cor' },
-        { chave: 'voltagem', nome: 'Voltagem' },
-        { chave: 'dimensao', nome: 'Dimensões' },
-        { chave: 'peso', nome: 'Pesos' },
-        { chave: 'genero', nome: 'Gênero' },
-        { chave: 'estampa', nome: 'Estampas' },
-        { chave: 'tamanho', nome: 'Tamanhos' },
-        { chave: 'material', nome: 'Materiais' },
-      ];
-
-      const [selecoes, setSelecoes] = useState({
+    const [selecoes, setSelecoes] = useState({
         cor: null,
+        materiais: null,
         voltagem: null,
-        dimensao: null,
-        peso: null,
-        genero: null,
-        estampa: null,
+        generos: null,
         tamanho: null,
-        material: null,
+        estampas: null,
+        pesos: null,
+        dimensoes: null,
       });
 
       const [hover, setHover] = useState({
@@ -124,6 +113,18 @@ function PaginaProduto(){
             setEstampaSelecionada(produtoBuscado?.estampa?.[0].id);
             setPesoSelecionado(produtoBuscado?.peso?.[0].id);
             setDimensoesSelecionada(produtoBuscado?.dimensoes?.[0].id);
+            setSelecoes({
+                cor: produtoBuscado?.cor?.[0]?.valor,
+                materiais: produtoBuscado?.materiais?.[0]?.valor,   
+                voltagem: produtoBuscado.voltagens?.[0]?.valor,
+                generos: produtoBuscado.generos?.[0]?.valor,
+                tamanho: produtoBuscado.tamanhos?.[0]?.valor,
+                estampas: produtoBuscado.estampas?.[0]?.valor,
+                pesos: produtoBuscado.pesos?.[0]?.valor,
+                dimensoes: produtoBuscado.dimensoes?.[0]?.valor,
+              });
+              console.log(produtoBuscado?.materiais?.[0]?.valor)
+              console.log(produtoBuscado?.cor?.[0]?.valor)
           } catch (err) {
             console.error("Erro ao buscar produto", err);
           }
@@ -268,8 +269,7 @@ function PaginaProduto(){
                                                 }}
                                                 onMouseEnter={() => handleHover(nome,item.valor)}
                                                 onMouseLeave={() => handleHover(nome,null)}
-                                                className="card-valor-cor"
-                                            >
+                                                className={`card-valor-cor ${selecoes[nome] === item.valor ? "selecionado" : ""}`}                                            >
                                                 <p>{item.valor}</p>
                                             </div>
                                             );
@@ -307,7 +307,7 @@ function PaginaProduto(){
                             
                         <div className="container-botoes">
                         <button className="botao-comprar-agora"><img src="/images/shopping-bag.png" className="imagem-bolsa"/>Comprar agora</button>
-                        <button className="botao-adicionar-carrinho" onClick={() => {console.log(`é`,produto.materiais[0].id);adicionarAoCarrinho(id,quantidadeSelecionada,corSelecionada,voltagemSelecionada,dimensoesSelecionada,pesoSelecionado,generoSelecionado,estampaSelecionada,tamanhoSelecionado,materialSelecionado);abrirModalCarrinho() }}><img src="/images/carrinho-de-compras.png" className="imagem-carrinho-botao"/>Adicionar ao carrinho</button>
+                        <button className="botao-adicionar-carrinho" onClick={() => {console.log(`é`,produto.materiais[0]?.id);adicionarAoCarrinho(id,quantidadeSelecionada,corSelecionada,voltagemSelecionada,dimensoesSelecionada,pesoSelecionado,generoSelecionado,estampaSelecionada,tamanhoSelecionado,materialSelecionado);abrirModalCarrinho() }}><img src="/images/carrinho-de-compras.png" className="imagem-carrinho-botao"/>Adicionar ao carrinho</button>
                         <div className="card-cep">
                             <div className="container-imagem-cep">
                             <img src= "/images/localizacao.png" className="icone-localizacao-card-cep"/>

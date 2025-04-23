@@ -33,7 +33,7 @@ function CardCarrinho({item,precoTotal,precoTotalPix,adicionarItemSalvo,mostrarM
                     <div className="container-botoes-excluir-salvar-altera">
                         <p style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}} onClick={() => excluirItemCarrinho(item.produto_id,item.cores_ids,item.voltagem_ids,item.dimensoes_ids,item.pesos_ids,item.generos_ids,item.estampas_ids,item.tamanhos_ids,item.materiais_ids)}>Excluir</p>
                         <p onClick={() => {adicionarItemSalvo(item.produto_id,item.cores_ids,item.voltagem_ids,item.dimensoes_ids,item.pesos_ids,item.generos_ids,item.estampas_ids,item.tamanhos_ids,item.materiais_ids); excluirItemCarrinho(item.produto_id,item.cores_ids,item.voltagem_ids,item.dimensoes_ids,item.pesos_ids,item.generos_ids,item.estampas_ids,item.tamanhos_ids,item.materiais_ids)}} style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}}>Salvar</p>
-                        <p onClick = {() => {mostrarModalAlterar();fetchItemSelecionado(item.produto_id, item.quantidade)}} style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}}>Alterar</p>
+                        <p onClick = {() => {mostrarModalAlterar();fetchItemSelecionado(item.produto_id, item.quantidade,item.cores_ids,item.voltagem_ids,item.dimensoes_ids,item.pesos_ids,item.generos_ids,item.estampas_ids,item.tamanhos_ids,item.materiais_ids)}} style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}}>Alterar</p>
                         <p style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}}>Comprar Agora</p>
                         </div>
                     

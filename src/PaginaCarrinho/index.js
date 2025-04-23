@@ -26,14 +26,56 @@ function PaginaCarrinho() {
     const [itemSelecionado, setItemSelecionado] = useState([]);
     const [nomeValor, setNomeValor] = useState("");    
     const [mostrarInputAtributo, setMostrarInputAtributo] = useState("");
+    const [atributoSelecionado, setAtributoSelecionado] = useState();
+    const [selecoes, setSelecoes] = useState({
+        cor: null,
+        voltagem: null,
+        dimensao: null,
+        peso: null,
+        genero: null,
+        estampa: null,
+        tamanho: null,
+        material: null,
+      });
+      const mapeamentoAtributos = {
+        cor: "cores",
+        voltagem: "voltagens",
+        dimensao: "dimensoes",
+        peso: "pesos",
+        genero: "generos",
+        estampa: "estampas",
+        tamanho: "tamanhos",
+        material: "materiais",
+      };
 
     const handleMostrarInputAtributo = (nome) => {
         setMostrarInputAtributo(nome);
     }
-    const fetchItemSelecionado =async (itemId,quantidade) => {
-        const resposta = await axios.get(`http://localhost:5000/produto/${itemId}`)
+    const fetchItemSelecionado =async (itemId,quantidade,corId = null,voltagemId = null,dimensoesId = null,pesosId = null,generoId = null,estampasId = null,tamanhosId = null,materiaisId = null) => {
+        const resposta = await axios.get(
+            `http://localhost:5000/produto/${itemId}`,
+            {
+              params: {
+                corId,
+                voltagemId,
+                dimensoesId,
+                pesosId,
+                generoId,
+                estampasId,
+                tamanhosId,
+                materiaisId
+              },
+              withCredentials: true
+            }
+          );
         setItemSelecionado(resposta.data.produto);
-        setNomeValor(resposta.data.produto.cores?.[0]?.valor || "Escolha uma opção");
+
+
+        
+        const itemNoCarrinho = carrinhoItens.find((item) => {return item.id === resposta.data.produto.cart_item_id});
+        console.log(itemNoCarrinho);
+
+        setNomeValor(itemNoCarrinho?.cores);
         setQuantidadeSelecionada(quantidade);
     }
 
@@ -135,18 +177,6 @@ const handleSelecionarAlterar = () =>{
         }
     };
 
-
-
-    const handleAtualizarProdutoCarrinho = async () => {
-        try{
-            await axios.put()
-        }
-        catch(err){
-            console.error("Erro ao atualizar o produto do carrinho");
-        }
-    }
-    
-
     useEffect(() => {
         obterCarrinho();
     },[carrinhoItens]);
@@ -154,6 +184,28 @@ const handleSelecionarAlterar = () =>{
     useEffect(() => {
         carregarItensSalvos();
     },[itensSalvos])
+
+    const atributosSuportados = [
+    "cor",
+    "voltagem",
+    "generos",
+    "tamanho",
+    "materiais",
+    "estampas",
+    "pesos",
+    "dimensoes",
+  ];
+    useEffect(() => {
+        if (itemSelecionado) {
+          const primeiroAtributo = Object.keys(itemSelecionado).find((chave) =>
+            atributosSuportados.includes(chave)
+          );
+          if (primeiroAtributo) {
+            setMostrarInputAtributo(primeiroAtributo);
+            setAtributoSelecionado(primeiroAtributo);
+          }
+        }
+      }, [itemSelecionado]);
 
     const calcularPrecoTotal = (item) => {
         return carrinhoItens.reduce((soma,item) => {
@@ -300,6 +352,7 @@ const handleSelecionarAlterar = () =>{
                 <img onClick={() => handleMostrarModalAlterar()}src = "/images/close.png" className= "imagem-fechar-modal" />
                 </div>
                 <p className="titulo-alterar" >Escolha os detalhes deste produto</p>
+                <div className="container-atributos-suportados">
                     {Object.entries(itemSelecionado).map(([nome,opcoes]) => {
                          const atributosSuportados = [
                             "cor",
@@ -311,10 +364,37 @@ const handleSelecionarAlterar = () =>{
                             "pesos",
                             "dimensoes",
                           ];
+                          const nomeMapeado = {
+                            cor: "cores",
+                            materiais: "materiais",
+                            voltagem: "voltagens",
+                            generos: "generos",
+                            tamanho: "tamanhos",
+                            estampas: "estampas",
+                            pesos: "pesos",
+                            dimensoes: "dimensoes",
+                          };
 
                         if(atributosSuportados.includes(nome)){
+                            const nomeCarrinho = nomeMapeado[nome] || nome;
                             return (
-                                <div>
+                                <div className={`card-atributo-suportado ${atributoSelecionado === nome ? "selecionado" : ""}`} onClick={() => { const itemNoCarrinho = carrinhoItens.find((item) => {return item.id === itemSelecionado.cart_item_id}
+                                )
+                                
+                                if(itemNoCarrinho){
+                                    if(nomeCarrinho === "dimensoes"){
+                                        const larguras = itemNoCarrinho.larguras
+                                        const alturas = itemNoCarrinho.alturas
+                                        const comprimentos = itemNoCarrinho.comprimentos;
+                                        setNomeValor(`${larguras} x ${alturas} x ${comprimentos}`);
+                                    }
+                                    else{
+                                        setNomeValor(itemNoCarrinho[nomeCarrinho]);
+                                        
+                                    }
+                                    setAtributoSelecionado(nome);
+                                    
+                                }}}>
                                     <p onClick={() => {handleMostrarInputAtributo(nome);
                                         const itemNoCarrinho = carrinhoItens.find((item) => {return item.produto_id === itemSelecionado.produto_id});
                                     if(itemNoCarrinho){
@@ -327,6 +407,7 @@ const handleSelecionarAlterar = () =>{
                     })
                         
                     }
+                    </div>
                     {Object.entries(itemSelecionado).map(([nome,opcoes]) => {
                          const atributosSuportados = [
                             "cor",
@@ -339,9 +420,10 @@ const handleSelecionarAlterar = () =>{
                             "dimensoes",
                           ];
 
+
                         if(atributosSuportados.includes(nome) && mostrarInputAtributo === nome){
                             return (
-                                <InputProdutoAlterar nome={nome} mostrarOpcoes={mostrarOpcoes} setMostrarOpcoes = {setMostrarOpcoes} setMostrarOpcoesSegundoInput={setMostrarOpcoesSegundoInput} selecionarNomeValor = {selecionarNomeValor} nomeValor={nomeValor} itemSelecionado={itemSelecionado}/>)
+                                <InputProdutoAlterar setNomeValor={setNomeValor} nome={nome} mostrarOpcoes={mostrarOpcoes} setMostrarOpcoes = {setMostrarOpcoes} setMostrarOpcoesSegundoInput={setMostrarOpcoesSegundoInput} selecionarNomeValor = {selecionarNomeValor} nomeValor={nomeValor} itemSelecionado={itemSelecionado}/>)
                         }
                     })
                         
@@ -364,7 +446,9 @@ const handleSelecionarAlterar = () =>{
                             </div>
                         )}
                                             </div>          
-                    <button onClick={() => {handleAtualizarProdutoCarrinho()}}className="botao-atualizar-alterar">Atualizar</button>
+                    <button onClick={() => {
+                       const encontrado = carrinhoItens.find((item) => item.id === itemSelecionado.cart_item_id);
+                       console.log(`encontrado é`,encontrado);editarQuantidadeItemCarrinho(quantidadeSelecionada,)}}className="botao-atualizar-alterar">Atualizar</button>
                 </div>
             </div>
         </div>)}

@@ -342,3 +342,29 @@
     display:flex;
     justify-content: end;
 }
+
+.container-atributos-suportados{
+    margin-top:5px;
+    display:flex;
+    gap:10px;
+}
+
+.card-atributo-suportado{
+    width:100%;
+    padding:5px;
+    box-sizing: border-box;
+    border: 1px solid #BFBFBF;
+    border-radius: 6px;
+}
+
+.card-atributo-suportado:hover{
+    border:2px solid #111111;
+    background-color: #111111;
+    color:white;
+}
+
+.card-atributo-suportado.selecionado {
+    background-color: #111111;
+    border:2px solid #111111;
+    color: white;
+  }

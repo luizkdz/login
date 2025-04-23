@@ -559,9 +559,10 @@ app.get("/sugestoes-produto/:nomeProduto", async (req,res) => {
 
 app.get("/produto/:id", async (req, res) => {
     const {id} = req.params;
+    const {corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId } = req.query;
+    const params = [];
     try {
-        const [produto] = await db.query(`
-            SELECT 
+    let query = `SELECT 
     p.id AS produto_id,
     p.nome AS produto_nome,
     p.descricao AS produto_descricao,
@@ -571,12 +572,51 @@ app.get("/produto/:id", async (req, res) => {
     p.preco_pix AS produto_preco_pix,
     p.desconto AS produto_desconto,
     p.estoque AS produto_estoque,
-    c.nome AS categoria_nome
-    
+    c.nome AS categoria_nome,
+    ci.id as cart_item_id
     FROM produtos p
     LEFT JOIN categorias c ON p.categoria_id = c.id
-    WHERE p.id = ?;`, [id]);
+    left join cart_items ci on p.id = ci.produto_id WHERE 1=1`
+        
+    if(id){
+        query += ` AND p.id = ?`
+        params.push(id);
+    }
+    if(corId){
+        query+=` AND ci.cores_ids = ?`
+        params.push(corId);
+    }
+    if(voltagemId){
+        query+=` AND ci.voltagemId = ?`
+        params.push(voltagemId);
+    }
+    if(dimensoesId){
+        query+=` AND ci.dimensoesId = ?`
+        params.push(dimensoesId);
+    }
+    if(pesosId){
+        query+=` AND ci.pesosId = ?`
+        params.push(pesosId);
+    }
+    if(generoId){
+        query+=` AND ci.generoId = ?`
+        params.push(generoId);
+    }
+    if(estampasId){
+        query+=` AND ci.estampasId = ?`
+        params.push(estampasId);
+    }
+    if(tamanhosId){
+        query+=` AND ci.tamanhosId = ?`
+        params.push(tamanhosId);
+    }
+    if(materiaisId){
+        query+=` AND ci.materiaisId = ?`
+        params.push(materiaisId);
+    }
 
+    const [produto] = await db.query(query,params);
+    
     const [imagens] = await db.query("Select url from imagens_produto where produto_id = ?",[id]);
 
     const [avaliacoes] = await db.query("select nota,comentario,usuario_id from avaliacoes where produto_id = ?",[id]);
