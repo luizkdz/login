@@ -24,29 +24,31 @@ function PaginaCarrinho() {
     const [valorQuantidade, setValorQuantidade] = useState("mais");
     const [mostrarModalAlterar, setMostrarModalAlterar] = useState(false);
     const [itemSelecionado, setItemSelecionado] = useState([]);
-    const [nomeValor, setNomeValor] = useState("");    
+    const [nomeValor, setNomeValor] = useState("Selecione uma opção");    
     const [mostrarInputAtributo, setMostrarInputAtributo] = useState("");
     const [atributoSelecionado, setAtributoSelecionado] = useState();
-    const [selecoes, setSelecoes] = useState({
-        cor: null,
-        voltagem: null,
-        dimensao: null,
-        peso: null,
-        genero: null,
-        estampa: null,
-        tamanho: null,
-        material: null,
-      });
-      const mapeamentoAtributos = {
-        cor: "cores",
-        voltagem: "voltagens",
-        dimensao: "dimensoes",
-        peso: "pesos",
-        genero: "generos",
-        estampa: "estampas",
-        tamanho: "tamanhos",
-        material: "materiais",
+    const [corSelecionada,setCorSelecionada] = useState("");
+    const [materialSelecionado,setMaterialSelecionado] = useState("");
+    const [voltagemSelecionada,setVoltagemSelecionada] = useState("");
+    const [generoSelecionado,setGeneroSelecionado] = useState("");
+    const [tamanhoSelecionado,setTamanhoSelecionado] = useState("");
+    const [estampaSelecionada,setEstampaSelecionada] = useState("");
+    const [pesoSelecionado,setPesoSelecionado] = useState("");
+    const [dimensoesSelecionada,setDimensoesSelecionada] = useState("");
+    const [produtoAlterar, setProdutoAlterar] = useState("");
+    const estadosSelecionados = {
+        cor: corSelecionada,
+        material: materialSelecionado,
+        voltagem: voltagemSelecionada,
+        genero: generoSelecionado,
+        tamanho: tamanhoSelecionado,
+        estampa: estampaSelecionada,
+        peso: pesoSelecionado,
+        dimensoes: dimensoesSelecionada
       };
+
+    let itemSalvo;
+    let itemSalvoAlterar;
 
     const handleMostrarInputAtributo = (nome) => {
         setMostrarInputAtributo(nome);
@@ -68,16 +70,68 @@ function PaginaCarrinho() {
               withCredentials: true
             }
           );
+        console.log(`data.produto e`,resposta.data.produto);
         setItemSelecionado(resposta.data.produto);
 
-
-        
         const itemNoCarrinho = carrinhoItens.find((item) => {return item.id === resposta.data.produto.cart_item_id});
-        console.log(itemNoCarrinho);
+        console.log(`itemNoCarrinho é`,itemNoCarrinho);
+        setCorSelecionada(itemNoCarrinho?.cores_ids);
+        setVoltagemSelecionada(itemNoCarrinho?.voltagem_ids);
+        setMaterialSelecionado(itemNoCarrinho?.materiais_ids);
+        setGeneroSelecionado(itemNoCarrinho?.generos_ids);
+        setTamanhoSelecionado(itemNoCarrinho?.tamanhos_ids);
+        setEstampaSelecionada(itemNoCarrinho?.estampas_ids);
+        setPesoSelecionado(itemNoCarrinho?.pesos_ids);
+        setDimensoesSelecionada(itemNoCarrinho?.dimensoes_ids);
 
-        setNomeValor(itemNoCarrinho?.cores);
+        setNomeValor("Escolha uma opção");
+    
         setQuantidadeSelecionada(quantidade);
     }
+
+    const fetchItemSalvo = async (itemId,quantidade,corId = null,voltagemId = null,dimensoesId = null,pesosId = null,generoId = null,estampasId = null,tamanhosId = null,materiaisId = null) => {
+        const segundaResposta = await axios.get(
+            `http://localhost:5000/produto/${itemId}`,
+            {
+              params: {
+                corId,
+                voltagemId,
+                dimensoesId,
+                pesosId,
+                generoId,
+                estampasId,
+                tamanhosId,
+                materiaisId
+              },
+              withCredentials: true
+            }
+          );
+          console.log(`segundarespostadataprodutoe`,segundaResposta.data.produto);
+          setItemSelecionado(segundaResposta.data.produto);
+
+        itemSalvo = await axios.get(`http://localhost:5000/itens-salvos`,{
+              withCredentials: true})
+
+        itemSalvoAlterar = itemSalvo.data.find((item) => {return item.id === segundaResposta.data.produto.produto_salvo.produto_salvo_id});
+        console.log(`itemSalvoAlterar é`,itemSalvoAlterar);
+        setProdutoAlterar(itemSalvoAlterar);
+        setCorSelecionada(itemSalvoAlterar?.cor_id);
+        setVoltagemSelecionada(itemSalvoAlterar?.voltagem_id);
+        setMaterialSelecionado(itemSalvoAlterar?.material_id);
+        setGeneroSelecionado(itemSalvoAlterar?.generos_id);
+        setTamanhoSelecionado(itemSalvoAlterar?.tamanho_id);
+        setEstampaSelecionada(itemSalvoAlterar?.estampas_id);
+        setPesoSelecionado(itemSalvoAlterar?.peso_id);
+        setDimensoesSelecionada(itemSalvoAlterar?.dimensoes_id)
+
+        console.log(`isaé`,itemSalvoAlterar?.cor_id)
+
+
+        setNomeValor("Escolha uma opção");
+
+        setQuantidadeSelecionada(quantidade);
+    }
+
 
     const handleMostrarModalAlterar = () => {
         setMostrarModalAlterar(!mostrarModalAlterar);
@@ -94,10 +148,6 @@ function PaginaCarrinho() {
 
 const handleMostrarOpcoesSegundoInput = () => {
     setMostrarOpcoesSegundoInput(!mostrarOpcoesSegundoInput);
-}
-
-const handleSelecionarAlterar = () =>{
-    setSelecionarAlterar(!selecionarAlterar);
 }
 
    const handleMostrarProdutos = () => {
@@ -317,7 +367,7 @@ const handleSelecionarAlterar = () =>{
                         return (
                             
                         
-                        <CardProdutoSalvo atualizarItemSalvo={atualizarItemSalvo} item = {item} obterCarrinho={obterCarrinho} precoTotal={precoTotal} excluirItemSalvo={excluirItemSalvo} precoTotalPix={precoTotalPix} setItensSalvos={setItensSalvos} carregarItensSalvos={carregarItensSalvos} adicionarItemSalvo={adicionarItemSalvo}/>
+                        <CardProdutoSalvo mostrarModalAlterar={handleMostrarModalAlterar} fetchItemSalvo={fetchItemSalvo} atualizarItemSalvo={atualizarItemSalvo} item = {item} obterCarrinho={obterCarrinho} precoTotal={precoTotal} excluirItemSalvo={excluirItemSalvo} precoTotalPix={precoTotalPix} setItensSalvos={setItensSalvos} carregarItensSalvos={carregarItensSalvos} adicionarItemSalvo={adicionarItemSalvo}/>
                     )})}
                     </div>
                         )}
@@ -340,9 +390,11 @@ const handleSelecionarAlterar = () =>{
                 <div className="imagem-texto-preco-alterar">
                 
             
-                    <img src = {itemSelecionado.imagens?.[0]} className="imagem-produto-alterar"/>
-                    <p style={{fontSize:"20px"}}>{itemSelecionado.produto_nome}</p>
-                    <p style={{fontSize:"24px"}}>R${itemSelecionado.produto_preco}</p>
+                    <img src = {Array.isArray(itemSelecionado.imagens) 
+        ? itemSelecionado.imagens?.[0] 
+        : itemSelecionado.produto_salvo?.imagens || 'caminho/para/imagem/por/defeito.jpg'} className="imagem-produto-alterar"/>
+                    <p style={{fontSize:"20px"}}>{itemSelecionado?.produto_nome ? itemSelecionado?.produto_nome : itemSelecionado.produto_salvo?.produto_nome}</p>
+                    <p style={{fontSize:"24px"}}>R${itemSelecionado?.produto_preco ? itemSelecionado?.produto_preco : itemSelecionado.produto_salvo?.produto_preco}</p>
                     <div className="botao-detalhe-do-produto">
                     <a href="#">Ver detalhe do produto</a>
                     </div>
@@ -374,30 +426,53 @@ const handleSelecionarAlterar = () =>{
                             pesos: "pesos",
                             dimensoes: "dimensoes",
                           };
+                          const nomeMapeadoAlterar = {
+                            cor:"cor_valor",
+                            materiais: "material_valor",
+                            voltagem: "voltagem_valor",
+                            generos: "genero_valor",
+                            tamanho : "tamanho_valor",
+                            estampas: "estampa_valor",
+                            pesos: "peso_valor",
+                            dimensoes: "dimensoes_valor"
+                          }
 
                         if(atributosSuportados.includes(nome)){
                             const nomeCarrinho = nomeMapeado[nome] || nome;
+                            const nomeSalvo = nomeMapeadoAlterar[nome];
                             return (
-                                <div className={`card-atributo-suportado ${atributoSelecionado === nome ? "selecionado" : ""}`} onClick={() => { const itemNoCarrinho = carrinhoItens.find((item) => {return item.id === itemSelecionado.cart_item_id}
-                                )
-                                
+                                <div className={`card-atributo-suportado ${atributoSelecionado === nome ? "selecionado" : ""}`} onClick={() => { setAtributoSelecionado(nome);console.log(itemSelecionado);console.log(`ITEMsALVOALTERAR É`,itemSalvoAlterar);const itemNoCarrinho = carrinhoItens.find((item) => {return item.id === itemSelecionado.cart_item_id
+                                }
+                                );
+                                console.log(`itemNoCarrinho é`,itemNoCarrinho);
+                                console.log(`itemSalvo A`, itemSalvo);
                                 if(itemNoCarrinho){
                                     if(nomeCarrinho === "dimensoes"){
                                         const larguras = itemNoCarrinho.larguras
                                         const alturas = itemNoCarrinho.alturas
-                                        const comprimentos = itemNoCarrinho.comprimentos;
+                                        const comprimentos = itemNoCarrinho.comprimentos
                                         setNomeValor(`${larguras} x ${alturas} x ${comprimentos}`);
                                     }
                                     else{
-                                        setNomeValor(itemNoCarrinho[nomeCarrinho]);
+                                        
+                                        setNomeValor(itemNoCarrinho?.[nomeCarrinho]);
                                         
                                     }
                                     setAtributoSelecionado(nome);
                                     
-                                }}}>
+                                }
+                                else{
+                                    console.log(itemSalvoAlterar);
+                                    console.log(`produto alterar e`,produtoAlterar);
+                                    setNomeValor(produtoAlterar?.[nomeSalvo]);
+                                }
+                                
+                                
+                                
+                                }}>
                                     <p onClick={() => {handleMostrarInputAtributo(nome);
                                         const itemNoCarrinho = carrinhoItens.find((item) => {return item.produto_id === itemSelecionado.produto_id});
-                                    if(itemNoCarrinho){
+                                    if(itemNoCarrinho || itemSalvoAlterar){
                                         const valorSelecionado = itemNoCarrinho[`${nome}Id`];
                                         setNomeValor(valorSelecionado);
                                     }
@@ -422,9 +497,16 @@ const handleSelecionarAlterar = () =>{
 
 
                         if(atributosSuportados.includes(nome) && mostrarInputAtributo === nome){
-                            return (
-                                <InputProdutoAlterar setNomeValor={setNomeValor} nome={nome} mostrarOpcoes={mostrarOpcoes} setMostrarOpcoes = {setMostrarOpcoes} setMostrarOpcoesSegundoInput={setMostrarOpcoesSegundoInput} selecionarNomeValor = {selecionarNomeValor} nomeValor={nomeValor} itemSelecionado={itemSelecionado}/>)
-                        }
+                            
+                            return (<div>
+                                <InputProdutoAlterar setNomeValor={setNomeValor} nome={nome} mostrarOpcoes={mostrarOpcoes} setMostrarOpcoes = {setMostrarOpcoes} setMostrarOpcoesSegundoInput={setMostrarOpcoesSegundoInput} selecionarNomeValor = {selecionarNomeValor} nomeValor={nomeValor} itemSelecionado={itemSelecionado} setCorSelecionada={setCorSelecionada} setMaterialSelecionado = {setMaterialSelecionado} setVoltagemSelecionada = {setVoltagemSelecionada} setGeneroSelecionado = {setGeneroSelecionado} setTamanhoSelecionado = {setTamanhoSelecionado} setEstampaSelecionada={setEstampaSelecionada} setPesoSelecionado={setPesoSelecionado} setDimensoesSelecionada ={setDimensoesSelecionada}/>
+ 
+                                <div>
+                                    
+                                </div>
+                            </div>)
+                                
+                            }
                     })
                         
                     }
@@ -448,7 +530,7 @@ const handleSelecionarAlterar = () =>{
                                             </div>          
                     <button onClick={() => {
                        const encontrado = carrinhoItens.find((item) => item.id === itemSelecionado.cart_item_id);
-                       console.log(`encontrado é`,encontrado);editarQuantidadeItemCarrinho(quantidadeSelecionada,)}}className="botao-atualizar-alterar">Atualizar</button>
+                       console.log(`encontrado é`,encontrado);editarQuantidadeItemCarrinho(quantidadeSelecionada,encontrado.id,corSelecionada,voltagemSelecionada,dimensoesSelecionada,pesoSelecionado,generoSelecionado,estampaSelecionada,tamanhoSelecionado,materialSelecionado,"alterar");handleMostrarModalAlterar()}}className="botao-atualizar-alterar">Atualizar</button>
                 </div>
             </div>
         </div>)}

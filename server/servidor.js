@@ -560,6 +560,8 @@ app.get("/sugestoes-produto/:nomeProduto", async (req,res) => {
 app.get("/produto/:id", async (req, res) => {
     const {id} = req.params;
     const {corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId } = req.query;
+    console.log(`corId é`,corId)
+    console.log(`materiaisId é`,materiaisId);
     const params = [];
     try {
     let query = `SELECT 
@@ -576,14 +578,16 @@ app.get("/produto/:id", async (req, res) => {
     ci.id as cart_item_id
     FROM produtos p
     LEFT JOIN categorias c ON p.categoria_id = c.id
-    left join cart_items ci on p.id = ci.produto_id WHERE 1=1`
+    left join cart_items ci on p.id = ci.produto_id 
+    WHERE 1=1
+    `
         
     if(id){
         query += ` AND p.id = ?`
         params.push(id);
     }
     if(corId){
-        query+=` AND ci.cores_ids = ?`
+        query+=` AND ci.cores_ids = ? `
         params.push(corId);
     }
     if(voltagemId){
@@ -614,8 +618,66 @@ app.get("/produto/:id", async (req, res) => {
         query+=` AND ci.materiaisId = ?`
         params.push(materiaisId);
     }
+    const segundoParams = [];
+    let segundaQuery = `SELECT 
+    p.id AS produto_id,
+    p.nome AS produto_nome,
+    p.descricao AS produto_descricao,
+    p.preco AS produto_preco,
+    p.preco_parcelado AS produto_preco_parcelado,
+    p.parcelas_máximas AS produto_parcelas_máximas,
+    p.preco_pix AS produto_preco_pix,
+    p.desconto AS produto_desconto,
+    p.estoque AS produto_estoque,
+    (SELECT i.url FROM imagens_produto i WHERE i.produto_id = p.id limit 1) AS imagens,
+    c.nome AS categoria_nome,
+    sv.id as produto_salvo_id
+    FROM produtos p
+    LEFT JOIN categorias c ON p.categoria_id = c.id
+    left join itens_salvos sv on p.id = sv.produto_id
+    WHERE 1=1`
+
+    if(id){
+        segundaQuery+= ` AND sv.produto_id = ?`
+        segundoParams.push(id);
+    }
+    if(corId){
+        segundaQuery+= ` AND sv.cor_id = ?`
+        segundoParams.push(corId);
+    }
+    if(voltagemId){
+        segundaQuery+= ` AND sv.voltagem_id = ?`
+        segundoParams.push(voltagemId);
+    }
+    if(dimensoesId){
+        segundaQuery+= ` AND sv.dimensoes_id = ?`
+        segundoParams.push(dimensoesId);
+    }
+    if(pesosId){
+        segundaQuery+= ` AND sv.pesos_id = ?`
+        segundoParams.push(pesosId);
+    }
+    if(generoId){
+        segundaQuery+= ` AND sv.genero_id = ?`
+        segundoParams.push(generoId);
+    }
+    if(estampasId){
+        segundaQuery+= ` AND sv.estampas_id = ?`
+        segundoParams.push(estampasId);
+    }
+    if(tamanhosId){
+        segundaQuery+= ` AND sv.tamanhos_id = ?`
+        segundoParams.push(tamanhosId);
+    }
+    if(materiaisId){
+        segundaQuery+= ` AND sv.materiais_id = ?`
+        segundoParams.push(materiaisId);
+    }
+
 
     const [produto] = await db.query(query,params);
+
+    const [itemSalvo] = await db.query(segundaQuery,segundoParams);
     
     const [imagens] = await db.query("Select url from imagens_produto where produto_id = ?",[id]);
 
@@ -631,9 +693,6 @@ app.get("/produto/:id", async (req, res) => {
 
     const [usuariosComentarios] = await db.query("SELECT u.nome,u.foto_url, a.created_at, a.nota, a.comentario FROM usuarios u JOIN avaliacoes a ON u.id = a.usuario_id WHERE a.produto_id = ? ",[id]);
     
-        if (produto.length === 0) {
-            return res.status(400).json({message: "Produto não encontrado"});
-        }
 
         
         const vendedoresFormatados = vendedores.map(vendedor => ({
@@ -674,6 +733,7 @@ app.get("/produto/:id", async (req, res) => {
         }
         const produtoFormatado = {
             ...produto[0],
+            produto_salvo: itemSalvo[0],
             imagens: imagens.map(img => img.url),
             avaliacoes: avaliacoes,
             totalAvaliacoes,
@@ -1133,58 +1193,126 @@ app.post("/cart" , autenticarToken, async (req,res) => {
 app.put("/cart/:itemId",autenticarToken, async (req,res) => {
     const {itemId} = req.params;
     const userId = req.usuarioId;
-    const {quantidade, corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId} = req.body;
+    const {quantidade, corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId,alterar} = req.body;
 
     try{
-        const params = [Number(quantidade)];
-        let query = `UPDATE cart_items ci join carts c on ci.cart_id = c.id SET ci.quantidade = ?   
-        where 1=1 `
+        let query = `UPDATE cart_items ci join carts c on ci.cart_id = c.id SET `
+        let updates = [];
+        let params = [];
         
-        if(itemId){
-            query+= ` AND ci.id = ?`
-            params.push(itemId);
-            
+        if(quantidade){
+            updates.push("ci.quantidade = ?");
+            params.push(quantidade);
         }
-        if(userId){
-            query+= ` AND c.usuario_id = ?`
-            params.push(userId);
-        }
+
         if(corId){
-            query+= ` AND ci.cores_ids = ?`
+            updates.push("ci.cores_ids = ?")
             params.push(corId);
         }
         
         if(voltagemId){
-            query+= ` AND ci.voltagemId = ?`
+            updates.push("ci.voltagemId = ?")
             params.push(voltagemId);
         }
         if(dimensoesId){
-            query+= ` AND ci.dimensoesId = ?`
+            updates.push("ci.dimensoesId = ?")
             params.push(dimensoesId);
         }
         if(pesosId){
-            query+= ` AND ci.pesosId = ?`
+            updates.push("ci.pesosId = ?")
             params.push(pesosId);
         }
         if(generoId){
-            query+= ` AND ci.generoId = ?`
+            updates.push("ci.generoId = ?")
             params.push(generoId);
         }
         if(estampasId){
-            query+= ` AND ci.estampasId = ?`
+            updates.push("ci.estampasId = ?")
             params.push(estampasId);
         }
         if(tamanhosId){
-            query+= ` AND ci.tamanhosId = ?`
+            updates.push("ci.tamanhosId = ?")
             params.push(tamanhosId);
         }
         if(materiaisId){
-            query+= ` AND ci.materiaisId = ?`
+            updates.push("ci.materiaisId = ?")
             params.push(materiaisId);
         }
 
-        await db.query(query,params);
+        query += updates.join(", ");
+        query += ` WHERE 1=1 `
         
+        if(itemId){
+            query+= ` AND ci.id = ?`
+            params.push(itemId);
+        }
+        if(corId){
+            query+= ` AND c.usuario_id = ?`
+            params.push(userId);
+        }
+        if(voltagemId){
+            query+= ` AND c.usuario_id = ?`
+            params.push(userId);
+        }
+        if(dimensoesId){
+            query+= ` AND c.usuario_id = ?`
+            params.push(userId);
+        }
+        if(pesosId){
+            query+= ` AND c.usuario_id = ?`
+            params.push(userId);
+        }
+        if(generoId){
+            query+= ` AND c.usuario_id = ?`
+            params.push(userId);
+        }
+        if(estampasId){
+            query+= ` AND c.usuario_id = ?`
+            params.push(userId);
+        }
+        if(tamanhosId){
+            query+= ` AND c.usuario_id = ?`
+            params.push(userId);
+        }
+        if(materiaisId){
+            query+= ` AND c.usuario_id = ?`
+            params.push(userId);
+        }
+
+        await db.query(query,params);
+
+        const segundoParams = [];
+        let segundaQuery = `SELECT * FROM cart_items ci join carts c on ci.cart_id = c.id 
+        where 1=1`
+        
+        if(userId){
+            segundaQuery+=` AND c.usuario_id = ?`
+            segundoParams.push(userId);
+        }
+
+        if(itemId){
+            query+= ` AND ci.id = ?`
+            params.push(itemId);
+        }
+
+        const [resultado] = await db.query(segundaQuery,segundoParams);
+
+        console.log(`resultado e`,resultado);
+        if(resultado.length > 0){
+            const itemExistente = resultado[0];
+            if(itemExistente){
+                await db.query(`UPDATE cart_items set quantidade = ? where id = ?`,[quantidade,itemExistente.id]);
+                console.log(`itemExistente e`,itemExistente.id);
+            console.log(`itemId é`, itemId);
+            if(alterar){
+                await db.query(`delete from cart_items where id = ?`, [itemId]); 
+            }
+                
+            }
+            
+    }
+
+
         if(corId) {
             await db.query(`UPDATE cart_item_cores SET cor_id = ? where cart_item_id = ? `,[corId,itemId]);
         }

@@ -264,7 +264,6 @@ function PaginaProduto(){
                                                 setPesoSelecionado(item.id);
                                                 if(nome === "dimensoes")
                                                 setDimensoesSelecionada(item.id);
-                                                // Log da seleção
                                                 console.log(`${nome} id é`, item.id);
                                                 }}
                                                 onMouseEnter={() => handleHover(nome,item.valor)}
