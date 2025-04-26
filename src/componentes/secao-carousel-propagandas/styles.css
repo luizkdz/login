@@ -1,0 +1,61 @@
+.carousel-propagandas-wrapper{
+    width:1332px;
+    display:flex;
+    position:relative;
+}
+
+.container-carousel-propagandas{
+    padding:30px;
+    display:flex;
+    justify-content: center;
+    background-color: #f0f0f0;
+    background: linear-gradient(to bottom, #f0f0f0, transparent);
+}
+
+.carousel-itens{
+    overflow:hidden;
+    width:1290px;
+    display:flex;
+}
+
+.track{
+    transition: transform 0.5s ease;
+    width:1710px;
+    display:flex;
+    gap:30px;
+}
+
+.seta-esquerda-carousel-propagandas{
+    position:absolute;
+    left:-40px;
+    top:125px;
+    background-color: #fff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 1;
+    box-sizing: border-box;
+    border: 0px solid rgba(255, 255, 255, 0.5);
+    
+    border-radius: 50%;
+    padding:10px;
+    width:64px;
+
+}
+
+.seta-direita-carousel-propagandas{
+    position: absolute;
+    right:0px;
+    top:125px;
+    background-color: #fff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    border: 0px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    padding:10px;
+    width:64px;
+    
+
+}

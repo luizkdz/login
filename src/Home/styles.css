@@ -5,9 +5,13 @@ body{
 }
 
 
-.card{
-    width:250px;
-    height:470px;
+.card-home{
+    padding:32px;
+    border-radius: 6px;
+    box-sizing: border-box;
+    border:1px solid #BFBFBF;
+    width:470px;
+    height:600px;
 
 }
 
@@ -16,12 +20,11 @@ body{
     display:flex;
     flex-direction: column;
 }
-.container-card{
+.container-card-home{
+    background-color: #fff;
+    margin:3rem;
     display:flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    
+    justify-content: space-evenly;
     
 }
 .pagina-toda{
@@ -37,4 +40,59 @@ body{
     flex-direction: column;
     align-items: center;
     gap:20px;
+}
+
+.input-email-senha{
+    box-sizing: border-box;
+    border: 1px solid #BFBFBF;
+    padding:13px;
+    border-radius: 6px;
+}
+
+.botao-entrar{
+    margin-top:10px;
+    background-color: #111111;
+    color:white;
+    padding:10px;
+    height:50px;
+}
+
+.criar-conta{
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    width:100%;
+    padding:10px;
+    background-color: white;
+}
+
+.login-google{
+    padding:10px;
+}
+
+.esqueci-senha{
+    padding:10px;
+}
+
+.container-hr-ou{
+    gap:20px;
+    align-items: center;
+    display:flex;
+}
+
+
+.hr-class{
+    width:200px;
+    height:0px;
+}
+
+.imagem-icone-data-science{
+    height:400px;
+    width:400px;
+}
+
+.container-digite-email-imagem{
+    display:flex;
+    flex-direction: column;
+    gap:30px;
 }

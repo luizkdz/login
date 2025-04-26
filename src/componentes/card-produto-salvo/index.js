@@ -37,9 +37,9 @@ function CardProdutoSalvo({item,precoTotal,precoTotalPix,adicionarItemSalvo,excl
                     
                     </div>
                     <div className="container-botao-alterar-quantidade">
-                    <img src={item.quantidade === 1 ? "/images/minus-grey.png" : "/images/minus.png"} className="botao-menos-quantidade" onClick={() => atualizarItemSalvo(item.quantidade - 1, item.id,item.cor_id)}/>
+                    <img src={item.quantidade === 1 ? "/images/minus-grey.png" : "/images/minus.png"} className="botao-menos-quantidade" onClick={() => atualizarItemSalvo(item.quantidade - 1, item.id,item.cor_id,item.voltagem_id,item.dimensoes_id,item.peso_id,item.genero_id,item.estampas_id,item.tamanho_id,item.material_id)}/>
                     <p>{item.quantidade}</p>
-                    <img src = "/images/plus.png" className="botao-mais-quantidade" onClick={() => atualizarItemSalvo(item.quantidade + 1, item.id,item.cor_id)}/>
+                    <img src = "/images/plus.png" className="botao-mais-quantidade" onClick={() => atualizarItemSalvo(item.quantidade + 1, item.id,item.cor_id,item.voltagem_id,item.dimensoes_id,item.peso_id,item.genero_id,item.estampas_id,item.tamanho_id,item.material_id)}/>
                     </div>
                     <div className="container-preco-preco-pix-desconto">
                         <div className="container-preco-desconto">

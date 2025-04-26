@@ -2,9 +2,9 @@ import { useState } from "react";
 import './styles.css';
 
 const imagens = [
-    "./images/cafe1.jpg",
-    "./images/cafe2.jpeg",
-    "./images/cafe3.jpeg"
+    "./images/foto1-banner.jpg",
+    "./images/foto2-banner.jpg",
+    "./images/foto3-banner.jpg"
 ];
 
 function Banner() {
@@ -45,6 +45,7 @@ function Banner() {
                 ))}
             </div>
         </div>
+        
     );
 }
 

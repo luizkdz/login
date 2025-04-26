@@ -1,0 +1,37 @@
+.carousel-card-propagandas{
+    display:flex;
+    flex-direction: column;
+    width:190px;
+    height:285px;
+    justify-content: space-between;
+    text-align: center;
+    align-items: center;
+    box-sizing: border-box;
+    border-radius: 6px;
+    border:2px solid #eeeeee;
+    background-color:#EEEEEE;
+    padding:10px;
+}
+
+.carousel-card-propagandas p{
+    width:100%;
+    word-break: break-word; /* quebra a palavra se for muito grande */
+    overflow-wrap: break-word; /* outra forma de garantir a quebra */
+    
+}
+
+.imagem-carousel-card-propaganda{
+    height:105px;
+    width:105px;
+}
+
+.botao-card-carousel-propagandas{
+    background-color:var(--andes-color-blue-150, rgba(65, 137, 230, .15));
+    border: 2px solid var(--andes-color-blue-150, rgba(65, 137, 230, .15));;
+    border-radius: 6px;
+    padding:6px 8px; 
+}
+
+.container-descricao-card-propagandas{
+    height:72px;
+}

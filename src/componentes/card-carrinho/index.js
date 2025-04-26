@@ -41,7 +41,7 @@ function CardCarrinho({item,precoTotal,precoTotalPix,adicionarItemSalvo,mostrarM
                     <div className="container-botao-alterar-quantidade">
                     <img src={item.quantidade === 1 ? "/images/minus-grey.png" : "/images/minus.png"} className="botao-menos-quantidade" onClick={() => editarQuantidadeItemCarrinho(item.quantidade - 1, item.id,item.cores_ids)}/>
                     <p>{item.quantidade}</p>
-                    <img src = "/images/plus.png" className="botao-mais-quantidade" onClick={() => editarQuantidadeItemCarrinho(item.quantidade + 1, item.id)}/>
+                    <img src = "/images/plus.png" className="botao-mais-quantidade" onClick={() => editarQuantidadeItemCarrinho(item.quantidade + 1, item.id,item.cores_ids,item.voltagem_ids,item.dimensoes_ids,item.pesos_ids,item.generos_ids,item.estampas_ids,item.tamanhos_ids,item.materiais_ids)}/>
                     </div>
                     <div className="container-preco-preco-pix-desconto">
                         <div className="container-preco-desconto">

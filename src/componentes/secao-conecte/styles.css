@@ -1,15 +1,17 @@
 .secao-conecte{
-    
+    padding-top:20px;
+    padding-bottom:20px;
     width:100vw;
     display:flex;
     justify-content: center;
+    background-color: #f0f0f0;
 }
 
 .card-conecte{
     box-sizing: border-box;
-    border: 2px solid #111111;
+    border: 2px solid #EEEEEE;
     border-radius: 12px;
-    background-color: #111111;
+    background-color:#EEEEEE;
     display:flex;
     padding:20px;
     flex-direction: row;
@@ -40,15 +42,15 @@
 .input-nome,
 .input-email {
     padding: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid #111111;
     border-radius: 5px;
     width: 200px; /* Ajuste conforme necessário */
 }
 .botao-cadastrar{
     height:40px;
     padding: 10px 15px;
-    background-color: white;
-    color: #111111;
+    background-color: #111111;
+    color: #EEEEEE;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -64,9 +66,9 @@
 }
 
 .container-contato h2{
-    color:white;
+    color:#111111;
 }
 
 .container-contato p{
-    color:white;
+    color:#111111;
 }

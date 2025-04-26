@@ -43,9 +43,11 @@ function Carousel({produtos: produtosProp, setProdutos :setProdutosProp,itensPas
     return (
     <div className="container-carousel-carrinho">
         <div className="titulo-produtos-carousel">
-        <h1>{titulo}</h1>
+        <div className="titulo-carousel"><h2>{titulo}</h2></div>
             <div className="carousel-wrapper">
-      <button onClick={prev} className="botao-carousel">◀</button>
+            <button className="seta-esquerda-carousel" onClick={prev}>
+                    <img src="./images/setinha-esquerda.png" className="setinha-esquerda-banner" />
+                </button>
       
       <div style={{overflow:"hidden",width:`${produtosAtuais.length >= 2 ? itensPassados * 250 + (itensPassados * 10 - 10) : (1 * 250)}px` }}>
         <div
@@ -70,7 +72,9 @@ function Carousel({produtos: produtosProp, setProdutos :setProdutosProp,itensPas
         </div>
       </div>
 
-      <button onClick={next} className="botao-carousel">▶</button>
+      <button className="seta-direita-carousel" onClick={next}>
+                    <img src="./images/setinha-direita.png" className="setinha-direita-banner" />
+                </button>
     </div>
     </div>
             </div>

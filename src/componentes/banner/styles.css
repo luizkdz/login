@@ -1,13 +1,22 @@
 .imagem-banner{
+    box-sizing: border-box;
+    border-radius: 6px;
     width:70vw;
-    height:250px;
+    height:300px;
+    
 }
 
+.banner-wrapper{
+    height:300px;
+}
 .banner-container{
+    padding-top:3rem;
+    padding-bottom:3rem;
     display:flex;
     justify-content: center;
     position: relative;
-
+    background-color:	#f0f0f0;
+    background: linear-gradient(to top, #f0f0f0, transparent);
 }
 
 .banner-container:hover .seta-esquerda,
@@ -17,31 +26,48 @@
 }
 
 .seta-esquerda{
+    position:absolute;
+    left:0px;
+    top:125px;
     opacity:0;
-    
-    height:250px;
-    background-color: transparent;
+    background-color: rgba(255, 255, 255, 0.5);
     color: white;
     border: none;
-    padding: 10px;
     cursor: pointer;
+    z-index: 1;
+    box-sizing: border-box;
+    border: 0px solid rgba(255, 255, 255, 0.5);
+    
+    border-bottom-right-radius: 50%;
+    border-top-right-radius: 50%;
+    padding:10px;
+    width:45px;
+
 }
 
 .seta-direita{
-    height: 250px   ;
+    position: absolute;
+    right:0;
+    top:125px;
     opacity: 0;
-    background-color: transparent;
+    background-color: rgba(255, 255, 255, 0.5);
     color: white;
     border: none;
     cursor: pointer;
+    box-sizing: border-box;
+    border: 0px solid rgba(255, 255, 255, 0.5);
     
+    border-bottom-left-radius: 50%;
+    border-top-left-radius: 50%;
+    padding:10px;
+    width:40px;
     
 
 }
 
 .indicadores {
     left:50%;
-    top:85%;
+    top:75%;
     position:absolute;
     display: flex;
     justify-content: center;
@@ -59,7 +85,7 @@
 }
 
 .bolinha.ativa {
-    background-color: aqua
+    background-color: white;
 }
 
 .indicadores{
@@ -67,17 +93,21 @@
 }
 
 .setinha-esquerda-banner {
-    width:50px;
-    height:50px;
+    width:30px;
+    height:30px;
 }
 
 .secao-banner{
+    position:relative;
+    height:300px;
     display:flex;
+    padding-bottom:3rem;
 }
 
 .setinha-direita-banner{
-    width:50px;
-    height:50px;
+    height:30px;
+    width:30px;
+
 }
 
 .fade-in-banner {

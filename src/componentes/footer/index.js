@@ -1,5 +1,6 @@
 import './styles.css';
 
+
 function Footer() {
     return (
         <footer className="footer">
@@ -60,6 +61,22 @@ function Footer() {
             <a href="https://www.flaticon.com/free-icons/minus" title="minus icons">Minus icons created by Pixel perfect - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/plus" title="plus icons">Plus icons created by hirschwolf - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/shopping-cart" title="shopping cart icons">Shopping cart icons created by Freepik - Flaticon</a>
+            <p>Foto de Lum3n: https://www.pexels.com/pt-br/foto/visao-de-baixo-angulo-de-sapatos-322207/</p>
+            <p>Foto de Tara Winstead: https://www.pexels.com/pt-br/foto/folhas-de-madeira-escovas-pinceis-6690884/</p>
+            <p>Foto de Andrea Piacquadio: https://www.pexels.com/pt-br/foto/caixas-de-presente-variadas-na-superficie-do-piso-de-madeira-marrom-1050244/</p>
+            <a href="https://www.flaticon.com/free-icons/computer" title="computer icons">Computer icons created by vectorsmarket15 - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/seo-and-web" title="seo and web icons">Seo and web icons created by Smashicons - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/business-and-finance" title="business and finance icons">Business and finance icons created by Aranagraphics - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/coins" title="coins icons">Coins icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/shopping-bag" title="shopping bag icons">Shopping bag icons created by iconixar - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/tourism" title="tourism icons">Tourism icons created by Mihimihi - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/online-shop" title="online shop icons">Online shop icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/categories" title="categories icons">Categories icons created by Anggara - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/email" title="email icons">Email icons created by rukanicon - Flaticon</a>
+            <p>Foto de Bastian Riccardi: https://www.pexels.com/pt-br/foto/31763558/</p>
+            <p>Foto de Christopher Welsch Leveroni: https://www.pexels.com/pt-br/foto/frasco-de-perfume-elegante-em-fundo-escuro-31771395/</p>
+            <a href="https://www.flaticon.com/free-icons/html-5" title="html 5 icons">Html 5 icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/javascript" title="javascript icons">Javascript icons created by Freepik - Flaticon</a>
             <p>&copy; 2025 Login ltda</p>
             </div>
         </footer>

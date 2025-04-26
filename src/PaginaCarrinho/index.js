@@ -24,7 +24,7 @@ function PaginaCarrinho() {
     const [valorQuantidade, setValorQuantidade] = useState("mais");
     const [mostrarModalAlterar, setMostrarModalAlterar] = useState(false);
     const [itemSelecionado, setItemSelecionado] = useState([]);
-    const [nomeValor, setNomeValor] = useState("Selecione uma opção");    
+    const [nomeValor, setNomeValor] = useState("");    
     const [mostrarInputAtributo, setMostrarInputAtributo] = useState("");
     const [atributoSelecionado, setAtributoSelecionado] = useState();
     const [corSelecionada,setCorSelecionada] = useState("");
@@ -84,8 +84,8 @@ function PaginaCarrinho() {
         setPesoSelecionado(itemNoCarrinho?.pesos_ids);
         setDimensoesSelecionada(itemNoCarrinho?.dimensoes_ids);
 
-        setNomeValor("Escolha uma opção");
-    
+        setNomeValor("Selecione uma opção");
+
         setQuantidadeSelecionada(quantidade);
     }
 
@@ -111,8 +111,8 @@ function PaginaCarrinho() {
 
         itemSalvo = await axios.get(`http://localhost:5000/itens-salvos`,{
               withCredentials: true})
-
-        itemSalvoAlterar = itemSalvo.data.find((item) => {return item.id === segundaResposta.data.produto.produto_salvo.produto_salvo_id});
+        itemSalvoAlterar = itemSalvo.data.find((item) => {return item.id === segundaResposta.data.produto.produto_salvo?.produto_salvo_id});
+        console.log(`itemSalvodata`, itemSalvo.data);
         console.log(`itemSalvoAlterar é`,itemSalvoAlterar);
         setProdutoAlterar(itemSalvoAlterar);
         setCorSelecionada(itemSalvoAlterar?.cor_id);
@@ -123,12 +123,9 @@ function PaginaCarrinho() {
         setEstampaSelecionada(itemSalvoAlterar?.estampas_id);
         setPesoSelecionado(itemSalvoAlterar?.peso_id);
         setDimensoesSelecionada(itemSalvoAlterar?.dimensoes_id)
-
         console.log(`isaé`,itemSalvoAlterar?.cor_id)
 
-
-        setNomeValor("Escolha uma opção");
-
+        setNomeValor("Selecione uma opção");
         setQuantidadeSelecionada(quantidade);
     }
 
@@ -208,7 +205,7 @@ const handleMostrarOpcoesSegundoInput = () => {
     };
 
 
-    const atualizarItemSalvo = async (quantidade,itemId,corId = null,voltagemId = null, dimensoesId = null, pesosId = null,generoId = null, estampasId = null,tamanhosId = null, materiaisId = null) => {
+    const atualizarItemSalvo = async (quantidade,itemId,corId = null,voltagemId = null, dimensoesId = null, pesosId = null,generoId = null, estampasId = null,tamanhosId = null, materiaisId = null,alterar = null) => {
         try {
             await axios.put(`http://localhost:5000/itens-salvos/${itemId}`,{
                 quantidade,
@@ -219,7 +216,8 @@ const handleMostrarOpcoesSegundoInput = () => {
                 generoId,
                 estampasId,
                 tamanhosId,
-                materiaisId
+                materiaisId,
+                alterar
             },{withCredentials:true});
             await carregarItensSalvos();
         } catch (err) {
@@ -529,8 +527,16 @@ const handleMostrarOpcoesSegundoInput = () => {
                         )}
                                             </div>          
                     <button onClick={() => {
+                       console.log(`ets`,produtoAlterar); 
                        const encontrado = carrinhoItens.find((item) => item.id === itemSelecionado.cart_item_id);
-                       console.log(`encontrado é`,encontrado);editarQuantidadeItemCarrinho(quantidadeSelecionada,encontrado.id,corSelecionada,voltagemSelecionada,dimensoesSelecionada,pesoSelecionado,generoSelecionado,estampaSelecionada,tamanhoSelecionado,materialSelecionado,"alterar");handleMostrarModalAlterar()}}className="botao-atualizar-alterar">Atualizar</button>
+                       console.log(`encontrado é`,encontrado);
+                       console.log(quantidadeSelecionada)
+                       console.log(corSelecionada);
+                       if(encontrado && (corSelecionada !== encontrado.cores_ids || voltagemSelecionada !== encontrado.voltagem_ids || dimensoesSelecionada !== encontrado.dimensoes_ids || pesoSelecionado !== encontrado.pesos_ids || generoSelecionado !== encontrado.generos_ids || estampaSelecionada !== encontrado.estampas_ids || tamanhoSelecionado !== encontrado.tamanhos_ids || materialSelecionado !== encontrado.materiais_ids)){
+                        editarQuantidadeItemCarrinho(quantidadeSelecionada,encontrado.id,corSelecionada,voltagemSelecionada,dimensoesSelecionada,pesoSelecionado,generoSelecionado,estampaSelecionada,tamanhoSelecionado,materialSelecionado,"alterar")}
+                        else{
+                        atualizarItemSalvo(quantidadeSelecionada,produtoAlterar.id,corSelecionada,voltagemSelecionada,dimensoesSelecionada,pesoSelecionado,generoSelecionado,estampaSelecionada,tamanhoSelecionado,materialSelecionado, "alterar");
+                        };handleMostrarModalAlterar()}}className="botao-atualizar-alterar">Atualizar</button>
                 </div>
             </div>
         </div>)}

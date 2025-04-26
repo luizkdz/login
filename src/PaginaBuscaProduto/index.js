@@ -169,7 +169,7 @@ Object.keys(novosFiltros).forEach((key) => {
       }
       console.log('Filtros aplicados:', filtrosURL);
       try {
-        console.log(nomeProduto);
+        console.log(`nomeProduto e`,nomeProduto);
         if (nomeProduto) {
           const respostaProduto = await axios.get(`http://localhost:5000/busca-produto/${encodeURIComponent(nomeProduto)}`
         ,{params:filtrosURL});
@@ -270,7 +270,7 @@ Object.keys(novosFiltros).forEach((key) => {
 
     useEffect(() => {
       fetchProducts();
-  },[nomeProduto,localidade])
+  },[nomeProduto,localidade,searchParams])
 
   useEffect(() => {
     

@@ -1,0 +1,30 @@
+.anuncio-logo{
+    width:60px;
+    height:42px;
+}
+
+.imagem-anuncio{
+    width:250px;
+    height:130px;
+}
+
+.card-anuncio{
+    gap:10px;
+    align-items: center;
+    display:flex;
+    height:130px;
+    width:590px;
+    box-sizing: border-box;
+    background-color: #eeeeee;
+    border:2px solid #111111;
+    border-radius: 6px;
+    margin-top:30px;
+    margin-bottom: 30px;
+    padding-left:60px;
+}
+
+.texto-card-anuncio{
+    display:flex;
+    flex-direction: column;
+    gap:10px;
+}

@@ -36,19 +36,30 @@ const handleGoogleRedirect = () => {
   return (
       <div className="pagina-toda">
         <Header/>
-        <div className="container-card">
-          <div className="card">
-            <img src="../images/logo.svg" alt="logo"/>
+        
+        <div className="container-card-home">
+        <div className="container-digite-email-imagem">
+        <h1>Digite seu e-mail<br/>para iniciar uma sessão</h1>
+        <img src = "/images/data-science.png" className="imagem-icone-data-science"/> 
+        </div>
+          <div className="card-home">
+            
         <form onSubmit={handleSubmit}>
           <div className="container-login">
+          <label htmlFor="email">Email:</label>
           <input className="input-email-senha" id="email" placeholder="Email" type="email"  onChange={(e) => setEmail(e.target.value)} required />
+          <label htmlFor="email">Senha:</label>
           <input className="input-email-senha" id="senha" placeholder="Senha" type="password" onChange={(e) => setSenha(e.target.value)} required />
-          <button type="submit">Entrar</button>
+          <button className="botao-entrar" type="submit">Entrar</button>
          <div className="container-links">
-          <Link className = "link-criar-conta"to="/cadastrar">Criar Conta</Link>
-          <Link className = "link-esqueci-senha"to ="/esqueci-minha-senha">Esqueceu sua senha?</Link>
+          <div className="criar-conta">
+          <Link className = "link-criar-conta"to="/cadastrar">Criar Conta</Link></div>
+          <div className="esqueci-senha">
+          <Link className = "link-esqueci-senha"to ="/esqueci-minha-senha">Esqueceu sua senha?</Link></div>
           </div>
-          <div onClick = {handleGoogleRedirect}>
+          <div className="container-hr-ou">
+          <hr className="hr-class"/><p>ou</p><hr className="hr-class"/></div>
+          <div className="login-google" onClick = {handleGoogleRedirect}>
           <GoogleLogin onError={() => {
             alert("Erro ao fazer login com o google");
           }}/>
