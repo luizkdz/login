@@ -98,3 +98,41 @@
 .botao-direita-paginas:disabled {
     opacity: 0;
 }
+
+.card-sugestao-produto{
+    display:flex;
+    color: #111111;
+    box-sizing: border-box;
+    
+    flex-wrap:wrap;
+    font-size: 12px;
+    margin-top:10px;
+    cursor: pointer;
+    gap:20px;
+}
+
+
+
+.container-sugestao-nome-produto{
+    padding:10px;
+    display:flex;
+    flex-direction: column;
+}
+
+.card-sugestao-produto-opacity{
+    opacity: 0;
+}
+
+.card-sugestao-nome-do-produto{
+    box-sizing: border-box;
+    border: 2px solid #f0f0f0;
+    background-color: #f0f0f0;
+    padding:10px;
+    display:inline-flex;
+    border-radius: 6px;
+}
+
+.card-sugestao-nome-do-produto:hover{
+    background-color: #111111;
+    color:white;
+}

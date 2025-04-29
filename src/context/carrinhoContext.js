@@ -34,7 +34,8 @@ const adicionarAoCarrinho = async (produtoId, quantidade, corId = null, voltagem
             materiaisId,
         }, { withCredentials: true });
 
-        console.log(`A resposta é :`, resposta);
+        console.log(`dimensoesId e`, dimensoesId);
+        
 
         await obterCarrinho();
     } catch (err) {

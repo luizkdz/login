@@ -5,7 +5,7 @@ import Header from '../componentes/header';
 import './styles.css';
 import CardPaginaBuscaProduto from '../componentes/card-pagina-busca-produto';
 import axios from 'axios';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { redirect, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { calcularPrecoParcelado } from '../utils/calcularPrecoParcelado';
 import { useCep } from '../context/CepContext';
 import { calcularFretePorCep } from '../utils/calcularFretePorCep';
@@ -272,11 +272,6 @@ Object.keys(novosFiltros).forEach((key) => {
       fetchProducts();
   },[nomeProduto,localidade,searchParams])
 
-  useEffect(() => {
-    
-  })
-
-  
   
     const calcularPaginasVisiveis = () => {
         const metade = Math.floor(limitePaginasVisiveis / 2);
@@ -303,27 +298,9 @@ Object.keys(novosFiltros).forEach((key) => {
     
 
 
-
         const itensVisiveis = 2;
     
-        const avancar = () => {
-            if(indice + itensVisiveis < produtos.length){
-                setIndice(indice+2);    
-            }
-            else{
-                setIndice(0);
-            }
-        };
-    
-        const voltar = () => {
-            if(indice > 0){
-                setIndice(indice - 2);
-            }
-            else{
-                setIndice(produtos.length - itensVisiveis)
-            }
-        }
-    
+      const sugestoes = produtos.filter((item) => item.nome !== nomeProduto).map((item) => {return <div className="card-sugestao-nome-do-produto"><p onClick={() => (window.location.href = `/busca-produto/${item.nome}`)}>{item.nome.slice(0,30)}</p></div>})
 
         const navigate = useNavigate();
         const redirectProduct = (id) => {
@@ -334,6 +311,7 @@ Object.keys(novosFiltros).forEach((key) => {
         <div className="pagina-toda-busca-produto">
             <Header props/>
             <div className="secao-ferramentas">
+              
             <div className="secao-busca-produto">
                 {tipo === "categoria" ? <h1 className="nome-categoria">{nomeProduto}</h1> : ""}
                 {filtros.map(({titulo, itens, isCheckBox }) => {
@@ -348,6 +326,13 @@ Object.keys(novosFiltros).forEach((key) => {
             </div>
             {produtosPaginados.length > 0 ? <div className="secao-categoria-produtos">
                 <div className="titulo-categoria-produtos">
+                <div className="container-sugestao-nome-produto">
+                {sugestoes.length > 0 ? <p>Sugestão de consultas:</p> : ""} 
+                  <div className={sugestoes.length > 0 ? `card-sugestao-produto`: ""}>
+                    {console.log(`sugestoese`,sugestoes)}
+                    {sugestoes ? sugestoes : ""}
+                    </div>
+                    </div>
             {tipo === "busca" ? <h1 className="resultado-pesquisa">Resultados para {nomeProduto.slice(0,20)}</h1> : ""}
             <h1 className= "resultado-pesquisa">Os mais vendidos da categoria</h1>
             <Carousel produtos={produtos} setProdutos = {setProdutos} itensPassados={2}/>

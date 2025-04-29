@@ -5,13 +5,24 @@ function InputProdutoAlterar({nome,mostrarOpcoes,setMostrarOpcoes,setMostrarOpco
 
 const handleClick = (item) => {
     selecionarNomeValor(item.valor);
+    if(nome === "dimensoes"){
+        setNomeValor(`${item.largura}${item.unidade} x ${item.altura}${item.unidade} x ${item.comprimento}${item.unidade}`);
+    }
+    else if(nome === "pesos"){
+        setNomeValor(`${item.valor}${item.unidade}`)
+    }
+    else if(nome === "voltagens"){
+        setNomeValor(`${item.valor}V`)
+    }
+    else{
     setNomeValor(item.valor);    
+    }
     console.log(item.id);
     if (nome === "cor") setCorSelecionada(item.id);
     if (nome === "materiais") setMaterialSelecionado(item.id);
-    if (nome === "voltagem") setVoltagemSelecionada(item.id);
+    if (nome === "voltagens") setVoltagemSelecionada(item.id);
     if (nome === "generos") setGeneroSelecionado(item.id);
-    if (nome === "tamanho") setTamanhoSelecionado(item.id);
+    if (nome === "tamanhos") setTamanhoSelecionado(item.id);
     if (nome === "estampas") setEstampaSelecionada(item.id);
     if (nome === "pesos") setPesoSelecionado(item.id);
     if (nome === "dimensoes") setDimensoesSelecionada(item.id);
@@ -30,7 +41,7 @@ const handleClick = (item) => {
                             <div className="selecao-input-cor">
                             {itemSelecionado[nome]?.map((item) => { return (
                             <div>
-                            <p onClick={() => handleClick(item)}>{item.valor}</p>
+                            <p onClick={() => handleClick(item)}>{nome === "dimensoes" ? `${item.largura}${item.unidade} x ${item.altura}${item.unidade} x ${item.comprimento}${item.unidade}`: nome === "voltagens" ? `${item.valor}V` : nome === "pesos" ? `${item.valor}${item.unidade}` : item.valor}</p>
                             </div> 
                         )} )}
                             </div>

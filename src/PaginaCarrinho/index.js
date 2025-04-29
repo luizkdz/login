@@ -34,7 +34,7 @@ function PaginaCarrinho() {
     const [tamanhoSelecionado,setTamanhoSelecionado] = useState("");
     const [estampaSelecionada,setEstampaSelecionada] = useState("");
     const [pesoSelecionado,setPesoSelecionado] = useState("");
-    const [dimensoesSelecionada,setDimensoesSelecionada] = useState("");
+    const [dimensoesSelecionada,setDimensoesSelecionada] = useState("d");
     const [produtoAlterar, setProdutoAlterar] = useState("");
     const estadosSelecionados = {
         cor: corSelecionada,
@@ -70,11 +70,11 @@ function PaginaCarrinho() {
               withCredentials: true
             }
           );
-        console.log(`data.produto e`,resposta.data.produto);
+        
         setItemSelecionado(resposta.data.produto);
 
         const itemNoCarrinho = carrinhoItens.find((item) => {return item.id === resposta.data.produto.cart_item_id});
-        console.log(`itemNoCarrinho é`,itemNoCarrinho);
+        
         setCorSelecionada(itemNoCarrinho?.cores_ids);
         setVoltagemSelecionada(itemNoCarrinho?.voltagem_ids);
         setMaterialSelecionado(itemNoCarrinho?.materiais_ids);
@@ -106,14 +106,13 @@ function PaginaCarrinho() {
               withCredentials: true
             }
           );
-          console.log(`segundarespostadataprodutoe`,segundaResposta.data.produto);
+          
           setItemSelecionado(segundaResposta.data.produto);
 
         itemSalvo = await axios.get(`http://localhost:5000/itens-salvos`,{
               withCredentials: true})
         itemSalvoAlterar = itemSalvo.data.find((item) => {return item.id === segundaResposta.data.produto.produto_salvo?.produto_salvo_id});
-        console.log(`itemSalvodata`, itemSalvo.data);
-        console.log(`itemSalvoAlterar é`,itemSalvoAlterar);
+        
         setProdutoAlterar(itemSalvoAlterar);
         setCorSelecionada(itemSalvoAlterar?.cor_id);
         setVoltagemSelecionada(itemSalvoAlterar?.voltagem_id);
@@ -123,7 +122,7 @@ function PaginaCarrinho() {
         setEstampaSelecionada(itemSalvoAlterar?.estampas_id);
         setPesoSelecionado(itemSalvoAlterar?.peso_id);
         setDimensoesSelecionada(itemSalvoAlterar?.dimensoes_id)
-        console.log(`isaé`,itemSalvoAlterar?.cor_id)
+        
 
         setNomeValor("Selecione uma opção");
         setQuantidadeSelecionada(quantidade);
@@ -401,14 +400,14 @@ const handleMostrarOpcoesSegundoInput = () => {
                 <div className="botao-fechar-alterar">
                 <img onClick={() => handleMostrarModalAlterar()}src = "/images/close.png" className= "imagem-fechar-modal" />
                 </div>
-                <p className="titulo-alterar" >Escolha os detalhes deste produto</p>
+                <p className="titulo-alterar" >Escolha os detalhes deste produto:</p>
                 <div className="container-atributos-suportados">
                     {Object.entries(itemSelecionado).map(([nome,opcoes]) => {
                          const atributosSuportados = [
                             "cor",
-                            "voltagem",
+                            "voltagens",
                             "generos",
-                            "tamanho",
+                            "tamanhos",
                             "materiais",
                             "estampas",
                             "pesos",
@@ -427,19 +426,21 @@ const handleMostrarOpcoesSegundoInput = () => {
                           const nomeMapeadoAlterar = {
                             cor:"cor_valor",
                             materiais: "material_valor",
-                            voltagem: "voltagem_valor",
+                            voltagens: "voltagem_valor",
                             generos: "genero_valor",
-                            tamanho : "tamanho_valor",
+                            tamanhos : "tamanho_valor",
                             estampas: "estampa_valor",
                             pesos: "peso_valor",
-                            dimensoes: "dimensoes_valor"
+                            
                           }
 
-                        if(atributosSuportados.includes(nome)){
+                        if(atributosSuportados.includes(nome) && opcoes.length > 0){
                             const nomeCarrinho = nomeMapeado[nome] || nome;
+                        
                             const nomeSalvo = nomeMapeadoAlterar[nome];
+                        
                             return (
-                                <div className={`card-atributo-suportado ${atributoSelecionado === nome ? "selecionado" : ""}`} onClick={() => { setAtributoSelecionado(nome);console.log(itemSelecionado);console.log(`ITEMsALVOALTERAR É`,itemSalvoAlterar);const itemNoCarrinho = carrinhoItens.find((item) => {return item.id === itemSelecionado.cart_item_id
+                                <div className={`card-atributo-suportado ${atributoSelecionado === nome ? "selecionado" : ""}`} onClick={() => { setAtributoSelecionado(nome);const itemNoCarrinho = carrinhoItens.find((item) => {return item.id === itemSelecionado.cart_item_id
                                 }
                                 );
                                 console.log(`itemNoCarrinho é`,itemNoCarrinho);
@@ -449,20 +450,47 @@ const handleMostrarOpcoesSegundoInput = () => {
                                         const larguras = itemNoCarrinho.larguras
                                         const alturas = itemNoCarrinho.alturas
                                         const comprimentos = itemNoCarrinho.comprimentos
-                                        setNomeValor(`${larguras} x ${alturas} x ${comprimentos}`);
+                                        const unidade = itemNoCarrinho.dimensoes_unidade;
+                                        setNomeValor(`${larguras}${unidade} x ${alturas}${unidade} x ${comprimentos}${unidade}`);
+                                    }
+                                    else if(nomeCarrinho === "pesos"){
+                                        const valor = itemNoCarrinho.pesos;
+                                        const unidade = itemNoCarrinho.pesos_unidade;
+                                        setNomeValor(`${valor}${unidade}`);
+                                    }
+                                    else if(nomeCarrinho === "voltagens"){
+                                        const valor = itemNoCarrinho.voltagens;
+                                        setNomeValor(`${valor}V`);
                                     }
                                     else{
-                                        
                                         setNomeValor(itemNoCarrinho?.[nomeCarrinho]);
-                                        
                                     }
+                                    
                                     setAtributoSelecionado(nome);
                                     
                                 }
                                 else{
-                                    console.log(itemSalvoAlterar);
-                                    console.log(`produto alterar e`,produtoAlterar);
-                                    setNomeValor(produtoAlterar?.[nomeSalvo]);
+                                    console.log(`pdae`,produtoAlterar);
+                                    if(nome === "dimensoes"){
+                                        const larguras = produtoAlterar?.largura
+                                        const alturas = produtoAlterar?.altura
+                                        const comprimentos = produtoAlterar?.comprimento
+                                        const unidade = produtoAlterar?.dimensoes_unidade;
+                                        setNomeValor(`${larguras}${unidade} x ${alturas}${unidade} x ${comprimentos}${unidade}`);
+                                    }
+                                    else if(nome === "pesos"){
+                                        const valor = produtoAlterar?.peso_valor;
+                                        const unidade = produtoAlterar?.peso_unidade;
+                                        setNomeValor(`${valor}${unidade}`);
+                                    }
+                                    else if(nome === "voltagens"){
+                                        const valor = produtoAlterar?.voltagem_valor;
+                                        setNomeValor(`${valor}V`);
+                                    }
+                                    else{
+                                        setNomeValor(produtoAlterar?.[nomeSalvo]);
+                                    }
+
                                 }
                                 
                                 
@@ -484,9 +512,9 @@ const handleMostrarOpcoesSegundoInput = () => {
                     {Object.entries(itemSelecionado).map(([nome,opcoes]) => {
                          const atributosSuportados = [
                             "cor",
-                            "voltagem",
+                            "voltagens",
                             "generos",
-                            "tamanho",
+                            "tamanhos",
                             "materiais",
                             "estampas",
                             "pesos",
@@ -498,7 +526,7 @@ const handleMostrarOpcoesSegundoInput = () => {
                             
                             return (<div>
                                 <InputProdutoAlterar setNomeValor={setNomeValor} nome={nome} mostrarOpcoes={mostrarOpcoes} setMostrarOpcoes = {setMostrarOpcoes} setMostrarOpcoesSegundoInput={setMostrarOpcoesSegundoInput} selecionarNomeValor = {selecionarNomeValor} nomeValor={nomeValor} itemSelecionado={itemSelecionado} setCorSelecionada={setCorSelecionada} setMaterialSelecionado = {setMaterialSelecionado} setVoltagemSelecionada = {setVoltagemSelecionada} setGeneroSelecionado = {setGeneroSelecionado} setTamanhoSelecionado = {setTamanhoSelecionado} setEstampaSelecionada={setEstampaSelecionada} setPesoSelecionado={setPesoSelecionado} setDimensoesSelecionada ={setDimensoesSelecionada}/>
- 
+                                
                                 <div>
                                     
                                 </div>
@@ -527,12 +555,10 @@ const handleMostrarOpcoesSegundoInput = () => {
                         )}
                                             </div>          
                     <button onClick={() => {
-                       console.log(`ets`,produtoAlterar); 
+                       
                        const encontrado = carrinhoItens.find((item) => item.id === itemSelecionado.cart_item_id);
-                       console.log(`encontrado é`,encontrado);
-                       console.log(quantidadeSelecionada)
-                       console.log(corSelecionada);
-                       if(encontrado && (corSelecionada !== encontrado.cores_ids || voltagemSelecionada !== encontrado.voltagem_ids || dimensoesSelecionada !== encontrado.dimensoes_ids || pesoSelecionado !== encontrado.pesos_ids || generoSelecionado !== encontrado.generos_ids || estampaSelecionada !== encontrado.estampas_ids || tamanhoSelecionado !== encontrado.tamanhos_ids || materialSelecionado !== encontrado.materiais_ids)){
+                       
+                       if(encontrado){
                         editarQuantidadeItemCarrinho(quantidadeSelecionada,encontrado.id,corSelecionada,voltagemSelecionada,dimensoesSelecionada,pesoSelecionado,generoSelecionado,estampaSelecionada,tamanhoSelecionado,materialSelecionado,"alterar")}
                         else{
                         atualizarItemSalvo(quantidadeSelecionada,produtoAlterar.id,corSelecionada,voltagemSelecionada,dimensoesSelecionada,pesoSelecionado,generoSelecionado,estampaSelecionada,tamanhoSelecionado,materialSelecionado, "alterar");

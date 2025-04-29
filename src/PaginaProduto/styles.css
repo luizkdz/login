@@ -7,6 +7,8 @@
     flex-direction: column;
     gap:15px;
     width:450px;
+    padding:20px;
+    margin-right:100px;
 }
 
 .container-produto{
@@ -42,7 +44,8 @@
 .container-imagem-card-produto{
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    gap:30px;
+    height:700px;
 }
 .container-imagens{
     gap:150px;
@@ -91,6 +94,7 @@
 }
 
 .card-cep{
+    width:450px;
     padding:10px;
     background-color:#f0f0f0;
     margin-top:20px;
@@ -257,7 +261,7 @@
 
     width:100%;
     display:flex;
-    gap:700px;  
+    gap:170px;
     padding-right:50px;
 }
 
@@ -289,6 +293,7 @@
 .container-imagem-texto{
     display:flex;
     min-width:300px;
+    width:450px;
 }
 
 .preco-frete{
@@ -469,6 +474,7 @@ body.modal-aberto {
     border-radius:6px;
     display:flex;
     align-items: center;
+    justify-content: center;
 }
 
 .container-card-cor{
@@ -487,3 +493,57 @@ body.modal-aberto {
     border:2px solid #111111;
 }
 
+.container-imagem-pagina-produto{
+    height:600px;
+}
+
+.container-imagens-imagem{
+    display:flex;
+    gap:120px;
+    
+}
+
+.container-imagem-falando-carousel{
+    display:flex;
+    flex-direction: column;
+    gap:50px;
+}
+
+.container-card-anuncio{
+    display:flex;
+    gap:20px;
+}
+
+.secao-produtos-carousel-pagamentos{
+    display:flex;
+    gap:200px;
+}
+
+.botao-meios-de-pagamento{
+    padding:12px 20px;
+    height:46px;
+    background-color: #111111;
+    color:white;
+}
+
+.imagem-meios-de-pagamento{
+    height:32px;
+    width:50px;
+}
+
+.card-meios-de-pagamento{
+    width:400px;
+    display:flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    border: 2px solid #111111;
+    padding:20px;
+    gap:10px;
+    border-radius: 6px;
+    background-color: #f0f0f0;
+}
+
+.container-imagens-linha-de-credito{
+    display:flex;
+    gap:30px;
+}

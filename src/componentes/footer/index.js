@@ -77,6 +77,16 @@ function Footer() {
             <p>Foto de Christopher Welsch Leveroni: https://www.pexels.com/pt-br/foto/frasco-de-perfume-elegante-em-fundo-escuro-31771395/</p>
             <a href="https://www.flaticon.com/free-icons/html-5" title="html 5 icons">Html 5 icons created by Freepik - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/javascript" title="javascript icons">Javascript icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/barcode" title="barcode icons">Barcode icons created by egorpolyakov - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/credit-card" title="credit card icons">Credit card icons created by Icon Place - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/credit-card" title="credit card icons">Credit card icons created by Mehwish - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/credit-card" title="credit card icons">Credit card icons created by juicy_fish - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/credit-card" title="credit card icons">Credit card icons created by manshagraphics - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/atm-machine" title="atm machine icons">Atm machine icons created by VectorPortal - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/bank-transfer" title="bank transfer icons">Bank transfer icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/money" title="money icons">Money icons created by vectorsmarket15 - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/coin" title="coin icons">Coin icons created by kliwir art - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/cashier" title="cashier icons">Cashier icons created by smashingstocks - Flaticon</a>
             <p>&copy; 2025 Login ltda</p>
             </div>
         </footer>

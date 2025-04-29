@@ -6,7 +6,7 @@ import axios from 'axios';
 import { calcularPrecoParcelado } from '../../utils/calcularPrecoParcelado.js';
 
 
-function Carousel({produtos: produtosProp, setProdutos :setProdutosProp,itensPassados, titulo, carrinhoItens}  ) {
+function CarouselPaginaProduto({produtos: produtosProp, setProdutos :setProdutosProp,itensPassados, titulo, carrinhoItens,produto}  ) {
     
     const [produtos,setProdutos] = useState([]);
     const [index, setIndex] = useState(0);
@@ -41,9 +41,9 @@ function Carousel({produtos: produtosProp, setProdutos :setProdutosProp,itensPas
   
 
     return (
-    <div className="container-carousel-carrinho">
-        <div className="titulo-produtos-carousel">
-        <div className="titulo-carousel"><h2>{titulo}</h2></div>
+    <div className="container-carousel-carrinho-pagina-produto">
+        <div className="titulo-produtos-carousel-pagina-produto">
+        <div className="titulo-carousel-pagina-produto"><h2>{titulo}</h2></div>
             <div className="carousel-wrapper">
             <button className="seta-esquerda-carousel" onClick={prev}>
                     <img src="/images/setinha-esquerda.png" className="setinha-esquerda-banner" />
@@ -55,10 +55,9 @@ function Carousel({produtos: produtosProp, setProdutos :setProdutosProp,itensPas
           style={{ transform: `translateX(calc(-${index * (250 * itensPassados)}px - ${index * 10 * itensPassados}px))` }}
         >
           {produtosAtuais.map((item, i) => {
-            const jaNoCarrinho = (carrinhoItens?.some((p) => {return p.produto_id === item.id}));
-            if(jaNoCarrinho) return null;
+                if(item.id === produto.produto_id) return null;
             return (
-            <div className="card-carousel-carrinho" key={i}>
+            <div className="card-carousel-carrinho-pagina-produto" key={i}>
               <img src={item.url} alt={item.nome} className="imagem-carousel" />
               <p className="nome-produto">{item.nome.length > 20 ? item.nome.slice(0,17) + "..." : item.nome}</p>
               <p>R$ {item.preco}</p>
@@ -82,4 +81,4 @@ function Carousel({produtos: produtosProp, setProdutos :setProdutosProp,itensPas
             )
 }
 
-export default Carousel;
+export default CarouselPaginaProduto;

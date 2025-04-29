@@ -12,18 +12,22 @@ const calcularDesconto = (desconto) => {
 function ModalCarrinho({fecharModalCarrinho,quantidadeSelecionada}){
 
     const [produtos,setProdutos] = useState([]);
-    const {carrinhoItens} = useCarrinho();
+    const {carrinhoItens,obterCarrinho} = useCarrinho();
     const [outrosProdutos,setOutrosProdutos] = useState([]);
     const navigate = useNavigate();
+
+    const ultimoItem = carrinhoItens[carrinhoItens.length - 1];
+
 const fetchProducts = async () => {
     try{
+        await obterCarrinho();
         const respostas = await Promise.all(carrinhoItens.map(item => axios.get(`http://localhost:5000/produto/${item.produto_id}`)));
-        console.log(`Resposta é`,respostas);
         const produtosComQuantidade = respostas.map((res,index) => ({
             ...res.data.produto,
             quantidade:quantidadeSelecionada
         }))
         setProdutos(produtosComQuantidade);
+
     }
     catch(err){
         console.error("Não foi possível carregar o produto");
@@ -48,7 +52,6 @@ useEffect(() => {
 },[setOutrosProdutos,carrinhoItens]);
 
 useEffect(() => {
-    console.log(produtos);
 })
     return (
         <div className="modal-carrinho">
@@ -56,22 +59,31 @@ useEffect(() => {
             <div className="container-imagem-fechar-modal">
             <img onClick={() => fecharModalCarrinho()}src = "/images/close.png" className= "imagem-fechar-modal" />
             </div>
-            {produtos.map((produto, index) => {
-                console.log(`O produto é`,produto);
-    return (
-        <div key={index} className="container-imagem-item-carrinho">
-            <div className="container-imagem-icone-verificado">
-            <img src={produto.imagens?.[0]} className="imagem-produto-modal-carrinho" alt={produto.produto_nome} />
-            <img src="/images/verificado.png" className="imagem-verificado"/>
-            </div>
-            <div className="texto-item-carrinho">
-                <p className="titulo-adicionado-ao-carrinho">Adicionado ao carrinho</p>
-                <p>{produto.produto_nome > 26 ? produto.produto_nome.slice(0,23) + "..." : produto.produto_nome}</p>
-                <p>{produto.quantidade > 1 ? produto.quantidade + ` unidades` : produto.quantidade + ` unidade`} </p>
-            </div>
+            {produtos.length > 0 && (
+    <div className="container-imagem-item-carrinho">
+        <div className="container-imagem-icone-verificado">
+            <img 
+                src={produtos[produtos.length - 1].imagens?.[0]} 
+                className="imagem-produto-modal-carrinho" 
+                alt={produtos[produtos.length - 1].produto_nome} 
+            />
+            <img src="/images/verificado.png" className="imagem-verificado" />
         </div>
-    );
-})}
+        <div className="texto-item-carrinho">
+            <p className="titulo-adicionado-ao-carrinho">Adicionado ao carrinho</p>
+            <p>
+                {produtos[produtos.length - 1].produto_nome.length > 26 
+                    ? produtos[produtos.length - 1].produto_nome.slice(0, 23) + "..." 
+                    : produtos[produtos.length - 1].produto_nome}
+            </p>
+            <p>
+                {produtos[produtos.length - 1].quantidade > 1 
+                    ? produtos[produtos.length - 1].quantidade + " unidades" 
+                    : produtos[produtos.length - 1].quantidade + " unidade"}
+            </p>
+        </div>
+    </div>
+)}
             <div className="segunda-secao-modal-carrinho">
                 <div className="titulo-outros-produtos-modal-carrinho">
                 <p>Aproveite os nossos outros produtos com desconto</p>

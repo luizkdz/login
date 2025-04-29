@@ -388,13 +388,13 @@ if(tipoProduto){
 app.get("/busca-produto/:nomeProduto?", async (req,res) => {
     try{
         const nomeProduto= req.params.nomeProduto || '';
-        console.log(nomeProduto);
+        
         const localidade = req.query.localidade || '';
         const precoMin = req.query.precoMin;
         const precoMax = req.query.precoMax;
         const ordenarPor = req.query.ordenarPor;
         const {preco,marcas,categoria,promocoes,entrega,avaliacao,vendidoPor,tipoCompra,tipoProduto} = req.query;
-        console.log(ordenarPor);
+        
         const params = [localidade];
         let query = `SELECT 
     p.id, p.nome, p.preco, p.descricao, p.preco_parcelado, 
@@ -560,8 +560,7 @@ app.get("/sugestoes-produto/:nomeProduto", async (req,res) => {
 app.get("/produto/:id", async (req, res) => {
     const {id} = req.params;
     const {corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId } = req.query;
-    console.log(`corId é`,corId)
-    console.log(`materiaisId é`,materiaisId);
+    
     const params = [];
     try {
     let query = `SELECT 
@@ -689,6 +688,18 @@ app.get("/produto/:id", async (req, res) => {
 
     const [materiais] = await db.query("select m.id, m.valor from material m join produtos_materiais pm on m.id = pm.material_id and pm.produto_id = ?",[id]);
 
+    const [dimensoes] = await db.query("SELECT d.id,d.largura,d.comprimento,d.altura,d.unidade from dimensoes d join produtos_dimensoes pd on d.id=pd.dimensoes_id and pd.produto_id = ?",[id]);
+
+    const [estampas] = await db.query("SELECT e.id, e.valor from estampas e join produtos_estampas pe on e.id=pe.estampa_id and pe.produto_id = ?",[id]);
+
+    const [generos] = await db.query("SELECT g.id, g.valor from generos g join produtos_genero pg on g.id=pg.genero_id and pg.produto_id = ?",[id]);
+
+    const [pesos] = await db.query("SELECT p.id, p.valor,p.unidade from pesos p join produtos_pesos pp on p.id=pp.peso_id and pp.produto_id = ?",[id]);
+
+    const [voltagens] = await db.query("SELECT v.id, v.valor from voltagens v join produtos_voltagens pv on v.id=pv.voltagens_id and pv.produto_id = ?",[id]);
+
+    const [tamanhos] = await db.query("SELECT t.id, t.valor from tamanhos t join produtos_tamanhos pt on t.id=pt.tamanho_id and pt.produto_id = ?",[id]);
+    
     const [vendedores] = await db.query("select u.nome, u.created_at,ve.total_vendidos,ve.nota_entrega,ve.nota_atendimento from usuarios u join produtos p ON p.user_id = u.id left join vendedores_estatisticas ve on ve.user_id = u.id where p.id = ?",[id]);
 
     const [usuariosComentarios] = await db.query("SELECT u.nome,u.foto_url, a.created_at, a.nota, a.comentario FROM usuarios u JOIN avaliacoes a ON u.id = a.usuario_id WHERE a.produto_id = ? ",[id]);
@@ -741,6 +752,12 @@ app.get("/produto/:id", async (req, res) => {
             totalComentarios,
             cor,
             materiais,
+            dimensoes,
+            estampas,
+            generos,
+            pesos,
+            voltagens,
+            tamanhos,
             frete:frete.length ? frete : null,
             vendedores: vendedoresFormatados,
             usuariosComentarios: usuariosComentarios.map((comentario) => ({
@@ -804,7 +821,7 @@ const buscaFretePorProduto = async (produto_id, cidade) => {
 
     const [resultado] = await db.query(query,params);
 
-    console.log('O resultado é ',resultado[0]);
+    
     return resultado.length > 0 ? resultado[0] : {valor:25.00, prazo: 7};
 }
 
@@ -906,6 +923,7 @@ app.get("/cart", async (req,res) => {
         GROUP_CONCAT(DISTINCT co.id) AS cores_ids,
         GROUP_CONCAT(DISTINCT co.valor) AS cores,
         GROUP_CONCAT(DISTINCT d.id) as dimensoes_ids,
+        GROUP_CONCAT(DISTINCT d.unidade) as dimensoes_unidade,
         GROUP_CONCAT(DISTINCT d.largura ORDER BY d.largura) AS larguras,
         GROUP_CONCAT(DISTINCT d.altura ORDER BY d.altura) AS alturas,
         GROUP_CONCAT(DISTINCT d.comprimento ORDER BY d.comprimento) AS comprimentos,
@@ -916,7 +934,8 @@ app.get("/cart", async (req,res) => {
         GROUP_CONCAT(DISTINCT ma.id) as materiais_ids,
     GROUP_CONCAT(DISTINCT ma.valor) AS materiais,  -- Agrupando materiais
     GROUP_CONCAT(DISTINCT pe.id) as pesos_ids,
-    GROUP_CONCAT(DISTINCT pe.valor) AS pesos,  -- Agrupando pesos
+    GROUP_CONCAT(DISTINCT pe.valor) AS pesos,
+    GROUP_CONCAT(DISTINCT pe.unidade) AS pesos_unidade,  -- Agrupando pesos
     GROUP_CONCAT(DISTINCT ta.id) as tamanhos_ids,
     GROUP_CONCAT(DISTINCT ta.valor) AS tamanhos,  -- Agrupando tamanhos
     GROUP_CONCAT(DISTINCT vo.id) as voltagem_ids,
@@ -989,15 +1008,16 @@ app.get("/cart", async (req,res) => {
     return res.status(200).json(resultado);
     }
     catch(err){
-    return res.status(400).json({message:"Não foi possível retornar os itens do carrinho",err});
+    return res.status(500).json({message:"Não foi possível retornar os itens do carrinho",err});
     }
 })
 app.post("/cart" , autenticarToken, async (req,res) => {
     const {produtoId, quantidade, corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId} = req.body;
+    
+    console.log(`dimensoesIde`,dimensoesId);
     const userId = req.usuarioId;
     try{
-        console.log(`materiaisId é`,materiaisId);
-        console.log(`corId é`, corId);
+        
         const [carrinho] = await db.query("SELECT id from carts where usuario_id = ?",[userId]);
 
         let cartId;
@@ -1154,8 +1174,7 @@ app.post("/cart" , autenticarToken, async (req,res) => {
         
         const [novoItem] = await db.query(sql, values);
         cartItemId = novoItem.insertId;
-        console.log(cartItemId);
-        console.log(cartId);
+        
     if(corId) {
         await db.query(`INSERT INTO cart_item_cores (cart_item_id, cor_id) values (? , ?)`,[cartItemId,corId]);
     }
@@ -1303,15 +1322,14 @@ app.put("/cart/:itemId",autenticarToken, async (req,res) => {
         const [resultado] = await db.query(segundaQuery,segundoParams);
         
 
-        console.log(`resultado e`,resultado);
+        
         if(resultado.length > 0){
             const itemExistente = resultado[0];
-            console.log(resultado[1]);
+            
             if(itemExistente){
                 
                 await db.query(`UPDATE cart_items SET quantidade = quantidade + ? where id = ? `,[quantidade,itemExistente.id]);
-                console.log(`itemExistente e`,itemExistente);
-            console.log(`itemId é`, itemId);
+                
             if(alterar){
                 await db.query(`delete from cart_items where id = ?`, [itemId]); 
             }
@@ -1419,7 +1437,7 @@ app.get("/itens-salvos", autenticarToken, async(req,res) => {
     const userId = req.usuarioId
     const params = [];
     let query = `SELECT it.id ,it.produto_id,it.nome, it.url, it.quantidade,it.preco,it.created_at,
-    v.valor as voltagem_valor,t.valor as tamanho_valor,p.valor as peso_valor,m.valor as material_valor ,g.valor as genero_valor,e.valor as estampa_valor,d.largura,d.altura,d.comprimento,
+    v.valor as voltagem_valor,t.valor as tamanho_valor,p.valor as peso_valor,p.unidade as peso_unidade,m.valor as material_valor ,g.valor as genero_valor,e.valor as estampa_valor,d.largura,d.altura,d.comprimento,d.unidade as dimensoes_unidade,
     c.id as cor_id,
     c.valor as cor_valor,
     v.id as voltagem_id,
@@ -1640,8 +1658,7 @@ app.post("/itens-salvos",autenticarToken, async (req,res) => {
             const [resultado] = await db.query(terceiraQuery,terceiroParams);
             
             itemSalvo = resultado.insertId;
-            console.log(`item salvo é`,itemSalvo);
-            console.log(`materiais id é `,materiaisId);
+            
 
             if(corId){
                 await db.query(`INSERT INTO itens_salvos_cores (item_salvo_id, cor_id)
@@ -1702,7 +1719,7 @@ app.put("/itens-salvos/:itemId", autenticarToken, async (req,res) => {
     const userId = req.usuarioId
     
     const {quantidade, corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId, alterar} = req.body;
-    console.log(req.body);
+    
     try{ 
         let query = `UPDATE itens_salvos SET `
         let updates = [];
@@ -1761,7 +1778,7 @@ app.put("/itens-salvos/:itemId", autenticarToken, async (req,res) => {
         }
 
         const [primeiroResultado] = await db.query(query,params);
-        console.log(`pre`,primeiroResultado);
+        
         
         
         const segundoParams = [];
@@ -1812,16 +1829,15 @@ app.put("/itens-salvos/:itemId", autenticarToken, async (req,res) => {
 
         const [resultado] = await db.query(segundaQuery,segundoParams);
 
-        console.log(`resultadoe`,resultado[0]);
+        
 
         if(resultado.length > 0){
             const itemExistente = resultado[0];
-            console.log(`itEEEE`,itemExistente);
+            
             if(itemExistente){
-                console.log()
+                
                 await db.query(`UPDATE itens_salvos set quantidade = ? where id = ?`,[quantidade,itemExistente.id]);
-                console.log(`iteE`,itemExistente.id);
-            console.log(`itemId é`, itemId);
+                
             if(alterar){
                 await db.query(`delete from itens_salvos where id = ?`, [itemId]); 
             }
@@ -1869,7 +1885,7 @@ app.put("/itens-salvos/:itemId", autenticarToken, async (req,res) => {
 app.delete("/itens-salvos",autenticarToken, async (req,res) => {
     const {produtoId, corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId} = req.body
     const userId = req.usuarioId
-    console.log(`Produto id é:`,produtoId, userId);
+    
     try{
         const params = [];
         let query =`DELETE FROM itens_salvos where 1=1`;
@@ -1922,6 +1938,17 @@ app.delete("/itens-salvos",autenticarToken, async (req,res) => {
     }
     catch(err){
         return res.status(500).json({message:"Erro interno do servidor"});
+    }
+})
+
+app.get("/categorias-tipo", async (req,res) => {
+    try{
+        const [resultado] = await db.query("Select * from categorias_tipos");
+
+        return res.status(200).json(resultado);
+    }
+    catch(err){
+        return res.status(500).json({message:"Não foi possivel carregar as categorias"})
     }
 })
 

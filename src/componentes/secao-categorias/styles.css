@@ -1,0 +1,116 @@
+.titulo-card-categoria-container{
+    display:flex;
+    width:1330px;
+    gap:20px;
+    padding-right:20px;
+    justify-content: space-between;
+}
+
+.secao-categorias{
+    padding-top:3rem;
+    padding-bottom:3rem;
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #111111;
+}
+
+.container-cards-categoria{
+    position:relative;
+    display:flex;
+    width:1330px;
+    gap:30px;
+    flex-wrap:wrap;
+    padding-bottom:30px;
+    
+}
+
+.card-cada-categoria{
+    align-items: center;
+    display:flex;
+    width:300px;
+    height:120px;
+    flex: 0 0 calc(20% - 20px);
+    gap:20px;
+    box-sizing: border-box;
+    border: 2px solid #f0f0f0;
+    background-color: white;
+    border-radius: 6px;
+}
+
+.imagem-card-cada-categoria{
+    width:80px;
+    height:80px;
+}
+
+.container-imagem-card-cada-categoria{
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    background-color:#f0f0f0;
+    width:120px;
+    height:120px;
+    padding:20px;
+}
+
+
+
+
+
+.container-cards-categoria{
+    display:flex;
+    justify-content: center;
+}
+
+.card-todas-categorias{
+    box-sizing: border-box;
+    border: 2px solid #f0f0f0;
+    border-radius: 12px;
+    width:1330px;
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: white;
+}
+
+.container-secao-categorias{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.texto-titulo-card-categoria{
+    display:flex;
+    gap:30px;
+    align-items: center;
+    padding: 20px;
+}
+
+.container-texto-valor-card-cada-categoria{
+    margin-right:20px;
+}
+
+.container-texto-valor-card-cada-categoria p {
+    width:140px;
+}
+
+.indicador {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #ccc;
+    cursor: pointer;
+}
+
+.indicador.ativo {
+    background-color: #111111;
+}
+
+.indicadores-card-categoria{
+    padding-top:30px;
+    padding-right:5px;
+    display:flex;
+    gap:10px;
+}

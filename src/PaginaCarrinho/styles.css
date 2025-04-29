@@ -269,12 +269,12 @@
 .titulo-inputs-alterar{
     display:flex;
     flex-direction: column;
-    padding:56px;
+    padding:10px;
     position:relative;
 }
 
 .titulo-alterar{
-    padding-left:34px;
+    margin-bottom:10px;
 }
 
 .container-input-alterar{
@@ -282,7 +282,7 @@
     flex-direction: column;
     gap:5px;
     margin:25px;
-    padding:15px;
+    
     width:280px;
     height:48px;
     position:relative;
@@ -290,7 +290,7 @@
 
 .botao-atualizar-alterar{
     position:absolute;
-    bottom: 10%;
+    bottom: 0%;
     right:9%;
     width:280px;
     height:48px;
@@ -317,6 +317,7 @@
     width:280px;
     position: absolute;
     top:163%;
+    margin-top:-5px;
     padding:15px;
     background-color: white;
     border: 1px solid #bfbfbf;
@@ -346,11 +347,12 @@
 .container-atributos-suportados{
     margin-top:5px;
     display:flex;
+    flex-wrap:wrap;
     gap:10px;
 }
 
 .card-atributo-suportado{
-    width:100%;
+    width:30%;
     padding:5px;
     box-sizing: border-box;
     border: 1px solid #BFBFBF;

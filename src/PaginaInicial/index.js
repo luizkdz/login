@@ -8,6 +8,7 @@ import SecaoOfertas from "../componentes/secao-ofertas/index.js";
 import Footer from "../componentes/footer/index.js";
 import SecaoCarouselPropagandas from '../componentes/secao-carousel-propagandas/index.js';
 import SecaoAnuncios from '../componentes/secao-anuncios/index.js';
+import SecaoCategorias from '../componentes/secao-categorias/index.js';
 function PaginaInicial() {
   
   return (
@@ -17,8 +18,7 @@ function PaginaInicial() {
       <SecaoCarouselPropagandas/>
       <SessaoProdutos/>
       <SecaoAnuncios/>
-      
-      
+      <SecaoCategorias/>
       <Conecte/>
       <Footer/>
       

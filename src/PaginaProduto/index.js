@@ -10,8 +10,63 @@ import { useCep } from '../context/CepContext';
 import ModalCep from '../componentes/modalCep/ModalCep';
 import { useCarrinho } from '../context/carrinhoContext';
 import ModalCarrinho from '../componentes/modalCarrinho/index.js';
+import Carousel from '../componentes/carousel/index.js';
+import CarouselPaginaProduto from '../componentes/carousel-pagina-produtos/index.js';
+import CardAnuncio from '../componentes/card-anuncio/index.js';
+import CardAnuncioPaginaProduto from '../componentes/card-anuncio-pagina-produto/index.js';
 
 function PaginaProduto(){
+
+    const cards = [{titulo:"CASHBACK ELECTROLUX",
+        logo:"/images/html-5.png",
+        descricao:"RECEBA ATÉ R$ 1200 DE PIX NA CONTA",
+        link:"Compre já",
+        imagem:"/images/coca-cola-anuncio.jpg"
+    },
+    {titulo:"Perfume do Cristiano",
+        logo:"/images/js.png",
+        descricao:"TECNOLOGIA PARA QUEM VOCÊ AMA",
+        link:"Aproveite",
+        imagem:"/images/perfume-anuncio.jpg"
+    }
+    ]
+
+    const meiosDePagamento = [{titulo: "Linha de Crédito",
+        imagem1:"/images/atm-machine-metodos-pagamento.png",
+        imagem2:"",
+        imagem3:"",
+        imagem4:"",
+        
+    },
+    {titulo: "Cartões de crédito",
+        imagem1:"/images/bank-transfer-metodos-pagamento.png",
+        imagem2:"/images/coin-metodos-pagamento.png",
+        imagem3:"/images/contactless-metodos-pagamento.png",
+        imagem4:"/images/credit-card-metodos-pagamento.png",
+        
+    },
+    {titulo: "Cartões de débito",
+        imagem1:"/images/money-metodos-pagamento.png",
+        imagem2:"",
+        imagem3:"",
+        imagem4:"",
+        
+    },
+    {titulo: "Pix",
+        imagem1:"/images/payment-metodos-pagamento.png",
+        imagem2:"",
+        imagem3:"",
+        imagem4:"",
+        
+    },
+    {titulo: "Boleto bancário",
+        imagem1:"/images/numbers-metodos-pagamento.png",
+        imagem2:"",
+        imagem3:"",
+        imagem4:"",
+        
+    }]
+
     const {id} = useParams();
     const [produto,setProduto] = useState(null);
     const [imagemSelecionada, setImagemSelecionada] = useState("");
@@ -34,13 +89,13 @@ function PaginaProduto(){
     const [estampaSelecionada, setEstampaSelecionada] = useState(null);
     const [pesoSelecionado, setPesoSelecionado] = useState(null);
     const [dimensoesSelecionada, setDimensoesSelecionada] = useState(null);
-
+    const [outrosProdutos, setOutrosProdutos] = useState([]);
     const [selecoes, setSelecoes] = useState({
         cor: null,
         materiais: null,
-        voltagem: null,
+        voltagens: null,
         generos: null,
-        tamanho: null,
+        tamanhos: null,
         estampas: null,
         pesos: null,
         dimensoes: null,
@@ -48,12 +103,12 @@ function PaginaProduto(){
 
       const [hover, setHover] = useState({
         cor: null,
-        voltagem: null,
+        voltagens: null,
         dimensao: null,
         peso: null,
         genero: null,
         estampa: null,
-        tamanho: null,
+        tamanhos: null,
         material: null,
       });
     
@@ -64,11 +119,29 @@ function PaginaProduto(){
         }));
       };
       const handleHover = (atributo, valor) => {
-        setHover((prevHover) => ({
-          ...prevHover,
-          [atributo]: valor,
-        }));
-      };
+        let valorFormatado = valor;
+
+        if(valor !== null){
+            if(atributo === "dimensoes"){
+                valorFormatado = `${valor.largura} ${valor.unidade} x ${valor.altura} ${valor.unidade} x ${valor.comprimento} ${valor.unidade}`;
+            }
+            else if(atributo === "pesos"){
+                valorFormatado = `${valor.valor} ${valor.unidade}`; 
+            }
+            else if(atributo === "voltagens"){
+                valorFormatado = `${valor.valor}V`;
+            }
+            
+          }
+          else{
+            valorFormatado="";
+          }
+          setHover((prevHover) => ({
+            ...prevHover,
+            [atributo]: valorFormatado,
+          }));
+        }
+        
     
     const {obterCarrinho, editarQuantidadeItemCarrinho, excluirItemCarrinho, carrinhoItens,setCarrinhoItens, adicionarAoCarrinho} = useCarrinho();
 
@@ -104,27 +177,31 @@ function PaginaProduto(){
             const resposta = await axios.get(`http://localhost:5000/produto/${id}`);
             const produtoBuscado = resposta.data.produto;
             setProduto(produtoBuscado);
-            setImagemSelecionada(produtoBuscado.imagens[0]);
-            setCorSelecionada(produtoBuscado.cor?.[0].valor);
-            setMaterialSelecionado(produtoBuscado?.materiais?.[0].id);
-            setVoltagemSelecionada(produtoBuscado?.voltagem?.[0].id);
-            setGeneroSelecionado(produtoBuscado?.genero?.[0].id);
-            setTamanhoSelecionado(produtoBuscado?.tamanho?.[0].id);
-            setEstampaSelecionada(produtoBuscado?.estampa?.[0].id);
-            setPesoSelecionado(produtoBuscado?.peso?.[0].id);
-            setDimensoesSelecionada(produtoBuscado?.dimensoes?.[0].id);
+            setImagemSelecionada(produtoBuscado.imagens[0] || null);
+            setCorSelecionada(produtoBuscado.cor?.[0].id || null );
+            setMaterialSelecionado(produtoBuscado?.materiais?.[0].id ||  null );
+            setVoltagemSelecionada(produtoBuscado?.voltagens?.[0].id || null);
+            setGeneroSelecionado(produtoBuscado?.generos?.[0].id || null);
+            setTamanhoSelecionado(produtoBuscado?.tamanhos?.[0].id || null);
+            setEstampaSelecionada(produtoBuscado?.estampas?.[0].id || null);
+            setPesoSelecionado(produtoBuscado?.pesos?.[0].id || null);
+
+            setDimensoesSelecionada(produtoBuscado?.dimensoes?.[0].id ||  null);
             setSelecoes({
                 cor: produtoBuscado?.cor?.[0]?.valor,
                 materiais: produtoBuscado?.materiais?.[0]?.valor,   
-                voltagem: produtoBuscado.voltagens?.[0]?.valor,
+                voltagens: produtoBuscado?.voltagens?.[0]?.valor ? `${produtoBuscado.voltagens[0].valor}V` : undefined,
                 generos: produtoBuscado.generos?.[0]?.valor,
-                tamanho: produtoBuscado.tamanhos?.[0]?.valor,
+                tamanhos: produtoBuscado.tamanhos?.[0]?.valor,
                 estampas: produtoBuscado.estampas?.[0]?.valor,
-                pesos: produtoBuscado.pesos?.[0]?.valor,
-                dimensoes: produtoBuscado.dimensoes?.[0]?.valor,
+                pesos: produtoBuscado?.pesos?.[0]?.valor && produtoBuscado?.pesos?.[0]?.unidade 
+           ? `${produtoBuscado.pesos[0].valor} ${produtoBuscado.pesos[0].unidade}` 
+           : undefined,
+                dimensoes: produtoBuscado?.dimensoes?.[0]?.largura && produtoBuscado?.dimensoes?.[0]?.altura && produtoBuscado?.dimensoes?.[0]?.comprimento
+               ? `${produtoBuscado.dimensoes[0].largura} ${produtoBuscado.dimensoes[0].unidade} x ${produtoBuscado.dimensoes[0].altura} ${produtoBuscado.dimensoes[0].unidade} x ${produtoBuscado.dimensoes[0].comprimento} ${produtoBuscado.dimensoes[0].unidade}` 
+               : undefined,
               });
-              console.log(produtoBuscado?.materiais?.[0]?.valor)
-              console.log(produtoBuscado?.cor?.[0]?.valor)
+
           } catch (err) {
             console.error("Erro ao buscar produto", err);
           }
@@ -144,6 +221,10 @@ function PaginaProduto(){
           );
         }
       }, [produto, cep]);
+
+      useEffect(() => {
+        fetchOtherProducts()
+      },[])
 
 
     const abrirModalCarrinho = () => {
@@ -170,7 +251,17 @@ function PaginaProduto(){
             estrelas.push(<img key={estrelas.length} src="/images/estrelavazia.png" className="estrela-avaliacao" alt="☆" />);
         }
         return estrelas;
-    };    
+    };
+    
+    const fetchOtherProducts = async () => {
+        try{
+            const resposta = await axios.get(`http://localhost:5000/produtos`);
+            setOutrosProdutos(resposta.data);
+        }
+        catch(err){
+            console.error("Não foi possível carregar os outros produtos");
+        }
+    }
 
     return (
         <div>
@@ -184,6 +275,8 @@ function PaginaProduto(){
                     </div>
                     <div className="container-frete">
                     <div className="container-imagens">
+                    <div className="container-imagem-falando-carousel">
+                        <div className="container-imagens-imagem">
                     <div className="container-imagem-card-produto">
                     {produto.imagens?.slice(0,5).map((imagem, index) => (
         <img key={index} className="imagem-card-pagina-produto"src={imagem}  alt={produto.nome} onMouseOver={() => setImagemSelecionada(imagem)}/>
@@ -193,6 +286,14 @@ function PaginaProduto(){
                     
                     <div className="container-imagem-pagina-produto">
                     <img className="imagem-pagina-produto" src={imagemSelecionada} alt={produto.nome} />
+                    
+                    </div>
+                    </div>
+                    <h2>O que os clientes estão falando do produto</h2>
+                    <p>De acordo com os consumidores, este item se destaca pela praticidade e facilidade de uso, além de ser elogiado por seu design compacto e bonito. A maioria dos usuários descreve as bebidas como deliciosas, embora alguns comentem que a temperatura e a quantidade poderiam ser melhoradas.</p>
+                    De acordo com os consumidores, este item se destaca pela praticidade e facilidade de uso, além de ser elogiado por seu design compacto e bonito. A maioria dos usuários descreve as bebidas como deliciosas, embora alguns comentem que a temperatura e a quantidade poderiam ser melhoradas.
+                    
+                    
                     </div>
                     <div className="container-preco-avaliacao">
                         <p>{calcularEstrelas(produto.mediaAvaliacoes)} {produto.mediaAvaliacoes} ({produto.totalAvaliacoes}) <a href="#">Avaliar Produto</a></p>
@@ -220,9 +321,9 @@ function PaginaProduto(){
                             {Object.entries(produto).map(([nome, opcoes]) => {
                                 const atributosSuportados = [
                                     "cor",
-                                    "voltagem",
+                                    "voltagens",
                                     "generos",
-                                    "tamanho",
+                                    "tamanhos",
                                     "materiais",
                                     "estampas",
                                     "pesos",
@@ -232,10 +333,27 @@ function PaginaProduto(){
 
                                 
                                 if (atributosSuportados.includes(nome) && Array.isArray(opcoes) && opcoes.length > 0) {
-                                    const exibirHover = hover[nome] || selecoes[nome] || opcoes[0].valor
+                                    let exibirHover;
+                                    if(nome === "dimensoes"){
+                                        exibirHover = hover[nome] || selecoes[nome] || `${opcoes[0].largura} ${opcoes[0].unidade} x ${opcoes[0].altura} ${opcoes[0].unidade} x ${opcoes[0].comprimento} ${opcoes[0].unidade}`
+                                    }
+                                    else if(nome === "pesos"){
+                                        exibirHover = hover[nome] || selecoes[nome] || `${opcoes[0].valor} ${opcoes[0].unidade}`
+                                    }
+                                    else if(nome === "voltagens"){
+                                        exibirHover = hover[nome] || selecoes[nome] || `${opcoes[0].valor}V`
+                                    }
+                                    else{
+                                        exibirHover = hover[nome] || selecoes[nome] || opcoes[0].valor
+                                    }
+                                        
+                                   
+                                    
+                                    
                                     return (
                                     <div className="card-variacao" key={nome}>
-                                        {nome.charAt(0).toUpperCase() + nome.slice(1)}: {exibirHover}
+                                        {nome.charAt(0).toUpperCase() + nome.slice(1)}:{exibirHover}
+                                        
                                         <div className={`container-card-${nome}`}>
                                         {opcoes?.map((item) => {
                                             return (
@@ -244,19 +362,28 @@ function PaginaProduto(){
                                                 onClick={() => {
                                                 
                                                 // Atualiza a seleção de atributos
-                                                ;setSelecoes((prevSelecoes) => ({
+                                                let valorFormatado = item.valor;
+                                                if(nome === "dimensoes"){
+                                                    valorFormatado = `${item.largura} ${item.unidade} x ${item.altura} ${item.unidade} x ${item.comprimento} ${item.unidade}`;
+                                                }
+                                                else if (nome === "pesos") {
+                                                    valorFormatado = `${item.valor} ${item.unidade}`;
+                                                  } else if (nome === "voltagens") {
+                                                    valorFormatado = `${item.valor}V`;
+                                                  }
+                                                setSelecoes((prevSelecoes) => ({
                                                     ...prevSelecoes,
-                                                    [nome]: item.valor,
+                                                    [nome]: valorFormatado,
                                                 }));
                                                 if(nome === "cor")
                                                 setCorSelecionada(item.id);
                                                 if(nome === "materiais")
                                                 setMaterialSelecionado(item.id);
-                                                if(nome === "voltagem")
+                                                if(nome === "voltagens")
                                                 setVoltagemSelecionada(item.id);
                                                 if(nome === "generos")
                                                 setGeneroSelecionado(item.id);
-                                                if(nome === "tamanho")
+                                                if(nome === "tamanhos")
                                                 setTamanhoSelecionado(item.id);
                                                 if(nome === "estampas")
                                                 setEstampaSelecionada(item.id);
@@ -264,12 +391,53 @@ function PaginaProduto(){
                                                 setPesoSelecionado(item.id);
                                                 if(nome === "dimensoes")
                                                 setDimensoesSelecionada(item.id);
-                                                console.log(`${nome} id é`, item.id);
+                                            
                                                 }}
-                                                onMouseEnter={() => handleHover(nome,item.valor)}
-                                                onMouseLeave={() => handleHover(nome,null)}
-                                                className={`card-valor-cor ${selecoes[nome] === item.valor ? "selecionado" : ""}`}                                            >
-                                                <p>{item.valor}</p>
+                                                onMouseEnter={() => {if(nome === "dimensoes"){
+                                                    
+                                                    handleHover(nome, {
+                                                        largura: item.largura,
+                                                        altura: item.altura,
+                                                        comprimento: item.comprimento,
+                                                        unidade: item.unidade,  // Caso também precise da unidade
+                                                      });
+                                                }
+                                                else if(nome === "pesos"){
+                                                    handleHover(nome,{
+                                                        valor:item.valor,
+                                                        unidade:item.unidade})
+                                                }
+                                                else if(nome === "voltagens"){
+                                                    handleHover(nome,{
+                                                        valor:item.valor,
+                                                        unidade:"V"
+                                                    })
+                                                }
+                                                else{
+                                                    handleHover(nome,item.valor)}}
+                                                }
+                                                
+                                                onMouseLeave={() => {
+                                                    
+                                                    handleHover(nome,null)}}
+                                                    className={`card-valor-cor ${
+                                                        nome === "dimensoes"
+                                                          ? selecoes[nome] === `${item.largura} ${item.unidade} x ${item.altura} ${item.unidade} x ${item.comprimento} ${item.unidade}` ||  `${produto.largura} ${produto.dimensoes_unidade} x ${produto.altura} ${produto.dimensoes_unidade} x ${produto.comprimento} ${produto.dimensoes_unidade}`
+                                                            ? "selecionado"
+                                                            : ""
+                                                          : nome === "pesos"
+                                                          ? selecoes[nome] === `${item.valor} ${item.unidade}`
+                                                            ? "selecionado"
+                                                            : ""
+                                                          : nome === "voltagens"
+                                                          ? selecoes[nome] == `${item.valor}V` || `${produto[nome]?.[0].valor}V`
+                                                            ? "selecionado"
+                                                            : ""
+                                                          : selecoes[nome] === item.valor || `${produto[nome].valor}`
+                                                          ? "selecionado"
+                                                          : ""
+                                                      }`}                                     >
+                                                <p>{nome === "dimensoes" ? `${item.largura}${item.unidade} x  ${item.altura}${item.unidade} x ${item.comprimento}${item.unidade}` : nome === "pesos" ? `${item.valor}${item.unidade}`:nome === "voltagens" ? `${item.valor}V`: item.valor}</p>
                                             </div>
                                             );
                                         })}
@@ -306,7 +474,19 @@ function PaginaProduto(){
                             
                         <div className="container-botoes">
                         <button className="botao-comprar-agora"><img src="/images/shopping-bag.png" className="imagem-bolsa"/>Comprar agora</button>
-                        <button className="botao-adicionar-carrinho" onClick={() => {console.log(`é`,produto.materiais[0]?.id);adicionarAoCarrinho(id,quantidadeSelecionada,corSelecionada,voltagemSelecionada,dimensoesSelecionada,pesoSelecionado,generoSelecionado,estampaSelecionada,tamanhoSelecionado,materialSelecionado);abrirModalCarrinho() }}><img src="/images/carrinho-de-compras.png" className="imagem-carrinho-botao"/>Adicionar ao carrinho</button>
+                        <button className="botao-adicionar-carrinho" onClick={ () => {console.log(produto
+);adicionarAoCarrinho(
+    id,
+    quantidadeSelecionada,
+    corSelecionada || (produto.cor?.[0]?.id || null),
+    voltagemSelecionada || (produto.voltagens?.[0]?.id || null),
+    dimensoesSelecionada || (produto.dimensoes?.[0]?.id || null),
+    pesoSelecionado || (produto.pesos?.[0]?.id || null),
+    generoSelecionado || (produto.generos?.[0]?.id || null),
+    estampaSelecionada || (produto.estampas?.[0]?.id || null),
+    tamanhoSelecionado || (produto.tamanhos?.[0]?.id || null),
+    materialSelecionado || (produto.materiais?.[0]?.id || null)
+  );;abrirModalCarrinho() }}><img src="/images/carrinho-de-compras.png" className="imagem-carrinho-botao"/>Adicionar ao carrinho</button>
                         <div className="card-cep">
                             <div className="container-imagem-cep">
                             <img src= "/images/localizacao.png" className="icone-localizacao-card-cep"/>
@@ -324,6 +504,25 @@ function PaginaProduto(){
                     </div>
                     
                     </div>
+                    <div className="secao-produtos-carousel-pagamentos">
+                    <CarouselPaginaProduto produtos={outrosProdutos} itensPassados={3} produto={produto} titulo="Explore e aproveite"/>
+                    <div className="card-meios-de-pagamento">
+                        <p>Meios de pagamentos</p>
+                        <button className="botao-meios-de-pagamento">Pague em até 7x sem juros!</button>
+                        {meiosDePagamento.map((item) => {return (
+                            <div className="container-linha-de-credito">
+                            <p>{item.titulo}</p>
+                            <div className="container-imagens-linha-de-credito">
+                            <img src={item.imagem1} className="imagem-meios-de-pagamento"/>
+                            {item.imagem2 !== "" ? <img src={item.imagem2} className="imagem-meios-de-pagamento"/> : ""}
+                            {item.imagem3 !== "" ? <img src={item.imagem3} className="imagem-meios-de-pagamento"/> : ""}
+                            {item.imagem4 !== "" ? <img src={item.imagem4} className="imagem-meios-de-pagamento"/>: ""}
+                            </div>
+                        </div>
+                        )})}
+                        
+                    </div>
+                    </div>
                     {mostrarModalCep && (
                                 <ModalCep fecharModalCep = {fecharModalCep} calcularFretePorCep={calcularFretePorCep} setLocalidade={setLocalidade} setPrazo={setPrazo} setValorFrete={setValorFrete} produtoId = {produto?.id}/>
                             )}
@@ -333,7 +532,11 @@ function PaginaProduto(){
                         
                     )}
                     <div className="container-card-frete">
-                        <div className="empty"></div>
+                    <div className="container-card-anuncio">
+                    {cards.map((item) => {return (
+                        <CardAnuncioPaginaProduto titulo={item.titulo} imagem={item.imagem} logo={item.logo} link={item.link} descricao={item.descricao}/>
+                    )})}
+                    </div>
                     <div className="card-frete">
                         <div className="container-imagem-texto">
                         <img src="/images/caminhao.png" className="imagem-caminhao-frete"/>
