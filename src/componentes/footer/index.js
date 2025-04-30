@@ -87,6 +87,19 @@ function Footer() {
             <a href="https://www.flaticon.com/free-icons/money" title="money icons">Money icons created by vectorsmarket15 - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/coin" title="coin icons">Coin icons created by kliwir art - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/cashier" title="cashier icons">Cashier icons created by smashingstocks - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/truck" title="truck icons">Truck icons created by Pixel perfect - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/safe" title="safe icons">Safe icons created by Arkinasi - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/recycle" title="recycle icons">Recycle icons created by Creative Stall Premium - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/shopping-cart" title="shopping cart icons">Shopping cart icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/transport" title="transport icons">Transport icons created by Ctrlastudio - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/credit-card" title="credit card icons">Credit card icons created by bqlqn - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/transfer" title="transfer icons">Transfer icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/credit-card" title="credit card icons">Credit card icons created by juicy_fish - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/credit-car" title="credit car icons">Credit car icons created by Ahsanu Nadia - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/coupons" title="coupons icons">Coupons icons created by Uniconlabs - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/document" title="document icons">Document icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/localization" title="localization icons">Localization icons created by hqrloveq - Flaticon</a>
             <p>&copy; 2025 Login ltda</p>
             </div>
         </footer>

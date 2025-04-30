@@ -90,6 +90,7 @@ function PaginaProduto(){
     const [pesoSelecionado, setPesoSelecionado] = useState(null);
     const [dimensoesSelecionada, setDimensoesSelecionada] = useState(null);
     const [outrosProdutos, setOutrosProdutos] = useState([]);
+    const [ultimoProdutoAtualizado, setUltimoProdutoAtualizado] = useState(null);
     const [selecoes, setSelecoes] = useState({
         cor: null,
         materiais: null,
@@ -291,8 +292,31 @@ function PaginaProduto(){
                     </div>
                     <h2>O que os clientes estão falando do produto</h2>
                     <p>De acordo com os consumidores, este item se destaca pela praticidade e facilidade de uso, além de ser elogiado por seu design compacto e bonito. A maioria dos usuários descreve as bebidas como deliciosas, embora alguns comentem que a temperatura e a quantidade poderiam ser melhoradas.</p>
-                    De acordo com os consumidores, este item se destaca pela praticidade e facilidade de uso, além de ser elogiado por seu design compacto e bonito. A maioria dos usuários descreve as bebidas como deliciosas, embora alguns comentem que a temperatura e a quantidade poderiam ser melhoradas.
-                    
+                    <div className="card-garantia-devolucao">
+                        <div className="icone-texto-entrega-garantia-devolucao">
+                            <img src="/images/delivery-truck.png" className="imagem-icone-texto-entrega-garantia"/>
+                            <div className="texto-entrega-garantia-devolucao">
+                                
+                            <div className="container-titulo-garantia-devolucao"><a style={{fontSize:"14px"}}href="#">Entrega Completa</a></div>
+                                <p style={{fontSize:"14px"}}>É entrega rápida, frete barato e mais segurança pra você</p>
+                            </div>
+                            </div>
+                            <div className="icone-texto-entrega-garantia-devolucao">
+                            <img src="/images/shield.png" className="imagem-icone-texto-entrega-garantia"/>
+                            <div className="texto-entrega-garantia-devolucao">
+                                <div className="container-titulo-garantia-devolucao"><a style={{fontSize:"14px"}} href="#">Garantia do Desenvolvedor</a></div>
+                                <p style={{fontSize:"14px"}} >Garantimos a sua compra do pedido à entrega</p>
+                                </div>
+                            </div>
+                            <div className="icone-texto-entrega-garantia-devolucao">
+                            <img src="/images/recycling-symbol.png" className="imagem-icone-texto-entrega-garantia"/>
+                            <div className="texto-entrega-garantia-devolucao">
+                            <div className="container-titulo-garantia-devolucao"><a style={{fontSize:"14px"}}  href="#">Devolução grátis</a></div>
+                                <p style={{fontSize:"14px"}} >É possível reembolsar ou trocar o item até 30 dias depois</p>
+                            </div>
+                            </div>
+                        
+                    </div>
                     
                     </div>
                     <div className="container-preco-avaliacao">
@@ -486,7 +510,7 @@ function PaginaProduto(){
     estampaSelecionada || (produto.estampas?.[0]?.id || null),
     tamanhoSelecionado || (produto.tamanhos?.[0]?.id || null),
     materialSelecionado || (produto.materiais?.[0]?.id || null)
-  );;abrirModalCarrinho() }}><img src="/images/carrinho-de-compras.png" className="imagem-carrinho-botao"/>Adicionar ao carrinho</button>
+  );setUltimoProdutoAtualizado(produto);abrirModalCarrinho() }}><img src="/images/carrinho-de-compras.png" className="imagem-carrinho-botao"/>Adicionar ao carrinho</button>
                         <div className="card-cep">
                             <div className="container-imagem-cep">
                             <img src= "/images/localizacao.png" className="icone-localizacao-card-cep"/>
@@ -528,7 +552,7 @@ function PaginaProduto(){
                             )}
                     {modalCarrinho && (
                         
-                        <ModalCarrinho fecharModalCarrinho={fecharModalCarrinho} quantidadeSelecionada={quantidadeSelecionada}/>
+                        <ModalCarrinho ultimoProdutoAtualizado= {ultimoProdutoAtualizado} fecharModalCarrinho={fecharModalCarrinho} quantidadeSelecionada={quantidadeSelecionada}/>
                         
                     )}
                     <div className="container-card-frete">

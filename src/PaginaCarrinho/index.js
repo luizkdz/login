@@ -346,7 +346,7 @@ const handleMostrarOpcoesSegundoInput = () => {
             
             </div>
             <div className="container-item-salvo">
-            <div className="card-item-salvo">
+            {itensSalvos.length > 0 ? <div className="card-item-salvo">
                 <div className="titulo-salvo-imagem">
                 <p>Produtos salvos</p>
                 <img src={itensSalvos?.[0]?.url} className={!mostrarProdutosSalvos ? "produto-salvo-imagem" : "produto-salvo-imagem-opacity"}/>
@@ -372,7 +372,7 @@ const handleMostrarOpcoesSegundoInput = () => {
                 
                 
                 
-            </div>
+            </div> : ""}
         </div>
             <div className="container-texto-recomendacoes">
             <p className="texto-recomendacoes">Recomendações para você</p>

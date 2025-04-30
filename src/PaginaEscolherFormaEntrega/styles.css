@@ -1,0 +1,239 @@
+.container-pagina-forma-entrega{
+    display:flex;
+    justify-content: space-evenly;
+    padding:3rem;
+}
+
+.pagina-toda-forma-entrega{
+    background-color: #f0f0f0;
+}
+
+.container-card-forma-entrega{
+    display:flex;
+    justify-content: space-between;
+}
+
+.container-card-forma-entrega-envio{
+    display:flex;
+    justify-content: space-between;
+    border-bottom: 2px solid #c1c1c1;
+    padding-bottom:20px;
+}
+
+.card-forma-entrega{
+    background-color: #F5F5F5;
+    box-sizing: border-box;
+    border: 2px solid #c1c1c1; 
+    padding:30px;
+    display:flex;
+    flex-direction: column;
+    gap:40px;
+    border-radius: 6px;
+}
+
+.container-alterar-endereco-pagina-forma-entrega{
+    box-sizing: border-box;
+    border-top: 2px solid #c1c1c1;
+    padding:20px 24px 20px 52px;
+}
+
+.input-radio-forma-entrega{
+    width:20px;
+    height:20px;
+}
+
+.container-texto-forma-entrega{
+    display:flex;
+    flex-direction: column;
+    gap:30px;
+}
+
+.botao-continuar-forma-entrega{
+    bottom:-100px;
+    right:0;
+    position:absolute;
+    width:120px;
+    height:50px;
+    background-color: #111111;
+    color:#F5F5F5;
+    border-radius: 6px;
+}
+
+.titulo-forma-entrega{
+    position: relative;
+    display:flex;
+    flex-direction: column;
+    gap:30px;
+    margin-bottom:100px;
+}
+
+.container-produto-preco-pagina-entrega{
+    display:flex;
+    justify-content: space-between;
+    box-sizing: border-box;
+    border-top:1px solid #c1c1c1;
+    padding-top:20px;
+    
+}
+
+.container-voce-pagara{
+    display:flex;
+    justify-content: space-between;
+}
+
+.card-resumo-compra-pagina-entrega{
+    border: 2px solid #c1c1c1;
+    border-radius: 6px;
+    background-color: #F5F5F5;
+    display:flex;
+    flex-direction: column;
+    gap:25px;
+    padding:48px;
+    width:412px;   
+}
+
+.container-icones-pagina-forma-entrega{
+    display:flex;
+    padding:3rem;
+    gap:30px;
+    justify-content: center;
+}
+
+.imagem-icone-pagina-entrega{
+    width:80px;
+    height:80px;
+    box-sizing: border-box;
+    border: 2px solid #c1c1c1;
+    padding:20px;
+    border-radius: 50%;
+}
+
+.imagem-icone-pagina-entrega-verde{
+    width:80px;
+    height:80px;
+    box-sizing: border-box;
+    border: 2px solid #58c22e;
+    padding:20px;
+    border-radius: 50%;
+}
+
+.imagem-icone-pagina-entrega-azul{
+    width:80px;
+    height:80px;
+    box-sizing: border-box;
+    border: 2px solid #0086ff;
+    padding:20px;
+    border-radius: 50%;
+}
+
+.icone-texto-pagina-forma-entrega{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    gap:10px;
+}
+
+.container-dias-uteis{
+    display:flex;
+    justify-content: space-between;
+}
+
+.container-input-texto-envio{
+    display:flex;
+    gap:20px;
+}
+
+.container-card-frete-pagina-entrega{
+    display:flex;
+    justify-content: space-between;
+}
+
+.card-frete-pagina-entrega{
+    box-sizing: border-box;
+    border:2px solid #c1c1c1;
+    padding:20px;
+    border-radius: 6px;
+}
+
+.container-input-tempo-entrega{
+    display:flex;
+    gap:20px;
+    align-items: center;
+}
+
+.container-input-pix{
+    display:flex;
+    align-items: center;
+    gap:20px;
+}
+
+.logo-icones-pagamento-pagina-entrega{
+    width:50px;
+    height:50px;
+}
+
+.card-forma-entrega-pagamento{
+    background-color: #F5F5F5;
+    box-sizing: border-box;
+    border: 2px solid #c1c1c1; 
+    padding:30px;
+    display:flex;
+    flex-direction: column;
+    gap:40px;
+    width:600px;
+    border-radius: 6px;
+}
+
+.container-frete-pagina-entrega{
+    display:flex;
+    justify-content: space-between;
+}
+
+.preco-produto-frete-pagina-entrega{
+    box-sizing: border-box;
+    border-bottom: 1px solid #c1c1c1;
+    display:flex;
+    flex-direction: column;
+    gap:5px;
+}
+
+.container-modificar-dados-faturamento{
+    box-sizing: border-box;
+    width:100%;
+    border-top:1px solid #c1c1c1;
+    padding-top: 10px;
+}
+
+.container-nome-cpf{
+    display:flex;
+    flex-direction: column;
+    gap:20px;
+}
+
+.container-card-nome-cpf{
+    display:flex;
+    flex-direction: column;
+    gap:20px;
+}
+
+.container-icone-faturamento-nome{
+    display:flex;
+    gap:20px;
+}
+
+.card-faturamento{
+    background-color: #F5F5F5;
+    box-sizing: border-box;
+    border: 2px solid #c1c1c1; 
+    padding:20px;
+    width:600px;
+    display:flex;
+    flex-direction: column;
+    gap:40px;
+    border-radius: 6px;
+}
+
+.container-endereco-alterar-endereco{
+    display:flex;
+    gap:10px;
+}

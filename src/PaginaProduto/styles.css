@@ -547,3 +547,35 @@ body.modal-aberto {
     display:flex;
     gap:30px;
 }
+
+.icone-texto-entrega-garantia-devolucao{
+    display:flex;
+    height:120px;
+    width:250px;
+    gap:20px;
+}
+
+.imagem-icone-texto-entrega-garantia{
+    width:40px;
+    height:40px;
+}
+
+.card-garantia-devolucao{
+    display:flex;
+    gap:20px;
+    padding:20px;
+    box-sizing: border-box;
+    border: 2px solid #c1c1c1;
+    border-radius: 6px;
+    margin-bottom:20px;
+}
+
+.container-titulo-garantia-devolucao{
+    height:45px;
+}
+
+.texto-entrega-garantia-devolucao{
+    display:flex;
+    flex-direction: column;
+    gap:5px;
+}

@@ -9,14 +9,13 @@ const calcularDesconto = (desconto) => {
     return descontoNumber ? `${descontoNumber}% OFF` : "";
 }
 
-function ModalCarrinho({fecharModalCarrinho,quantidadeSelecionada}){
+function ModalCarrinho({fecharModalCarrinho,quantidadeSelecionada, ultimoProdutoAtualizado}){
 
     const [produtos,setProdutos] = useState([]);
     const {carrinhoItens,obterCarrinho} = useCarrinho();
     const [outrosProdutos,setOutrosProdutos] = useState([]);
     const navigate = useNavigate();
 
-    const ultimoItem = carrinhoItens[carrinhoItens.length - 1];
 
 const fetchProducts = async () => {
     try{
@@ -27,7 +26,6 @@ const fetchProducts = async () => {
             quantidade:quantidadeSelecionada
         }))
         setProdutos(produtosComQuantidade);
-
     }
     catch(err){
         console.error("Não foi possível carregar o produto");
@@ -63,23 +61,23 @@ useEffect(() => {
     <div className="container-imagem-item-carrinho">
         <div className="container-imagem-icone-verificado">
             <img 
-                src={produtos[produtos.length - 1].imagens?.[0]} 
+                src={ultimoProdutoAtualizado.imagens?.[0]} 
                 className="imagem-produto-modal-carrinho" 
-                alt={produtos[produtos.length - 1].produto_nome} 
+                alt={ultimoProdutoAtualizado.produto_nome} 
             />
             <img src="/images/verificado.png" className="imagem-verificado" />
         </div>
         <div className="texto-item-carrinho">
             <p className="titulo-adicionado-ao-carrinho">Adicionado ao carrinho</p>
             <p>
-                {produtos[produtos.length - 1].produto_nome.length > 26 
-                    ? produtos[produtos.length - 1].produto_nome.slice(0, 23) + "..." 
-                    : produtos[produtos.length - 1].produto_nome}
+                {ultimoProdutoAtualizado.produto_nome.length > 26 
+                    ? ultimoProdutoAtualizado.produto_nome.slice(0, 23) + "..." 
+                    : ultimoProdutoAtualizado.produto_nome}
             </p>
             <p>
-                {produtos[produtos.length - 1].quantidade > 1 
-                    ? produtos[produtos.length - 1].quantidade + " unidades" 
-                    : produtos[produtos.length - 1].quantidade + " unidade"}
+                {quantidadeSelecionada > 1 
+                    ? quantidadeSelecionada + " unidades" 
+                    : quantidadeSelecionada + " unidade"}
             </p>
         </div>
     </div>
