@@ -100,6 +100,19 @@ function Footer() {
             <a href="https://www.flaticon.com/free-icons/coupons" title="coupons icons">Coupons icons created by Uniconlabs - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/document" title="document icons">Document icons created by Freepik - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/localization" title="localization icons">Localization icons created by hqrloveq - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/qr-code" title="qr code icons">Qr code icons created by Mohamed Mbarki - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/clock" title="clock icons">Clock icons created by kmg design - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/cancel" title="cancel icons">Cancel icons created by Alfredo Hernandez - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/document" title="document icons">Document icons created by Vector Stall - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/alert" title="alert icons">Alert icons created by Good Ware - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/foursquare-check-in" title="foursquare check in icons">Foursquare check in icons created by hqrloveq - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/home-button" title="home button icons">Home button icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/portfolio" title="portfolio icons">Portfolio icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/cube" title="cube icons">Cube icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/password" title="password icons">Password icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/shopping-bag" title="shopping bag icons">Shopping bag icons created by DinosoftLabs - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/adress" title="adress icons">Adress icons created by Freepik - Flaticon</a>
             <p>&copy; 2025 Login ltda</p>
             </div>
         </footer>

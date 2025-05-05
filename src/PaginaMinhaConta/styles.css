@@ -1,0 +1,32 @@
+.secao-minha-conta{
+}
+
+
+.card-pedidos{
+    padding:20px;
+    background-color: #f4f4f4;
+    width:40%;
+    height:200px;
+}
+
+.container-pedidos-servicos-gerenciar-compra-cadastro{
+    display:flex;
+    justify-content: center;
+    gap:20px;
+    flex-wrap:wrap;
+}
+
+.container-sua-conta-pedidos{
+    display:flex;
+    justify-content: center;
+    gap:20px;
+    flex-wrap:wrap;
+}
+
+.paragrafo-hover-minha-conta{
+    cursor:pointer;
+}
+
+.paragrafo-hover-minha-conta:hover{
+    text-decoration: underline;
+}

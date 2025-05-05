@@ -830,6 +830,7 @@ app.get("/calcular-frete/:cep/:produto_id", async (req,res) => {
         const {cep, produto_id} = req.params;
         const resposta = await axios.get(`https://viacep.com.br/ws/${cep}/json`);
         const cidade = resposta.data.localidade;
+        const estado = resposta.data.estado;
 
         if(!cidade){
             return res.status(400).json({message: "Localidade não encontrada para esse cep"})
@@ -838,6 +839,7 @@ app.get("/calcular-frete/:cep/:produto_id", async (req,res) => {
 
         res.json({
             cidade,
+            estado,
             valor: frete?.menor_valor_frete ?? null,
             prazo: frete?.menor_prazo_frete ?? null
         });
@@ -1949,6 +1951,214 @@ app.get("/categorias-tipo", async (req,res) => {
     }
     catch(err){
         return res.status(500).json({message:"Não foi possivel carregar as categorias"})
+    }
+})
+
+app.get("/enderecos",autenticarToken, async (req,res) => {
+    const userId = req.usuarioId;
+
+    try{
+        const [resultado] = await db.query("SELECT * from enderecos e left join usuarios u on e.usuario_id = u.id where u.id = ?",[userId])
+
+        if(resultado.length === 0){
+            return res.status(200).json([]);
+        }
+        return res.status(200).json(resultado);
+    }
+    catch(err){
+        return res.status(500).json({message:"Não foi possivel obter os endereços"})
+    }
+})
+
+app.post("/salvar-endereco",autenticarToken, async (req,res) => {
+    const {cep, rua,numero, complemento, informacoesAdicionais, tipoDoLocal, nome, telefone,bairro,cidade,estado} = req.body;
+    const userId = req.usuarioId;
+
+    try{
+        const params = [];
+        const columns = [];
+
+        if(userId){
+            columns.push(`usuario_id`);
+            params.push(userId);
+        }
+
+        if(cep){   
+            columns.push(`cep`);
+            params.push(cep);
+        }
+        if(bairro){   
+            columns.push(`bairro`);
+            params.push(bairro);
+        }
+        if(cidade){   
+            columns.push(`cidade`);
+            params.push(cidade);
+        }
+        if(estado){   
+            columns.push(`estado`);
+            params.push(estado);
+        }
+        if(rua){   
+            columns.push(`logradouro`);
+            params.push(rua);
+        }
+        if(numero){   
+            columns.push(`numero`);
+            params.push(numero);
+        }
+        if(complemento){   
+            columns.push(`complemento`);
+            params.push(complemento);
+        }
+        if(informacoesAdicionais){   
+            columns.push(`informacoes_adicionais`);
+            params.push(informacoesAdicionais);
+        }
+        if(tipoDoLocal){   
+            columns.push(`tipo_do_local`);
+            params.push(tipoDoLocal);
+        }
+        if(nome){   
+            columns.push(`nome_destinatario`);
+            params.push(nome);
+        }
+        if(telefone){   
+            columns.push(`telefone`);
+            params.push(telefone);
+        }
+
+        const placeholders = columns.join(", ");
+        const valuePlaceholders = columns.map(() => "?").join(", ");
+        let query = `INSERT INTO enderecos (${placeholders}) values (${valuePlaceholders})`;
+
+     await db.query(query, params);
+    
+    return res.status(200).json({message:"O endereço foi cadastrado com sucesso"});
+    }
+
+    catch(err){
+        return res.status(500).json({message:"Não foi possivel cadastrar o endereco"});
+    }
+})
+
+app.put("/salvar-endereco/:enderecoId",autenticarToken, async(req,res) => {
+    const userId = req.usuarioId;
+    const {enderecoId} = req.params;
+    const {cep, rua,numero, complemento, informacoesAdicionais, tipoDoLocal, nome, telefone,bairro,cidade,estado} = req.body;
+    try{
+            const params = [];
+            const columns = [];
+    
+            if(cep){   
+                columns.push(`cep = ?`);
+                params.push(cep);
+            }
+            if(bairro){   
+                columns.push(`bairro = ?`);
+                params.push(bairro);
+            }
+            if(cidade){   
+                columns.push(`cidade = ?`);
+                params.push(cidade);
+            }
+            if(estado){   
+                columns.push(`estado = ? `);
+                params.push(estado);
+            }
+            if(rua){   
+                columns.push(`logradouro = ?`);
+                params.push(rua);
+            }
+            if(numero){   
+                columns.push(`numero = ?`);
+                params.push(numero);
+            }
+            if(complemento){   
+                columns.push(`complemento = ?`);
+                params.push(complemento);
+            }
+            if(informacoesAdicionais){   
+                columns.push(`informacoes_adicionais = ?`);
+                params.push(informacoesAdicionais);
+            }
+            if(tipoDoLocal){   
+                columns.push(`tipo_do_local = ?`);
+                params.push(tipoDoLocal);
+            }
+            if(nome){   
+                columns.push(`nome_destinatario = ?`);
+                params.push(nome);
+            }
+            if(telefone){   
+                columns.push(`telefone = ?`);
+                params.push(telefone);
+            }
+    
+            const setClause = columns.join(", ");
+            let query = `UPDATE enderecos set ${setClause}`;
+    
+            query += ` WHERE 1=1 `
+
+            if(enderecoId){
+                query += ` AND id_endereco = ? `
+                params.push(enderecoId);
+            }
+            if(userId){
+                query += ` AND usuario_id = ? `
+                params.push(userId);
+            }
+         
+            await db.query(query, params);
+        
+        return res.status(200).json({message:"O endereço foi cadastrado com sucesso"});
+        
+
+    }
+    catch(err){
+        return res.status(500).json({message:"Não foi possivel editar o endereco"});
+    }
+})
+
+app.put("/enderecos/:enderecoId",autenticarToken, async (req,res) => {
+    const {enderecoId} = req.params;
+    try{
+        await db.query("UPDATE enderecos set padrao = 1 where id_endereco = ?",[enderecoId]);
+        await db.query("UPDATE enderecos set padrao = 0 where id_endereco != ? ",[enderecoId]);
+    }
+    catch(err){
+        return res.status(500).json({message:"Não foi possivel tornar padrão"});
+    }
+})
+
+app.get("/enderecos/:enderecoId",autenticarToken, async (req,res) => {
+    const {enderecoId} = req.params;
+    const userId = req.usuarioId;
+    try{
+        const [resultado] = await db.query("SELECT * from enderecos e left join usuarios u on e.usuario_id = u.id where u.id = ? and e.id_endereco = ?",[userId,enderecoId]);
+    
+        if(resultado.length === 0){
+            return res.status(200).json([]);
+        }
+        
+            return res.status(200).json(resultado[0]);
+    }
+    catch(err){
+        return res.status(500).json({message:"Não foi possivel carregar o endereco para editar"})
+    }
+})
+
+app.delete("/enderecos/:enderecoId",autenticarToken, async (req,res) => {
+    const userId = req.usuarioId;
+    const {enderecoId} = req.params;
+
+    try{
+        await db.query("DELETE FROM enderecos where id_endereco = ? and usuario_id = ? ",[enderecoId,userId]);
+    return res.status(200).json({message:"O endereço foi deletado com sucesso"});
+
+    }
+    catch(err){
+        return res.status(500).json({message:"Não foi possivel excluir o endereço"})
     }
 })
 

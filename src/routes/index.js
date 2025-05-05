@@ -7,6 +7,8 @@ import PaginaProduto from '../PaginaProduto/index.js';
 import PaginaBuscaProduto from "../PaginaBuscaProduto/index.js";
 import PaginaCarrinho from "../PaginaCarrinho/index.js";
 import PaginaEscolherFormaEntrega from "../PaginaEscolherFormaEntrega/index.js";
+import PaginaMinhaConta from "../PaginaMinhaConta/index.js";
+import PaginaEnderecos from "../PaginaEnderecos/index.js";
 
 function Rotas() {
   return (
@@ -20,6 +22,8 @@ function Rotas() {
       <Route path="/busca-produto/:nomeProduto" element = {<PaginaBuscaProduto/>}></Route>
       <Route path="/carrinho" element ={<PaginaCarrinho/>}></Route>
       <Route path="/checkout" element = {<PaginaEscolherFormaEntrega/>}></Route>
+      <Route path="/minha-conta" element ={<PaginaMinhaConta/>}></Route>
+      <Route path="/minha-conta/enderecos" element={<PaginaEnderecos/>} />
     </Routes>
   );
 }

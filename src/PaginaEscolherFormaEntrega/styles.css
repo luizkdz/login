@@ -237,3 +237,294 @@
     display:flex;
     gap:10px;
 }
+
+.botao-confirmar-compra-checkout{
+    background-color: #111111;
+    color: white;
+    padding:20px;
+    font-weight: bold;
+    margin-top: 20px;
+    border-radius: 12px;
+}
+
+.container-pagamento-finalizado{
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #00a650;
+    gap:60px;
+    padding:3rem;
+}
+
+.icone-pagamento-concluido{
+    box-sizing: border-box;
+    border: 2px solid #eeeeee;
+    background-color:#eeeeee;
+    border-radius: 50%;
+    width:64px;
+    height:64px;
+}
+
+.container-card-pagamento-pix{
+    margin-top:3rem;
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0;
+}
+
+.card-pagamento-pix{
+    width:600px;
+    box-sizing: border-box;
+    background-color:white;
+    padding:24px;
+    border-radius: 12px;
+}
+
+.botao-copiar-codigo-pix{
+    padding:5px;
+    background-color: #111111;
+    color:white;
+    border-radius: 6px;
+}
+
+.container-botao-copiar-codigo-minhas-compras{
+    margin-top:20px;
+    margin-bottom:20px;
+    display:flex;
+    gap:30px;
+    align-items: center;
+}
+
+.imagem-pix{
+    padding:20px;
+    width:200px;
+    height:200px;
+}
+
+.lista-imagem-qr-code{
+    padding:20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-bottom:0px;
+}
+
+.container-imagem-relogio-pagamento{
+    gap:10px;
+    display:flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding:10px;
+    border-bottom:1px solid #c1c1c1;
+}
+
+.imagem-relogio{
+    width:16px;
+    height:16px;
+}
+
+.container-codigo-pix{
+    position:relative;
+    padding:16px;
+    box-sizing: border-box;
+    border: 1px solid #c1c1c1;
+    border-radius: 6px;
+}
+
+.container-copiar-codigo-pix{
+    position:absolute;
+    right:0;
+    top:30%;
+    margin-right:10px;
+}
+
+.container-avisos-pix{
+    width:600px;
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap:10px;
+    margin:20px;
+}
+
+.container-codigo-copia-cola{
+    padding-top:20px;
+    padding-bottom:10px;
+}
+
+.container-pagamento-recusado{
+    padding:48px;
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #d00027;
+}
+
+.container-pagamento-recusado-imagem{
+    display:flex;
+    align-items: center;
+    gap:60px;
+}
+
+.imagem-pagamento-recusado{
+    width:64px;
+    height:64px;
+}
+
+.imagem-x-pagamento-recusado{
+    width:30px;
+    height:30px;
+}
+
+.imagem-pagamento-recusado-card{
+    background-color: #eeeeee;
+    box-sizing: border-box;
+    border-radius: 50%;
+    width:100px;
+    height:100px;
+}
+
+.secao-pagamento-recusado{
+    display:flex;
+    flex-direction: column;
+}
+
+.container-card-pagamento-recusado{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    padding:3rem;
+}
+
+.card-pagamento-recusado{
+    margin-top:20px;
+    padding:20px;
+    padding-bottom:20px;
+    background-color: white;
+    box-sizing: border-box;
+    border-radius: 6px;
+}
+
+.container-imagens-texto-card-pagamento-recusado{
+    box-sizing: border-box;
+    border-top-right-radius: 6px;
+    border-top-left-radius: 6px;
+    background-color:#ff6666;
+    margin-top:-20px;
+    margin-right:-20px;
+    margin-left:-20px;  
+    padding:20px;
+    display:flex;
+    flex-direction: column;
+    gap:10px;
+}
+.container-imagens-pagamento-recusado{
+    position:relative;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.imagem-x-pagamento-recusado{
+    position:absolute;
+    right:35%;
+    bottom:0;
+}
+
+.container-texto-botoes-pagamento-recusado{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top:3rem;
+    gap:20px;
+    padding-bottom:3rem;
+}
+
+.botao-pagar-de-outro-jeito{
+    border: none;
+    border-radius: 6px;
+    padding:10px;
+    width:100%;
+    background-color:rgb(52, 131, 250);
+    color:white;
+}
+
+.botao-voltar-ao-inicio{
+    border: none;
+    border-radius: 6px;
+    padding:10px;
+    width:100%;
+    background-color:rgb(52, 131, 250);
+    color: white;
+}
+
+.container-botoes-pagar-outro-jeito-voltar-ao-inicio{
+    padding-top:20px;
+    box-sizing: border-box;
+    border-top: 1px solid #c1c1c1;
+    display:flex;
+    gap:10px;
+    flex-direction: column;
+    width:100%;
+}
+
+.container-textos-card-pagamento-recusado{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    
+    gap:20px;
+}
+
+.container-pagamento-em-analise{
+    
+        padding:48px;
+        display:flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: #FFC300;
+    
+}
+
+.imagem-pagamento-em-analise{
+        box-sizing: border-box;
+        background-color: #eeeeee;
+        border-radius: 50%;
+        width:64px;
+        height:64px;
+}
+
+.container-imagens-texto-card-pagamento-em-analise{
+    
+        box-sizing: border-box;
+        border-top-right-radius: 6px;
+        border-top-left-radius: 6px;
+        background-color: #FFC300;
+        margin-top:-20px;
+        margin-right:-20px;
+        margin-left:-20px;  
+        padding:20px;
+        display:flex;
+        flex-direction: column;
+        gap:10px;
+}
+
+.container-textos-card-pagamento-em-analise{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    
+    gap:20px;
+}
+
+.imagem-pagamento-aprovado{
+
+    width:64px;
+    height:64px;
+}

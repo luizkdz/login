@@ -1,0 +1,13 @@
+.secao-meus-enderecos{
+    display:flex;
+    flex-direction: column;
+
+}
+
+.card-meus-enderecos{
+    width:700px;
+    box-sizing: border-box;
+    border: 1px solid #c1c1c1;
+    border-radius: 6px;
+    padding:20px;
+}
