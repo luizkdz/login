@@ -5,7 +5,7 @@ import './styles.css'
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 
-function ModalEditarEndereco({enderecoId,handleNext,handleMostrarModalComoPagar,handleMostrarReviseEConfirme,setSecaoMeusEnderecos,setAdicionarNovoEndereco,handleBack}) {
+function ModalEditarEndereco({enderecoId,handleNext,handleMostrarModalComoPagar,handleMostrarReviseEConfirme,setSecaoMeusEnderecos,setAdicionarNovoEndereco,handleBack,setAtualizarEnderecos,atualizarEnderecos}) {
     
     const [cep,setCep] = useState("");
     const [rua, setRua] = useState("")
@@ -79,6 +79,7 @@ const handleSalvarEndereçoEditado = async () => {
             estado,
         }, {withCredentials:true}
         )
+        setAtualizarEnderecos(!atualizarEnderecos);
         handleBack(); 
     }
     catch(err){
@@ -90,8 +91,7 @@ const handleSalvarEndereçoEditado = async () => {
     return (
         
         <div style={{alignItems:"center"}}className="titulo-forma-entrega">
-            <form onSubmit={(e) => { e.preventDefault();
-                            handleSalvarEndereçoEditado()}}> 
+            <form> 
                     <p style={{fontSize:"24px"}}>Editar endereço</p>
                     <div style={{position:"relative"}}className="card-forma-entrega">
                         
@@ -166,9 +166,7 @@ const handleSalvarEndereçoEditado = async () => {
                         
                         <div style={{display:"flex",flexDirection:"column",alignItems:"end"}}>
                         <button type="submit" style={{position:"static", marginBottom:"20px",backgroundColor:"rgb(52, 131, 250)",border:"none"}} className="botao-continuar-forma-entrega" onClick={() => {if(location.pathname === "/checkout"){
-                            handleNext();
-                            handleMostrarModalComoPagar();
-                            handleMostrarReviseEConfirme()
+                            handleSalvarEndereçoEditado();
                         }
                             }}>Salvar</button>
                         

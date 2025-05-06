@@ -1,0 +1,55 @@
+.card-gostou-do-produto{
+    padding:20px;
+    display:flex;
+    flex-direction: column;
+    gap:20px;
+    background-color: #ffffff;
+}
+
+.container-cards-detalhes-pedido{
+    display:flex;
+    flex-direction: column;
+    gap:30px    
+}
+
+.card-gostou-do-produto{
+    border-radius: 6px;
+}
+
+.menu-lateral{
+    max-width: 70px;
+    overflow: hidden;
+    background-color: #f1f1f1;
+    padding:20px;
+    width:250px;
+    box-sizing: border-box;
+
+}
+
+.menu-lateral:hover{
+    max-width: 250px;
+}
+
+.paragrafo-menu-lateral{
+    height:50px;
+}
+
+.container-meus-pedidos{
+    
+}
+
+.container-meus-pedidos-inativo{
+    position:relative;
+    display:flex;
+    
+}
+
+.container-inativo{
+    position:absolute;
+    top: 0;
+    right:0;
+    width:83.5%;
+    height:100%;
+    background: rgba(0, 0, 0, 0.5);
+    
+}

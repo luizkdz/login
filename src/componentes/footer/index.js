@@ -113,6 +113,17 @@ function Footer() {
             <a href="https://www.flaticon.com/free-icons/shopping-bag" title="shopping bag icons">Shopping bag icons created by DinosoftLabs - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Freepik - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/adress" title="adress icons">Adress icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/back-arrow" title="back arrow icons">Back arrow icons created by Lizel Arina - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/settings" title="settings icons">Settings icons created by Gregor Cresnar Premium - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/price-tag" title="price tag icons">Price tag icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/coupon" title="coupon icons">Coupon icons created by Atif Arshad - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/pension" title="pension icons">Pension icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/votes" title="votes icons">Votes icons created by iconsmind - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/application" title="application icons">Application icons created by smalllikeart - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/paper" title="paper icons">Paper icons created by Hilmy Abiyyu A. - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/bag" title="bag icons">Bag icons created by Phoenix Group - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/menu" title="menu icons">Menu icons created by ariefstudio - Flaticon</a>
             <p>&copy; 2025 Login ltda</p>
             </div>
         </footer>

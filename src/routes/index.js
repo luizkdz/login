@@ -9,6 +9,8 @@ import PaginaCarrinho from "../PaginaCarrinho/index.js";
 import PaginaEscolherFormaEntrega from "../PaginaEscolherFormaEntrega/index.js";
 import PaginaMinhaConta from "../PaginaMinhaConta/index.js";
 import PaginaEnderecos from "../PaginaEnderecos/index.js";
+import PaginaMeusPedidos from "../PaginaMeusPedidos/index.js";
+import PaginaDetalhesPedido from "../PaginaDetalhesPedido/index.js";
 
 function Rotas() {
   return (
@@ -24,6 +26,8 @@ function Rotas() {
       <Route path="/checkout" element = {<PaginaEscolherFormaEntrega/>}></Route>
       <Route path="/minha-conta" element ={<PaginaMinhaConta/>}></Route>
       <Route path="/minha-conta/enderecos" element={<PaginaEnderecos/>} />
+      <Route path="/meus-pedidos" element={<PaginaMeusPedidos/>}></Route>
+      <Route path="/meus-pedidos/:idPedido" element={<PaginaDetalhesPedido/>}></Route>
     </Routes>
   );
 }

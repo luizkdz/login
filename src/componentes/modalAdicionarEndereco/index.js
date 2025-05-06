@@ -3,7 +3,7 @@ import './styles.css'
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 
-function ModalAdicionarEndereco({handleNext,handleMostrarModalComoPagar,handleMostrarReviseEConfirme,setSecaoMeusEnderecos,setAdicionarNovoEndereco,handleBack}) {
+function ModalAdicionarEndereco({handleNext,handleMostrarModalComoPagar,handleMostrarReviseEConfirme,setSecaoMeusEnderecos,setAdicionarNovoEndereco,handleBack,setAtualizarEnderecos,atualizarEnderecos}) {
     
     const [cep,setCep] = useState("");
     const [rua, setRua] = useState("")
@@ -52,6 +52,7 @@ const handleSalvarEndereço = async () => {
         }, {withCredentials:true}
         )
         
+        setAtualizarEnderecos(!atualizarEnderecos);
         handleBack();
     }
     catch(err){
@@ -63,8 +64,7 @@ const handleSalvarEndereço = async () => {
     return (
         
         <div style={{alignItems:"center"}}className="titulo-forma-entrega">
-            <form onSubmit={(e) => { e.preventDefault();
-                            handleSalvarEndereço()}}> 
+            <form> 
                     <p style={{fontSize:"24px"}}>Adicionar endereço</p>
                     <div style={{position:"relative"}}className="card-forma-entrega">
                         
@@ -139,9 +139,7 @@ const handleSalvarEndereço = async () => {
                         
                         <div style={{display:"flex",flexDirection:"column",alignItems:"end"}}>
                         <button type="submit" style={{position:"static", marginBottom:"20px",backgroundColor:"rgb(52, 131, 250)",border:"none"}} className="botao-continuar-forma-entrega" onClick={() => {if(location.pathname === "/checkout"){
-                            handleNext();
-                            handleMostrarModalComoPagar();
-                            handleMostrarReviseEConfirme()
+                            handleSalvarEndereço();
                         }
                             }}>Salvar</button>
                         

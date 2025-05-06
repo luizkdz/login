@@ -2162,4 +2162,54 @@ app.delete("/enderecos/:enderecoId",autenticarToken, async (req,res) => {
     }
 })
 
+app.get("/cartoes-salvos",autenticarToken, async (req,res) => {
+    const userId = req.usuarioId;
+    
+    try{
+        const [resultado] = await db.query("SELECT id_cartao, numero_mascarado, nome_titular, bandeira, data_expiracao from cartoes_salvos where id_usuario = ?",[userId]);
+
+        if(resultado.length === 0){
+            return res.status(200).json([]);
+        }
+
+        return res.status(200).json(resultado);
+    }
+    catch(err){
+        return res.status(500).json({message:"Não foi possivel retornar os cartões salvos"});
+    }
+})
+
+
+app.post("/cartoes-salvos", autenticarToken, async (req,res) => {
+    const {numeroCartao, nomeTitularCartao, vencimentoCartao, tipoDeDocumento,documentoTitular, bandeira} = req.body;
+    const userId = req.usuarioId;
+    try{
+        const numerosFinaisCartao = numeroCartao.slice(-4);
+        const numeroMascaradoCartao = `**** **** **** ` + numerosFinaisCartao;
+        const [resultado] = await db.query(`INSERT INTO cartoes_salvos (numero_mascarado, id_usuario, nome_titular, bandeira, data_expiracao)
+             values (?,?,?,?,?)`,[numeroMascaradoCartao,userId,nomeTitularCartao,bandeira,vencimentoCartao]);
+            
+            const insertedId = resultado.insertId;
+            console.log(insertedId);
+             return res.status(200).json({message:"O cartão foi adicionado com sucesso",
+                id_cartao:insertedId
+             });
+    }
+    catch(err){
+        return res.status(500).json({message:"Não foi possivel salvar o cartão"});
+    }
+})
+
+app.delete("/cartoes-salvos/:idCartao", autenticarToken, async(req,res) => {
+        const userId = req.usuarioId;
+        const {idCartao} = req.params;
+    try{
+        await db.query("DELETE FROM cartoes_salvos where id_usuario = ? and id_cartao =  ?",[userId,idCartao]);
+        return res.status(200).json({message:"O cartão foi deletado com sucesso"});
+    }
+    catch(err){
+        return res.status(500).json({message:"Não foi possível excluir o cartão"});
+    }
+})
+
 app.listen(port, () => {console.log("servidor rodando na porta " + `${port}`)});

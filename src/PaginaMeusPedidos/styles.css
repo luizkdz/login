@@ -1,0 +1,13 @@
+.container-meus-pedidos{
+    display:flex;
+
+}
+
+.card-meus-pedidos{
+    width:800px;
+    background-color: rgb(211, 218, 221);
+    padding:20px;
+    border-radius: 6px;
+    margin-top:2rem;
+    margin-bottom:2rem;
+}

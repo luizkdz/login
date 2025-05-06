@@ -36,7 +36,76 @@ function PaginaEscolherFormaEntrega(){
     const [enderecoSelecionado, setEnderecoSelecionado] = useState(null);
     const [enderecoEnvio, setEnderecoEnvio] = useState(null);
     const [selecionarEndereco, setSelecionarEndereco] = useState(null);
-    
+    const [selecionarEnderecoEnvio, setSelecionarEnderecoEnvio] = useState(null);
+    const [atualizarEnderecos, setAtualizarEnderecos] = useState(false);
+    const [cartoesDeCreditoSalvos, setCartoesDeCreditoSalvos] = useState([]);
+    const [selecionarIdCartao, setSelecionarIdCartao] = useState(null);
+    const [numeroCartao, setNumeroCartao] = useState('');
+    const [nomeTitularCartao, setNomeTitularCartao] = useState("");
+    const [vencimentoCartao, setVencimentoCartao] = useState("");
+    const [codigoSeguranca, setCodigoSegurança] = useState("");
+    const [documentoTitular, setDocumentoTitular] = useState("");
+    const [bandeira, setBandeira] = useState("");
+    const handleInputChange = (e) => {
+        let value = e.target.value.replace(/\D/g, ''); // remove não dígitos
+        value = value.substring(0, 16); // limita a 16 dígitos
+
+        // adiciona espaço a cada 4 dígitos
+        value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+
+        setNumeroCartao(value);
+    };
+
+    const handleSalvarCartao = async () => {
+        try{
+            const resposta = await axios.post(`http://localhost:5000/cartoes-salvos`,{
+                numeroCartao,
+                nomeTitularCartao,
+                vencimentoCartao,
+                tipoDeDocumento,
+                documentoTitular,
+                bandeira
+            },
+                {withCredentials:true});
+        handleBack();
+        console.log(resposta.data.id_cartao);
+        setSelecionarIdCartao(resposta.data.id_cartao);
+        setSelecionarOpcaoDePagamento("Cartao");
+        }
+        catch(err){
+            console.error("Não foi possivel salvar o cartão");
+        }
+    }
+
+    function detectarBandeira(numero) {
+        numero = numero.replace(/\D/g, ''); // Remove espaços e caracteres não numéricos
+      
+        const regexes = {
+          visa: /^4[0-9]{12}(?:[0-9]{3})?$/,
+          mastercard: /^5[1-5][0-9]{14}$/};
+
+          for (const [bandeira, regex] of Object.entries(regexes)) {
+            if (regex.test(numero)) {
+              return bandeira;
+            }
+          }
+        
+          return 'desconhecida';
+        }
+        
+
+
+    const fetchCartoesDeCredito =async  () => {
+        try{
+            const resposta = await axios.get("http://localhost:5000/cartoes-salvos",{withCredentials:true});
+            setCartoesDeCreditoSalvos(resposta.data);
+        }
+        catch(err){
+            console.error("Não foi possivel carregar os cartões salvos");
+        }
+    }
+
+
     const fetchEnderecoEnvio = async () => {
         try{
             const resposta = await axios.get(`http://localhost:5000/enderecos/${selecionarEndereco}`,{withCredentials:true});
@@ -63,6 +132,9 @@ function PaginaEscolherFormaEntrega(){
         try{
             const resposta = await axios.get("http://localhost:5000/enderecos",{withCredentials:true});
             setEndereco(resposta.data);
+            const enderecoFiltrado = resposta.data.filter((item) => {return item.padrao === 1});
+            setSelecionarEnderecoEnvio(enderecoFiltrado[0].id_endereco);
+            setSelecionarEndereco(enderecoFiltrado[0].id_endereco);
         }
         catch(err){
             console.error("Não foi possivel carregar o endereço");
@@ -198,10 +270,18 @@ function PaginaEscolherFormaEntrega(){
 
     useEffect(() => {
         fetchEndereco();
-    },endereco);
+    },[atualizarEnderecos]);
+
+    useEffect(() => {
+        fetchCartoesDeCredito();
+    },[cartoesDeCreditoSalvos]);
+
 
     const handleNext = () => {
         setStep((prev) => prev + 1);
+    };
+    const handleBack = () => {
+        setStep((prev) => prev - 1);
     };
 
     const entregaConcluida = step === 3 || step === 4;
@@ -265,7 +345,7 @@ const classePagamento = entregaConcluida
                     <p style={{fontSize:"24px"}}>Escolha a forma de entrega</p>
                     <div className="card-forma-entrega">
                         {enderecoEnvio !== null ? <div className="container-card-forma-entrega">
-                            <input type="radio" className="input-radio-forma-entrega"/>
+                            <input checked={selecionarEndereco === enderecoEnvio.id_endereco} value={selecionarEndereco} onChange={() => {setSelecionarEndereco(enderecoEnvio.id_endereco)}} type="radio" className="input-radio-forma-entrega"/>
                             <div className="container-texto-forma-entrega">
                             <p style={{fontWeight:"bold"}}>Enviar no meu endereço</p>
                             <p>{enderecoEnvio.logradouro} {enderecoEnvio.numero} {enderecoEnvio.complemento} -{enderecoEnvio.cidade} <br/> {enderecoEnvio.tipo_do_local}</p>
@@ -273,7 +353,7 @@ const classePagamento = entregaConcluida
                             <p>R${calcularFreteTotal().toFixed(2)}</p>
                         </div> : endereco.filter((item) => {return item.padrao === 1}).map((item) => {return (
                             <div className="container-card-forma-entrega">
-                            <input type="radio" className="input-radio-forma-entrega"/>
+                            <input checked = {item.id_endereco === selecionarEnderecoEnvio} value={selecionarEnderecoEnvio} onChange={()=>{setSelecionarEnderecoEnvio(item.id_endereco)}} type="radio" className="input-radio-forma-entrega"/>
                             <div className="container-texto-forma-entrega">
                             <p style={{fontWeight:"bold"}}>Enviar no meu endereço</p>
                             <p>{item.logradouro} {item.numero} {item.complemento} -{item.cidade} <br/> {item.tipo_do_local}</p>
@@ -294,7 +374,7 @@ const classePagamento = entregaConcluida
                         {endereco.map((item) => {return (
                             <div>
                             <div style={{gap:"20px",alignItems:"start"}}className="container-card-forma-entrega">
-                            <input checked={selecionarEndereco === item.id_endereco} value={selecionarEndereco} onChange={() => {setSelecionarEndereco(item.id_endereco)}} style={{marginTop:"3px"}}type="radio" className="input-radio-forma-entrega"/>
+                            <input checked={item.id_endereco === selecionarEndereco} value={selecionarEndereco} onChange={() => setSelecionarEndereco(item.id_endereco)} style={{marginTop:"3px"}}type="radio" className="input-radio-forma-entrega"/>
                             <div style={{gap:"20px"}}className="container-texto-forma-entrega">
                             <p style={{fontWeight:"bold"}}>{item.logradouro} {item.numero}</p>
                             <p>{item.cidade}, {item.estado} - CEP {item.cep}</p>
@@ -316,8 +396,8 @@ const classePagamento = entregaConcluida
                     </div>
                     
                 </div> : ""}
-                {step === 3 && editarEndereco ?  <ModalEditarEndereco enderecoId={enderecoSelecionado}/> : ""}
-                {step === 3 && adicionarEndereco ? <ModalAdicionarEndereco/> : ""}
+                {step === 3 && editarEndereco ?  <ModalEditarEndereco atualizarEnderecos ={atualizarEnderecos} setAtualizarEnderecos={setAtualizarEnderecos} handleBack={handleBack} enderecoId={enderecoSelecionado}/> : ""}
+                {step === 3 && adicionarEndereco ? <ModalAdicionarEndereco atualizarEnderecos ={atualizarEnderecos} setAtualizarEnderecos={ setAtualizarEnderecos}handleBack={handleBack} /> : ""}
                 
                 {step === 2 && !mostrarMeusEnderecos && (<div className="titulo-forma-entrega">
                     <p style={{fontSize:"24px"}}>Escolha quando sua compra irá chegar</p>
@@ -369,8 +449,8 @@ const classePagamento = entregaConcluida
                             <div className="container-input-texto-envio">
                             <div className="container-texto-forma-entrega">
                             <div className="container-input-pix">
-                            <input type="radio" className="input-radio-forma-entrega" checked={selecionarOpcaoDePagamento === "Pix"} onChange={() => {setSelecionarOpcaoDePagamento("Pix"); setImagemOpcaoPagamento("/images/coupons-pagina-pagamento.png")}}/>
-                            <img src="/images/coupons-pagina-pagamento.png" className="logo-icones-pagamento-pagina-entrega"/>
+                            <input type="radio" className="input-radio-forma-entrega" checked={selecionarOpcaoDePagamento === "Pix"} onChange={() => {setSelecionarOpcaoDePagamento("Pix"); setImagemOpcaoPagamento("/images/icone-pix.png")}}/>
+                            <img src="/images/icone-pix.png" className="logo-icones-pagamento-pagina-entrega"/>
                             <div className="container-texto-pix">
                             <p style={{fontWeight:"bold"}}>Pix</p>
                             <p>Aprovação imediata</p>
@@ -383,24 +463,29 @@ const classePagamento = entregaConcluida
                             
                            
                     </div>
-                    <div className="card-forma-entrega">
-                    <div className="container-card-forma-entrega">
-                            <div className="container-input-texto-envio">
-                            <div className="container-texto-forma-entrega">
-                            <div className="container-input-pix">
-                            <input type="radio" className="input-radio-forma-entrega" checked={selecionarOpcaoDePagamento === "Cartao"} onChange={() => {setSelecionarOpcaoDePagamento("Cartao"); setImagemOpcaoPagamento("/images/contactless-metodos-pagamento.png")}}/>
-                            <img src="/images/contactless-metodos-pagamento.png" className="logo-icones-pagamento-pagina-entrega"/>
-                            <div className="container-texto-pix">
-                            <p style={{fontWeight:"bold"}}>Cartão de crédito **** 1111</p>
-                            </div>
-                            
-                            </div>
-                            </div>
-                            
-                            </div>
-                            
-                            </div>
-                            </div>
+                    {cartoesDeCreditoSalvos.map((item) => { return (
+                        <div className="card-forma-entrega">
+                        <div className="container-card-forma-entrega">
+                                <div className="container-input-texto-envio">
+                                <div className="container-texto-forma-entrega">
+                                <div className="container-input-pix">
+                                <input type="radio" className="input-radio-forma-entrega" checked={selecionarOpcaoDePagamento === "Cartao" && item.id_cartao === selecionarIdCartao} onChange={() => {setSelecionarOpcaoDePagamento("Cartao");setSelecionarIdCartao(item.id_cartao); setImagemOpcaoPagamento("/images/contactless-metodos-pagamento.png")}}/>
+                                <img src="/images/contactless-metodos-pagamento.png" className="logo-icones-pagamento-pagina-entrega"/>
+                                <div className="container-texto-pix">
+                                <p style={{fontWeight:"bold"}}>{item.numero_mascarado}</p>
+                                <p>{item.data_expiracao}</p>
+                                <p style={{fontWeight:"bold"}}>{item.bandeira}</p>
+                                </div>
+                                
+                                </div>
+                                </div>
+                                
+                                </div>
+                                
+                                </div>
+                                </div>
+                                )
+                    }) }
                             <div className="card-forma-entrega">
                             <div className="container-input-pix">
                             <input type="radio" className="input-radio-forma-entrega" checked={selecionarOpcaoDePagamento === "novoCartao"} onChange={() => {setSelecionarOpcaoDePagamento("novoCartao"); setImagemOpcaoPagamento("/images/")}}/>
@@ -436,7 +521,7 @@ const classePagamento = entregaConcluida
                     }}>Continuar</button>
                 </div> : ""}
 
-                {step === 4 ? <div className="titulo-forma-entrega">
+                {step === 4 && (selecionarOpcaoDePagamento !== "novoCartao") ? <div className="titulo-forma-entrega">
                     <p style={{fontSize:"24px"}}>Revise e confirme</p>
                     <p>Faturamento</p>
                     <div className="card-faturamento">
@@ -472,7 +557,12 @@ const classePagamento = entregaConcluida
                             <div className="container-icone-faturamento-nome">
                             <img src="/images/gps.png" className="logo-icones-pagamento-pagina-entrega"/>
                             <div className="container-texto-pix">
-                            <p style={{fontSize:"16px",fontWeight:"bold"}}>Rua xxxxxxx 1111 - Apto 1111</p>
+                            {endereco.filter((item) => {
+                               return selecionarEndereco !== null ? selecionarEndereco === item.id_endereco : selecionarEnderecoEnvio === item.id_endereco
+                            }).map((item) => {return (
+                                <p style={{fontSize:"16px",fontWeight:"bold"}}>{item.logradouro} - {item.numero} {item.complemento ? `Complemento :${item.complemento}` : ""}</p>
+                            )})}
+                            
                             <div className="container-endereco-alterar-endereco">
                             <p style={{fontSize:"14px"}}>Entrega no endereço</p>
                             <p style={{fontSize:"14px",color:"#3483fa"}}>Alterar endereço</p>
@@ -530,6 +620,12 @@ const classePagamento = entregaConcluida
                             <img src = {imagemOpcaoPagamento} className="logo-icones-pagamento-pagina-entrega"/>
                             <div className="container-texto-pix">
                             <p style={{fontWeight:"bold"}}>{selecionarOpcaoDePagamento}</p>
+                                 {selecionarOpcaoDePagamento === "Cartao" ?
+                                cartoesDeCreditoSalvos.filter((item) => {return item.id_cartao === selecionarIdCartao}).map((item) => {return <div style={{display:"flex",gap:"30px"}}>
+                                    <p>{item.numero_mascarado}</p>
+                                    <p>{item.data_expiracao}</p>
+                                    </div>}) :""}
+
                             <p>R$ {calcularPrecoTotal().toFixed(2)}</p>
                             </div>
                             </div>
@@ -547,6 +643,90 @@ const classePagamento = entregaConcluida
                     </div>
                     
                 </div> : ""}
+                {step === 4 && (selecionarOpcaoDePagamento === "novoCartao") ? <div style={{alignItems:"center"}}className="titulo-forma-entrega">
+                    <p style={{fontSize:"24px"}}>Adicione um novo cartão</p>
+                    <div style={{width:"700px"}}className="card-forma-entrega-pagamento">
+                        <div className="container-card-forma-entrega-">
+                            <div className="container-input-texto-envio">
+                            <div className="container-texto-forma-entrega">
+                            <div className="container-input-pix">
+                            
+                            <img style={{boxSizing:"border-box",border:"2px solid #c1c1c1",borderRadius:"50%", padding:"10px",width:"70px",height:"70px",backgroundColor:"#ffffff"}}src="/images/credit-card-pagina-pagamento.png" className="logo-icones-pagamento-pagina-entrega"/>
+                            <div className="container-texto-pix">
+                            <p style={{fontWeight:"bold"}}>Novo cartão de crédito</p>
+                            
+                            </div>
+                            </div>
+                            </div>
+                            </div>
+                            
+                            </div>
+                            
+                           
+                    </div>
+                    <div style={{flexDirection:"row",width:"700px",alignItems:"center",gap:"75px",position:"relative"}}className="card-forma-entrega">
+                    <div className="container-card-forma-entrega">
+                            <div className="container-input-texto-envio">
+                            <div className="container-texto-forma-entrega">
+                            <div style={{flexDirection:"column",alignItems:"start"}} className="container-input-pix">
+
+                            <div className="container-texto-pix">
+                            <p style={{fontSize:"14px"}}>Número do cartão</p>
+                            <div style={{display:"flex",position:"relative", alignItems:"center"}}className="container-input-imagem-cartao">
+                            <input onChange={(e) => {handleInputChange(e);const bandeira = detectarBandeira(e.target.value);setBandeira(bandeira)}} value={numeroCartao} maxLength={19} style={{border:"1px solid #c1c1c1",borderRadius:"6px",width:"300px",padding:"10px"}} placeholder="1234 1234 1234 1234"/>
+                            <img src="/images/credit-card-pagina-pagamento.png" style={{position:"absolute",right:"10px",width:"30px",height:"30px"}}/>
+                            </div>
+                            </div>
+                            <div className="container-texto-pix">
+                            <p style={{fontSize:"14px"}}>Nome do titular</p>
+                            <div style={{display:"flex",position:"relative", alignItems:"center"}}className="container-input-imagem-cartao">
+                            <input maxLength={50} onChange={(e) => {setNomeTitularCartao(e.target.value)}} value={nomeTitularCartao} style={{border:"1px solid #c1c1c1",borderRadius:"6px",width:"300px",padding:"10px"}} placeholder="Ex: João da Silva"/>
+                            </div>
+                            </div>
+                            <div style ={{display:"flex",gap:"15px"}}className="container-vencimento-codigo-seguranca">
+                            <div className="container-texto-pix">
+                            <p style={{fontSize:"14px"}}>Vencimento</p>
+                            <div style={{display:"flex",position:"relative", alignItems:"center"}} className="container-input-imagem-cartao" >
+                            <input maxLength={9} onChange={(e) => setVencimentoCartao(e.target.value)} value={vencimentoCartao} style={{border:"1px solid #c1c1c1",borderRadius:"6px",width:"130px",padding:"10px"}} placeholder="MM/AA"/>
+                            
+                            </div>
+                            </div>
+                            <div className="container-texto-pix">
+                            <p style={{fontSize:"14px"}}>Código de segurança</p>
+                            <div style={{display:"flex",position:"relative", alignItems:"center"}}className="container-input-imagem-cartao">
+                            <input maxLength={5} onChange={(e) => {setCodigoSegurança(e.target.value)}} value={codigoSeguranca} style={{border:"1px solid #c1c1c1",borderRadius:"6px",width:"130px",padding:"10px"}} placeholder="Ex: 123" onFocus={handleVirarCartao} onBlur={handleDesvirarCartao}/>
+                            
+                            </div>
+                            </div>
+                            
+                            </div>
+                            <div className="container-texto-pix">
+                            <p style={{fontSize:"14px"}}>Documento do titular</p>
+                            <div style={{display:"flex",position:"relative", alignItems:"center"}}className="container-input-imagem-cartao">
+                            <select value={tipoDeDocumento} onChange={handleSelectChange} style={{border:"none",borderRight:"1px solid #c1c1c1",position:"absolute",left:"5px",padding:"8px"}}>
+                                <option>CPF</option>
+                                <option>CNPJ</option>
+                            </select>
+                            <input onChange={(e) => {setDocumentoTitular(e.target.value)}} value={documentoTitular} style={{paddingTop:"10px",paddingBottom:"10px",paddingLeft:"100px",border:"1px solid #c1c1c1",borderRadius:"6px",width:"300px"}} placeholder={tipoDeDocumento === "CPF" ? "999.999.999-99" : "99.9999.999/9999-99"}/>
+                            </div>
+                            </div>
+                            </div>
+                            </div>
+                            
+                            </div>
+                            
+                            </div>
+                            
+                            <img src={imagemCartao} style={{width:"250px",transition: "transform 0.6s",transitionDelay: "0.2s",transform: virarCartao ? "rotateY(180deg)" : "rotateY(0deg)",transformStyle: "preserve-3d",height:"250px"
+                            }}/>
+                            <button style={{position:"absolute"}}className="botao-continuar-forma-entrega" onClick={() => {handleSalvarCartao();setSelecionarIdCartao()}}>Continuar</button>
+                            </div>
+                            
+                    <div>
+                    
+                    </div>
+                </div> : ""}
+
                 
                 
                 {step !== 5 ? <div className="card-resumo-compra-pagina-entrega">
@@ -774,89 +954,7 @@ const classePagamento = entregaConcluida
                         </div>
                 </div>
                 </div>
-                <div style={{alignItems:"center"}}className="titulo-forma-entrega">
-                    <p style={{fontSize:"24px"}}>Adicione um novo cartão</p>
-                    <div style={{width:"700px"}}className="card-forma-entrega-pagamento">
-                        <div className="container-card-forma-entrega-">
-                            <div className="container-input-texto-envio">
-                            <div className="container-texto-forma-entrega">
-                            <div className="container-input-pix">
-                            
-                            <img style={{boxSizing:"border-box",border:"2px solid #c1c1c1",borderRadius:"50%", padding:"10px",width:"70px",height:"70px",backgroundColor:"#ffffff"}}src="/images/credit-card-pagina-pagamento.png" className="logo-icones-pagamento-pagina-entrega"/>
-                            <div className="container-texto-pix">
-                            <p style={{fontWeight:"bold"}}>Novo cartão de crédito</p>
-                            
-                            </div>
-                            </div>
-                            </div>
-                            </div>
-                            
-                            </div>
-                            
-                           
-                    </div>
-                    <div style={{flexDirection:"row",width:"700px",alignItems:"center",gap:"75px",position:"relative"}}className="card-forma-entrega">
-                    <div className="container-card-forma-entrega">
-                            <div className="container-input-texto-envio">
-                            <div className="container-texto-forma-entrega">
-                            <div style={{flexDirection:"column",alignItems:"start"}} className="container-input-pix">
-
-                            <div className="container-texto-pix">
-                            <p style={{fontSize:"14px"}}>Número do cartão</p>
-                            <div style={{display:"flex",position:"relative", alignItems:"center"}}className="container-input-imagem-cartao">
-                            <input style={{border:"1px solid #c1c1c1",borderRadius:"6px",width:"300px",padding:"10px"}} placeholder="1234 1234 1234 1234"/>
-                            <img src="/images/credit-card-pagina-pagamento.png" style={{position:"absolute",right:"10px",width:"30px",height:"30px"}}/>
-                            </div>
-                            </div>
-                            <div className="container-texto-pix">
-                            <p style={{fontSize:"14px"}}>Nome do titular</p>
-                            <div style={{display:"flex",position:"relative", alignItems:"center"}}className="container-input-imagem-cartao">
-                            <input style={{border:"1px solid #c1c1c1",borderRadius:"6px",width:"300px",padding:"10px"}} placeholder="Ex: João da Silva"/>
-                            </div>
-                            </div>
-                            <div style ={{display:"flex",gap:"15px"}}className="container-vencimento-codigo-seguranca">
-                            <div className="container-texto-pix">
-                            <p style={{fontSize:"14px"}}>Vencimento</p>
-                            <div style={{display:"flex",position:"relative", alignItems:"center"}} className="container-input-imagem-cartao" >
-                            <input style={{border:"1px solid #c1c1c1",borderRadius:"6px",width:"130px",padding:"10px"}} placeholder="MM/AA"/>
-                            
-                            </div>
-                            </div>
-                            <div className="container-texto-pix">
-                            <p style={{fontSize:"14px"}}>Código de segurança</p>
-                            <div style={{display:"flex",position:"relative", alignItems:"center"}}className="container-input-imagem-cartao">
-                            <input style={{border:"1px solid #c1c1c1",borderRadius:"6px",width:"130px",padding:"10px"}} placeholder="Ex: 123" onFocus={handleVirarCartao} onBlur={handleDesvirarCartao}/>
-                            
-                            </div>
-                            </div>
-                            
-                            </div>
-                            <div className="container-texto-pix">
-                            <p style={{fontSize:"14px"}}>Documento do titular</p>
-                            <div style={{display:"flex",position:"relative", alignItems:"center"}}className="container-input-imagem-cartao">
-                            <select value={tipoDeDocumento} onChange={handleSelectChange} style={{border:"none",borderRight:"1px solid #c1c1c1",position:"absolute",left:"5px",padding:"8px"}}>
-                                <option>CPF</option>
-                                <option>CNPJ</option>
-                            </select>
-                            <input style={{paddingTop:"10px",paddingBottom:"10px",paddingLeft:"100px",border:"1px solid #c1c1c1",borderRadius:"6px",width:"300px"}} placeholder={tipoDeDocumento === "CPF" ? "999.999.999-99" : "99.9999.999/9999-99"}/>
-                            </div>
-                            </div>
-                            </div>
-                            </div>
-                            
-                            </div>
-                            
-                            </div>
-                            
-                            <img src={imagemCartao} style={{width:"250px",transition: "transform 0.6s",transitionDelay: "0.2s",transform: virarCartao ? "rotateY(180deg)" : "rotateY(0deg)",transformStyle: "preserve-3d",height:"250px"
-                            }}/>
-                            <button style={{position:"absolute"}}className="botao-continuar-forma-entrega" onClick={() => {handleNext();handleMostrarModalComoPagar();handleMostrarReviseEConfirme()}}>Continuar</button>
-                            </div>
-                            
-                    <div>
-                    
-                    </div>
-                </div>
+                
                 
             
         <Footer/>
