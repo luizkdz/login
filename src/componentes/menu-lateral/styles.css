@@ -1,0 +1,19 @@
+.menu-lateral{
+    max-width: 70px;
+    overflow: hidden;
+    background-color: #f1f1f1;
+    padding:20px;
+    width:250px;
+    box-sizing: border-box;
+    padding-left:20px;
+    transition: max-width 0.3s ease;
+
+}
+
+.menu-lateral:hover{
+    max-width: 250px;
+}
+
+.paragrafo-menu-lateral{
+    height:50px;
+}

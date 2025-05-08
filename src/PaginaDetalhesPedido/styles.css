@@ -23,6 +23,8 @@
     padding:20px;
     width:250px;
     box-sizing: border-box;
+    padding-left:20px;
+    transition: max-width 0.3s ease;
 
 }
 
@@ -52,4 +54,38 @@
     height:100%;
     background: rgba(0, 0, 0, 0.5);
     
+}
+
+.card-detalhe-da-compra{
+    display:flex;
+    flex-direction: column;
+    padding-top:100px;
+    gap:30px;
+    width:400px;
+    background-color: #f1f1f1;
+    padding-left:36px;
+    padding-right:36px;
+}
+
+.card-pagamento-detalhes-da-compra{
+    display:flex;
+    gap:30px;
+    box-sizing: border-box;
+    border:2px solid grey;
+    border-radius: 6px;
+    padding:20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.detalhes-pagamento-envio{
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.detalhes-pagamento-animated{
+    max-height: 1000px; 
+    opacity: 1;
 }

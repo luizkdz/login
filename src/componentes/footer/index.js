@@ -124,7 +124,15 @@ function Footer() {
             <a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Freepik - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/bag" title="bag icons">Bag icons created by Phoenix Group - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/menu" title="menu icons">Menu icons created by ariefstudio - Flaticon</a>
-            <p>&copy; 2025 Login ltda</p>
+            <a href="https://www.flaticon.com/free-icons/search" title="search icons">Search icons created by Royyan Wijaya - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/filter" title="filter icons">Filter icons created by Rahul Kaklotar - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/shoe" title="shoe icons">Shoe icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/car" title="car icons">Car icons created by Vectors Market - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/building" title="building icons">Building icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/customer-service" title="customer service icons">Customer service icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/advertising" title="advertising icons">Advertising icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/dslr-camera" title="dslr-camera icons">Dslr-camera icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/picture" title="picture icons">Picture icons created by Freepik - Flaticon</a>
             </div>
         </footer>
     );

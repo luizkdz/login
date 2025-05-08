@@ -46,6 +46,7 @@ function PaginaEscolherFormaEntrega(){
     const [codigoSeguranca, setCodigoSegurança] = useState("");
     const [documentoTitular, setDocumentoTitular] = useState("");
     const [bandeira, setBandeira] = useState("");
+    const [selecionarEnderecoEntrega, setSelecionarEnderecoEntrega] = useState("");
     const handleInputChange = (e) => {
         let value = e.target.value.replace(/\D/g, ''); // remove não dígitos
         value = value.substring(0, 16); // limita a 16 dígitos
@@ -55,6 +56,57 @@ function PaginaEscolherFormaEntrega(){
 
         setNumeroCartao(value);
     };
+
+
+    const handleConfirmarCompra = async () => {
+       try{
+        console.log(`enderecoEntregae`,selecionarEnderecoEntrega);
+        const resposta = await axios.get(`http://localhost:5000/enderecos/${selecionarEnderecoEntrega}`,{withCredentials:true});
+        const enderecoEnvio = resposta.data;
+        console.log(resposta);
+        console.log(enderecoEnvio);
+        const itensParaEnviar = carrinhoItens.map((item) => { return ({
+            nome:item.nome,
+            quantidade:item.quantidade,
+            preco:item.preco,
+            imagem:item.imagem_produto,
+            produto_id:item.produto_id,
+            prazo:prazos[item.produto_id],
+            frete:item.valor_frete,
+            cores:item.cores,
+            dimensoes:`${item.larguras}${item.dimensoes_unidade} x ${item.alturas}${item.dimensoes_unidade} x ${item.comprimentos}${item.dimensoes_unidade}`,
+            estampas:item.estampas,
+            generos:item.generos,
+            materiais:item.materiais,
+            pesos:`${item.pesos}${item.pesos_unidade}`,
+            tamanhos:item.tamanhos,
+            voltagens:`${item.voltagens}V`
+        })});
+
+
+       const cartaoSelecionado = cartoesDeCreditoSalvos.find((item) => item.id_cartao === selecionarIdCartao);
+       const cartaoUsadoParaEnviar = cartaoSelecionado ? {numero:cartaoSelecionado.numero_mascarado,
+        expiracao:cartaoSelecionado.data_expiracao} : null;
+
+        
+        const pedido = {
+            itens:itensParaEnviar,
+            valorFrete:calcularFreteTotal(),
+            valorTotal:calcularPrecoTotal(),
+            metodoPagamento:selecionarOpcaoDePagamento,
+            enderecoEnvio:enderecoEnvio,
+            imagemMetodoPagamento:imagemOpcaoPagamento,
+            cartaoUsado:cartaoUsadoParaEnviar
+        }
+
+        await axios.post("http://localhost:5000/confirmar-compra",{
+            pedido
+        },{withCredentials:true})
+       }
+        catch(err){
+            console.error("Não foi possivel confirmar a compra");
+        }
+    }
 
     const handleSalvarCartao = async () => {
         try{
@@ -110,6 +162,7 @@ function PaginaEscolherFormaEntrega(){
         try{
             const resposta = await axios.get(`http://localhost:5000/enderecos/${selecionarEndereco}`,{withCredentials:true});
             setEnderecoEnvio(resposta.data);
+            setSelecionarEnderecoEntrega(resposta.data);
         }
         catch(err){
             console.error("Não foi possivel carregar o endereço de envio");
@@ -135,6 +188,7 @@ function PaginaEscolherFormaEntrega(){
             const enderecoFiltrado = resposta.data.filter((item) => {return item.padrao === 1});
             setSelecionarEnderecoEnvio(enderecoFiltrado[0].id_endereco);
             setSelecionarEndereco(enderecoFiltrado[0].id_endereco);
+            setSelecionarEnderecoEntrega(enderecoFiltrado[0].id_endereco);
         }
         catch(err){
             console.error("Não foi possivel carregar o endereço");
@@ -345,7 +399,7 @@ const classePagamento = entregaConcluida
                     <p style={{fontSize:"24px"}}>Escolha a forma de entrega</p>
                     <div className="card-forma-entrega">
                         {enderecoEnvio !== null ? <div className="container-card-forma-entrega">
-                            <input checked={selecionarEndereco === enderecoEnvio.id_endereco} value={selecionarEndereco} onChange={() => {setSelecionarEndereco(enderecoEnvio.id_endereco)}} type="radio" className="input-radio-forma-entrega"/>
+                            <input checked={selecionarEndereco === enderecoEnvio.id_endereco} value={selecionarEndereco} onChange={() => {setSelecionarEndereco(enderecoEnvio.id_endereco);setSelecionarEnderecoEntrega(enderecoEnvio.id_endereco)}} type="radio" className="input-radio-forma-entrega"/>
                             <div className="container-texto-forma-entrega">
                             <p style={{fontWeight:"bold"}}>Enviar no meu endereço</p>
                             <p>{enderecoEnvio.logradouro} {enderecoEnvio.numero} {enderecoEnvio.complemento} -{enderecoEnvio.cidade} <br/> {enderecoEnvio.tipo_do_local}</p>
@@ -353,7 +407,7 @@ const classePagamento = entregaConcluida
                             <p>R${calcularFreteTotal().toFixed(2)}</p>
                         </div> : endereco.filter((item) => {return item.padrao === 1}).map((item) => {return (
                             <div className="container-card-forma-entrega">
-                            <input checked = {item.id_endereco === selecionarEnderecoEnvio} value={selecionarEnderecoEnvio} onChange={()=>{setSelecionarEnderecoEnvio(item.id_endereco)}} type="radio" className="input-radio-forma-entrega"/>
+                            <input checked = {item.id_endereco === selecionarEnderecoEnvio} value={selecionarEnderecoEnvio} onChange={()=>{setSelecionarEnderecoEnvio(item.id_endereco);setSelecionarEnderecoEntrega(item.id_endereco)}} type="radio" className="input-radio-forma-entrega"/>
                             <div className="container-texto-forma-entrega">
                             <p style={{fontWeight:"bold"}}>Enviar no meu endereço</p>
                             <p>{item.logradouro} {item.numero} {item.complemento} -{item.cidade} <br/> {item.tipo_do_local}</p>
@@ -595,6 +649,7 @@ const classePagamento = entregaConcluida
                             <p style={{fontWeight:"bold"}}>Envio {index + 1}</p>
                             <p style={{fontSize:"14px"}}>Chegará em {prazos[item.produto_id]} dias úteis</p>
                             <p style={{fontSize:"14px"}}>{item.produto_nome}</p>
+                            <p style={{fontSize:"14px"}}>Quantidade: {item.quantidade}</p>
                             </div>
                             </div>
                             <div className="container-modificar-dados-faturamento">
@@ -749,7 +804,7 @@ const classePagamento = entregaConcluida
                         <p>Você pagará</p>
                         <p>R${calcularPrecoTotal().toFixed(2)}</p>
                     </div>
-                    {step === 4 ? <button onClick={() => handleNext()} className="botao-confirmar-compra-checkout">Confirmar Compra</button> : ""}
+                    {step === 4 ? <button onClick={() => {handleConfirmarCompra();handleNext()}} className="botao-confirmar-compra-checkout">Confirmar Compra</button> : ""}
                     
                 </div> : ""}
                 

@@ -2212,4 +2212,299 @@ app.delete("/cartoes-salvos/:idCartao", autenticarToken, async(req,res) => {
     }
 })
 
+app.post("/confirmar-compra", autenticarToken, async (req,res) => {
+    const userId = req.usuarioId;
+    const {itens, statusPedido,codigoRastramento,dataEnvio,dataCancelamento,observacoes,valorTotal, metodoPagamento, enderecoEnvio, cartaoUsado} = req.body.pedido;
+    const numero = cartaoUsado?.numero || null
+    const expiracao = cartaoUsado?.expiracao || null;
+    const lougradouroEndereco = enderecoEnvio?.logradouro || null ;
+    const cidadeEndereco = enderecoEnvio?.cidade || null
+    const numeroEndereco = enderecoEnvio?.numero || null
+    const complementoEndereco = enderecoEnvio?.complemento || null
+    const estadoEndereco = enderecoEnvio?.estado || null;
+
+    try{
+        const columns = [];
+        const params = [];
+
+        if(userId){
+            columns.push(`user_id`)
+            params.push(userId);
+        }
+        
+        if(statusPedido){
+            columns.push(`status`)
+            params.push(statusPedido);
+        }
+        
+        if(metodoPagamento){
+            columns.push(`metodo_pagamento`)
+            params.push(metodoPagamento);
+        }
+        
+        if(lougradouroEndereco){
+            columns.push(`endereco_logradouro`)
+            params.push(lougradouroEndereco);
+        }
+        if(cidadeEndereco){
+            columns.push(`endereco_cidade`)
+            params.push(cidadeEndereco);
+        }
+        if(numeroEndereco){
+            columns.push(`endereco_numero`)
+            params.push(numeroEndereco);
+        }
+        if(complementoEndereco){
+            columns.push(`endereco_complemento`)
+            params.push(complementoEndereco);
+        }
+        if(estadoEndereco){
+            columns.push(`endereco_estado`)
+            params.push(estadoEndereco);
+        }
+        
+        if(codigoRastramento){
+            columns.push(`codigo_rastreamento`)
+            params.push(codigoRastramento);
+        }
+        
+        if(dataEnvio){
+            columns.push(`data_envio`)
+            params.push(dataEnvio);
+        }
+        
+        if(dataCancelamento){
+            columns.push(`data_cancelamento`)
+            params.push(dataCancelamento);
+        }
+        if(valorTotal){
+            columns.push(`total`)
+            params.push(valorTotal);
+        }
+        if(observacoes){
+            columns.push(`observacoes`)
+            params.push(observacoes);
+        }
+        if(numero){
+            columns.push(`cartao_mascarado`)
+            params.push(numero);
+        }
+        if(expiracao){
+            columns.push(`cartao_expiracao`);
+            params.push(expiracao);
+        }
+
+
+        const placeholders = columns.join(", ");
+        const valuePlaceholders = columns.map(() => "?").join(", ");
+        
+        let query = `INSERT INTO pedidos (${placeholders}) values (${valuePlaceholders})`
+
+        const [resultado] = await db.query(query,params);
+
+        let pedidoId = resultado.insertId;
+
+       
+        for (const item of itens) {
+            const columns = ['pedido_id', 'produto_id', 'quantidade', 'preco_unitario', 'sub_total'];
+            const params = [pedidoId, item.produto_id, item.quantidade, item.preco, Number(item.preco) * Number(item.quantidade)];
+        
+            if (item.cores) {
+                columns.push('cor_nome');
+                params.push(item.cores);
+            }
+            if (item.voltagens) {
+                columns.push('voltagem');
+                params.push(item.voltagens);
+            }
+            if (item.dimensoes) {
+                columns.push('dimensoes');
+                params.push(item.dimensoes);
+            }
+            if (item.pesos) {
+                columns.push('pesos');
+                params.push(item.pesos);
+            }
+            if (item.generos) {
+                columns.push('generos');
+                params.push(item.generos);
+            }
+            if (item.estampas) {
+                columns.push('estampas');
+                params.push(item.estampas);
+            }
+            if (item.tamanhos) {
+                columns.push('tamanhos');
+                params.push(item.tamanhos);
+            }
+            if (item.materiais) {
+                columns.push('materiais');
+                params.push(item.materiais);
+            }
+        
+            const placeholders = columns.map(() => '?').join(', ');
+        
+            const query = `INSERT INTO itens_pedido (${columns.join(', ')}) VALUES (${placeholders})`;
+        
+            await db.query(query, params);
+        }
+             
+        
+        return res.status(200).json({message:"Pedido salvo com sucesso"});
+    }
+    catch(err){
+        console.log(err);
+        return res.status(500).json({message:"Não foi possivel confirmar a compra"})
+    }
+})
+
+
+app.get("/meus-pedidos", autenticarToken, async(req,res) => {
+    const userId = req.usuarioId;
+
+    try{
+        const [pedidos] = await db.query("SELECT * from pedidos where user_id = ?",[userId]);
+
+        
+        if(pedidos.length === 0){
+            return res.status(200).json([]);
+        }
+        for (const pedido of pedidos) {
+            const [itens] = await db.query("SELECT ip.id,ip.pedido_id,ip.produto_id,ip.quantidade,ip.preco_unitario,ip.sub_total,p.nome,ip.cor_nome,ip.voltagem,ip.dimensoes,ip.pesos,ip.generos,ip.estampas,ip.tamanhos,ip.materiais,(SELECT i.url FROM imagens_produto i WHERE i.produto_id = ip.produto_id LIMIT 1) AS url FROM itens_pedido ip left join produtos p on p.id = ip.produto_id WHERE pedido_id = ?", [pedido.id]);
+            pedido.itens = itens;
+        }
+
+        const quantidadeDePedidos = pedidos.length;
+
+
+
+        return res.status(200).json(
+             {  quantidadeDePedidos,
+                dados:pedidos});
+    }
+    catch(err){
+        return res.status(500).json({message:"Não foi possivel retornar seus pedidos"})
+    }
+})
+
+app.get("/meus-pedidos/:idPedido", autenticarToken, async (req, res) => {
+    const userId = req.usuarioId;
+    const { idPedido } = req.params;
+    try {
+        // Primeiro, pegue as informações do pedido
+        const [pedidoResultado] = await db.query(
+            `SELECT p.id, p.user_id, p.data_pedido, p.total, p.status, p.metodo_pagamento, 
+                    p.endereco_logradouro,p.endereco_cidade,p.endereco_estado,p.endereco_complemento,p.endereco_numero, p.observacoes, p.codigo_rastreamento, 
+                    p.data_envio, p.data_cancelamento, p.cartao_mascarado, p.cartao_expiracao 
+             FROM pedidos p 
+             WHERE p.id = ? AND p.user_id = ?`,
+            [idPedido, userId]
+        );
+
+        // Se o pedido não for encontrado, retorne erro
+        if (pedidoResultado.length === 0) {
+            return res.status(404).json({ message: "Pedido não encontrado" });
+        }
+
+        const pedido = pedidoResultado[0]; // Pedido encontrado
+
+        // Agora, pegue os itens do pedido
+        const [itensResultado] = await db.query(
+            `SELECT ip.id, ip.produto_id, ip.quantidade, ip.preco_unitario, ip.sub_total, 
+                    ip.cor_nome, ip.voltagem, ip.dimensoes, ip.pesos, ip.generos, 
+                    ip.estampas, ip.tamanhos, ip.materiais,(SELECT i.url FROM imagens_produto i WHERE i.produto_id = ip.produto_id LIMIT 1) AS url, pr.nome,
+                    f.valor as valor_frete
+                    FROM itens_pedido ip
+             left join produtos pr on pr.id = ip.produto_id
+             left join frete f on f.produto_id = ip.produto_id
+             WHERE ip.pedido_id = ?`,
+            [idPedido]
+        );
+
+        // Se não houver itens para esse pedido, retorne erro
+        if (itensResultado.length === 0) {
+            return res.status(404).json({ message: "Itens do pedido não encontrados" });
+        }
+
+        // Adicionar os itens ao pedido
+        pedido.itens = itensResultado;
+
+        // Retornar o pedido com os itens
+        return res.status(200).json(pedido);
+
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Erro ao carregar pedido" });
+    }
+});
+
+app.get("/meus-pedidos-pesquisa/:nomePesquisa?",autenticarToken, async (req,res) => {
+    const userId = req.usuarioId;
+    const nomePesquisa = req.params.nomePesquisa || '';
+    const filtro = req.query.filtroSelecionado;
+    console.log(`nomePesquisae`,nomePesquisa);
+    
+
+    try{
+        
+        let query = `select *,(SELECT i.url FROM imagens_produto i WHERE i.produto_id = pr.id LIMIT 1) AS url from itens_pedido ip left join pedidos p on p.id = ip.pedido_id left join produtos pr on pr.id = ip.produto_id where ip.pedido_id in (select ip2.pedido_id from itens_pedido ip2 left join produtos pr2 on pr2.id = ip2.produto_id where 1=1`
+        
+        const params = [];
+        
+        if(nomePesquisa){
+            query += ` AND pr2.nome like ?`;
+            params.push(`%${nomePesquisa}%`);
+        }
+
+        query += ` ) AND p.user_id = ?`
+        params.push(userId);
+
+
+        if(filtro === "Todas") {
+        } else {
+            switch(filtro) {
+                case "Este Mês":
+                    query += ` AND MONTH(p.data_pedido) = ?`;
+                    params.push(new Date().getMonth() + 1); 
+                    break;
+                case "Mês passado":
+                    query += ` AND MONTH(p.data_pedido) = ? AND YEAR(p.data_pedido) = ?`;
+                    params.push(new Date().getMonth()); 
+                    params.push(new Date().getFullYear()); 
+                    break;
+                case "Esse ano":
+                    query += ` AND YEAR(p.data_pedido) = ?`;
+                    params.push(new Date().getFullYear()); 
+                    break;
+                case "2024":
+                case "2023":
+                case "2022":
+                case "2021":
+                    query += ` AND YEAR(p.data_pedido) = ?`;
+                    params.push(Number(filtro)); 
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        const [resposta] = await db.query(query,params);
+
+        const pedidosUnicos = new Set(resposta.map(item => item.pedido_id));
+        const quantidadeDePedidos = pedidosUnicos.size;
+
+        return res.status(200).json({
+            quantidadeDePedidos,
+            dados:resposta});
+    
+    
+    
+    }
+    catch(err){
+        return res.status(500).json({message:"Não foi possivel pesquisar pedido"});
+    }
+})
+
+
+
 app.listen(port, () => {console.log("servidor rodando na porta " + `${port}`)});

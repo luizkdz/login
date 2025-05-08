@@ -11,3 +11,16 @@
     margin-top:2rem;
     margin-bottom:2rem;
 }
+
+.select-custom {
+   font-size: 14px;
+   padding-right:10px;
+}
+
+
+
+.select-wrapper{
+    display:flex;
+    gap:20px;
+    align-items: center;
+}

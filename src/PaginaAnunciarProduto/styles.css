@@ -1,0 +1,78 @@
+.secao-anunciar-produto{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    background-color:#f1f1f1;
+    padding-top:3rem;
+    padding-bottom:3rem;
+}
+
+.container-anunciar-produto{
+    display:flex;
+    gap:30px
+}
+
+.card-anunciar-produto{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+    padding:20px;
+    border-radius: 6px;
+    background-color: #c1c1c1;
+    
+}
+
+.imagem-card-anunciar-produto{
+    width:120px;
+    height:100px;
+}
+
+.secao-identificar-produto{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+.card-secao-identificar-produto{
+    width:100%;
+    padding-top:3rem;
+    padding-bottom:3rem;
+}
+
+.paragrafo-condicao-produto:hover{
+    background-color:#f1f1f1;
+}
+
+.container-informacoes-produto-imagem-pagina-venda{
+    display:flex;
+    gap:20px;
+    align-items: center;
+}
+
+.container-informacoes-produto-pagina-venda{
+    width:500px;
+    display:flex;
+    flex-wrap: wrap;
+    gap:10px
+}
+
+.container-adicionar-link-botao{
+    display:flex;
+    flex-direction: column;
+    gap:50px;
+    align-items: center;
+}
+
+.container-adicionar-link-imagem{
+    display:flex;
+    gap:100px;
+    align-items: center;
+}
+
+.container-imagem-fotos-produto{
+    align-items: center;
+    display:flex;
+    flex-direction: column;
+}
