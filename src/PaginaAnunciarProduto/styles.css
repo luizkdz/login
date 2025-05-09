@@ -55,7 +55,7 @@
     width:500px;
     display:flex;
     flex-wrap: wrap;
-    gap:10px
+    gap:50px
 }
 
 .container-adicionar-link-botao{
@@ -69,10 +69,54 @@
     display:flex;
     gap:100px;
     align-items: center;
+    margin-top:50px;
 }
 
 .container-imagem-fotos-produto{
     align-items: center;
     display:flex;
     flex-direction: column;
+}
+
+.container-fotos-aparecendo{
+    display:flex;
+    gap:20px;
+    border: 2px solid #f0f0f0;
+    padding:20px;
+    border-radius: 6px;
+    flex-wrap: wrap;
+    width:400px;
+    height:276px;
+    margin-top:50px;
+}
+
+.card-condicoes-de-venda{
+    padding:20px;
+    width:500px;
+}
+
+.card-valor-do-frete{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    padding:20px;
+}
+
+.card-resumo-anuncio{
+    border-radius: 6px;
+    background-color: #f1f1f1;
+    width:500px;
+    padding:20px;
+}
+
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }

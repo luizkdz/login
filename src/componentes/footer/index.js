@@ -133,6 +133,19 @@ function Footer() {
             <a href="https://www.flaticon.com/free-icons/advertising" title="advertising icons">Advertising icons created by Freepik - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/dslr-camera" title="dslr-camera icons">Dslr-camera icons created by Freepik - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/picture" title="picture icons">Picture icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/refund" title="refund icons">Refund icons created by zero_wing - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/refurbished-product" title="refurbished product icons">Refurbished product icons created by Nualnoi Kinkaeo - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/exclusive" title="exclusive icons">Exclusive icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/gift" title="gift icons">Gift icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/import-goods" title="import goods icons">Import goods icons created by Three musketeers - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/social-media-marketing" title="social media marketing icons">Social media marketing icons created by SBTS2018 - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/personalized" title="personalized icons">Personalized icons created by Awicon - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/license" title="license icons">License icons created by monkik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/ecommerce" title="ecommerce icons">Ecommerce icons created by Alfredo Hernandez - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/shop" title="shop icons">Shop icons created by srip - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/pitch" title="pitch icons">Pitch icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/description" title="description icons">Description icons created by Marz Gallery - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/flannel" title="flannel icons">Flannel icons created by creative_designer - Flaticon</a>
             </div>
         </footer>
     );
