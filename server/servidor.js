@@ -265,7 +265,7 @@ app.get("/produtos", async (req,res) => {
         const params = [localidade];
         let query = `SELECT 
     p.id, p.nome, p.preco, p.descricao, p.preco_parcelado, 
-    p.parcelas_máximas, p.preco_pix, p.desconto, COUNT(DISTINCT p.id) as total_produtos,
+    p.parcelas_máximas, p.preco_pix,p.cep_origem, p.desconto, COUNT(DISTINCT p.id) as total_produtos,
     COALESCE(MIN(f.valor), MIN(f_default.valor), 0) AS valor_frete, 
     (SELECT i.url FROM imagens_produto i WHERE i.produto_id = p.id LIMIT 1) AS url, 
     ROUND(COALESCE(AVG(a.nota), 0), 1) AS media_avaliacoes,COUNT(p.id) OVER() as total_produtos,
@@ -573,6 +573,7 @@ app.get("/produto/:id", async (req, res) => {
     p.preco_pix AS produto_preco_pix,
     p.desconto AS produto_desconto,
     p.estoque AS produto_estoque,
+    p.cep_origem,
     c.nome AS categoria_nome,
     ci.id as cart_item_id
     FROM produtos p
@@ -922,6 +923,8 @@ app.get("/cart", async (req,res) => {
         p.preco, 
         p.preco_pix, 
         p.desconto,
+        p.cep_origem,
+        p.parcelas_máximas,
         GROUP_CONCAT(DISTINCT co.id) AS cores_ids,
         GROUP_CONCAT(DISTINCT co.valor) AS cores,
         GROUP_CONCAT(DISTINCT d.id) as dimensoes_ids,
@@ -1214,7 +1217,7 @@ app.post("/cart" , autenticarToken, async (req,res) => {
 app.put("/cart/:itemId",autenticarToken, async (req,res) => {
     const {itemId} = req.params;
     const userId = req.usuarioId;
-    const {quantidade, corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId,alterar} = req.body;
+    const {produtoId,quantidade, corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId,alterar} = req.body;
 
     try{
         let query = `UPDATE cart_items ci join carts c on ci.cart_id = c.id SET `
@@ -1319,6 +1322,10 @@ app.put("/cart/:itemId",autenticarToken, async (req,res) => {
         if(materiaisId){
             segundaQuery+= ` AND ci.materiaisId = ?`
             segundoParams.push(materiaisId);
+        }
+        if(produtoId){
+            segundaQuery+= ` AND ci.produto_id = ?`
+            segundoParams.push(produtoId);
         }
 
         const [resultado] = await db.query(segundaQuery,segundoParams);
@@ -1720,7 +1727,7 @@ app.put("/itens-salvos/:itemId", autenticarToken, async (req,res) => {
 
     const userId = req.usuarioId
     
-    const {quantidade, corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId, alterar} = req.body;
+    const {quantidade, corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId,produtoId, alterar} = req.body;
     
     try{ 
         let query = `UPDATE itens_salvos SET `
@@ -1782,7 +1789,6 @@ app.put("/itens-salvos/:itemId", autenticarToken, async (req,res) => {
         const [primeiroResultado] = await db.query(query,params);
         
         
-        
         const segundoParams = [];
         let segundaQuery = `SELECT * FROM itens_salvos 
         where 1=1`
@@ -1827,6 +1833,10 @@ app.put("/itens-salvos/:itemId", autenticarToken, async (req,res) => {
         if(materiaisId){
             segundaQuery+= ` AND materiais_id = ?`
             segundoParams.push(materiaisId);
+        }
+        if(produtoId){
+            segundaQuery+= ` AND ci.produto_id = ?`
+            segundoParams.push(produtoId);
         }
 
         const [resultado] = await db.query(segundaQuery,segundoParams);
@@ -2184,7 +2194,7 @@ app.post("/cartoes-salvos", autenticarToken, async (req,res) => {
     const {numeroCartao, nomeTitularCartao, vencimentoCartao, tipoDeDocumento,documentoTitular, bandeira} = req.body;
     const userId = req.usuarioId;
     try{
-        const numerosFinaisCartao = numeroCartao.slice(-4);
+        const numerosFinaisCartao = numeroCartao?.slice(-4);
         const numeroMascaradoCartao = `**** **** **** ` + numerosFinaisCartao;
         const [resultado] = await db.query(`INSERT INTO cartoes_salvos (numero_mascarado, id_usuario, nome_titular, bandeira, data_expiracao)
              values (?,?,?,?,?)`,[numeroMascaradoCartao,userId,nomeTitularCartao,bandeira,vencimentoCartao]);
@@ -2214,7 +2224,7 @@ app.delete("/cartoes-salvos/:idCartao", autenticarToken, async(req,res) => {
 
 app.post("/confirmar-compra", autenticarToken, async (req,res) => {
     const userId = req.usuarioId;
-    const {itens, statusPedido,codigoRastramento,dataEnvio,dataCancelamento,observacoes,valorTotal, metodoPagamento, enderecoEnvio, cartaoUsado} = req.body.pedido;
+    const {itens, statusPedido,codigoRastramento,dataEnvio,dataCancelamento,observacoes,valorTotal, metodoPagamento, enderecoEnvio, cartaoUsado,parcelas,valorParcela,valorFrete} = req.body.pedido;
     const numero = cartaoUsado?.numero || null
     const expiracao = cartaoUsado?.expiracao || null;
     const lougradouroEndereco = enderecoEnvio?.logradouro || null ;
@@ -2293,7 +2303,18 @@ app.post("/confirmar-compra", autenticarToken, async (req,res) => {
             columns.push(`cartao_expiracao`);
             params.push(expiracao);
         }
-
+        if(valorParcela){
+            columns.push(`valor_parcela`)
+            params.push(valorParcela);
+        }
+        if(parcelas){
+            columns.push(`parcelas`);
+            params.push(parcelas);
+        }
+        if(valorFrete){
+            columns.push(`preco_frete`);
+            params.push(valorFrete);
+        }
 
         const placeholders = columns.join(", ");
         const valuePlaceholders = columns.map(() => "?").join(", ");
@@ -2395,7 +2416,7 @@ app.get("/meus-pedidos/:idPedido", autenticarToken, async (req, res) => {
         const [pedidoResultado] = await db.query(
             `SELECT p.id, p.user_id, p.data_pedido, p.total, p.status, p.metodo_pagamento, 
                     p.endereco_logradouro,p.endereco_cidade,p.endereco_estado,p.endereco_complemento,p.endereco_numero, p.observacoes, p.codigo_rastreamento, 
-                    p.data_envio, p.data_cancelamento, p.cartao_mascarado, p.cartao_expiracao 
+                    p.parcelas,p.valor_parcela,p.preco_frete,p.data_envio, p.data_cancelamento, p.cartao_mascarado, p.cartao_expiracao 
              FROM pedidos p 
              WHERE p.id = ? AND p.user_id = ?`,
             [idPedido, userId]
@@ -2504,6 +2525,409 @@ app.get("/meus-pedidos-pesquisa/:nomePesquisa?",autenticarToken, async (req,res)
         return res.status(500).json({message:"Não foi possivel pesquisar pedido"});
     }
 })
+
+
+app.get("/buscar-cores-produto/:nomeCor", async (req,res) => {
+
+    const {nomeCor} = req.params
+
+    try{
+        const [cores] = await db.query("SELECT * from cores where valor like ? ",[`%${nomeCor}%`]);
+
+        return res.status(200).json(cores);
+    }
+    catch(err){
+        console.error(err);
+        return res.status(500).json({message:"Não foi possivel buscar a cor"});
+    }
+});
+
+app.get("/buscar-estampa-produto/:nomeEstampa", async (req,res) => {
+
+    const {nomeEstampa} = req.params
+
+    try{
+        const [estampas] = await db.query("SELECT * from estampas where valor like ?",[`%${nomeEstampa}%`]);
+        
+
+        return res.status(200).json(estampas);
+    }
+    catch(err){
+        console.error(err);
+        return res.status(500).json({message:"Não foi possivel buscar a cor"});
+    }
+});
+
+
+app.get("/buscar-genero-produto/:nomeGenero", async (req,res) => {
+
+    const {nomeGenero} = req.params
+
+    try{
+        const [generos] = await db.query("SELECT * from generos where valor like ? ",[`%${nomeGenero}%`]);
+        return res.status(200).json(generos);
+    }
+    catch(err){
+        console.error(err);
+        return res.status(500).json({message:"Não foi possivel buscar a cor"});
+    }
+});
+
+app.get("/buscar-materiais-produto/:nomeMateriais", async (req,res) => {
+
+    const {nomeMateriais} = req.params
+
+    try{
+        const [materiais] = await db.query("SELECT * from material where valor like ?",[`%${nomeMateriais}%`]);
+        return res.status(200).json(materiais);
+    }
+    catch(err){
+        console.error(err);
+        return res.status(500).json({message:"Não foi possivel buscar o material"});
+    }
+});
+
+app.get("/buscar-tamanhos-produto/:nomeTamanhos", async (req,res) => {
+
+    const {nomeTamanhos} = req.params
+
+    try{
+        const [tamanhos] = await db.query("SELECT * from tamanhos where valor like ?",[`%${nomeTamanhos}%`]);
+        return res.status(200).json(tamanhos);
+    }
+    catch(err){
+        console.error(err);
+        return res.status(500).json({message:"Não foi possivel buscar o tamanho"});
+    }
+});
+
+app.get("/buscar-voltagens-produto/:nomeVoltagens", async (req,res) => {
+
+    const {nomeVoltagens} = req.params
+
+    try{
+        const [voltagens] = await db.query("SELECT * from voltagens where valor like ?",[`%${nomeVoltagens}%`]);
+        return res.status(200).json(voltagens);
+    }
+    catch(err){
+        console.error(err);
+        return res.status(500).json({message:"Não foi possivel buscar a cor"});
+    }
+});
+
+app.post("/anunciar-produto", autenticarToken, async(req,res) => {
+    const userId = req.usuarioId;
+    const {nomeProduto,descricao,
+        precoProduto,estoque,tipoProdutoId,
+        cor,dimensoes,estampa,genero,
+        material,pesos,
+        tamanho,voltagem,opiniaoClientes,
+    imagens,precoProdutoPix,numeroParcelas,precoTotalParcelado,desconto,cep,
+    numeroParcelasGratis,
+    taxaJurosAoMes} = req.body;
+    
+
+    try{
+        const columns = [];
+        const params = [];
+
+        if(nomeProduto){
+            columns.push(`nome`);
+            params.push(nomeProduto);
+        }
+        if(descricao){
+            columns.push(`descricao`);
+            params.push(descricao);
+        }
+        if(precoProduto){
+            columns.push(`preco`);
+            params.push(precoProduto);
+        }
+        if(estoque){
+            columns.push(`estoque`);
+            params.push(estoque);
+        }
+        if(userId){
+            columns.push(`user_id`);
+            params.push(userId);
+        }
+        if(tipoProdutoId){
+            columns.push(`tipo_produto_id`);
+            params.push(tipoProdutoId);
+        }
+        if(precoProdutoPix){
+            columns.push(`preco_pix`);
+            params.push(precoProdutoPix);
+        }
+        if(numeroParcelas){
+            columns.push(`parcelas_máximas`);
+            params.push(numeroParcelas);
+        }
+        if(desconto && desconto > 0){
+            columns.push(`desconto`);
+            params.push(desconto);
+        }
+        if(precoTotalParcelado){
+            columns.push(`preco_parcelado`);
+            params.push(precoTotalParcelado);
+        }
+       
+        
+
+        if(cep){
+            columns.push(`cep_origem`)
+            params.push(cep);
+        }
+
+        const placeholders = columns.join(", ");
+        const valuePlaceholders = columns.map(() => "?").join(", ");
+
+        let query = `INSERT INTO produtos (${placeholders}) values (${valuePlaceholders})`;
+        
+        const [resultado] = await db.query(query,params);
+
+        const produtoId = resultado.insertId;
+
+        if(cor){
+
+            for(const c of cor){
+                const [corJaExiste] = await db.query("SELECT id from cores where valor = ? ",[c]);
+                if(corJaExiste.length > 0){
+                    let query = `INSERT INTO produtos_cor (produto_id,cor_id) values (?,?)`
+                const params = [produtoId,corJaExiste[0].id];
+                await db.query(query,params) 
+                }
+                else{
+                 const [resultado] = await db.query("INSERT INTO cores (valor) values (?)",[c]);
+                 let query = `INSERT INTO produtos_cor (produto_id,cor_id) values (?,?)`
+                 const params = [produtoId,resultado.insertId];
+                 await db.query(query,params) 
+                }
+            }
+
+            
+            
+        }
+        if(dimensoes){
+
+            const {largura,altura,comprimento,unidade} = dimensoes;
+            const columns = [];
+            const params = [];
+            
+            if(largura){
+                columns.push(`largura`)
+                params.push(largura);
+            }
+            if(altura){
+                columns.push(`altura`)
+                params.push(altura);
+            }
+            if(comprimento){
+                columns.push(`comprimento`)
+                params.push(comprimento);
+            }
+            if(unidade){
+                columns.push(`unidade`)
+                params.push(unidade);
+            }
+
+            const placeholders = columns.join(", ");
+            const valuePlaceholders = columns.map(() => "?").join(", ");
+            
+            let query = `INSERT INTO dimensoes (${placeholders}) values (${valuePlaceholders})`
+
+            const [resultado] = await db.query(query,params);
+
+            await db.query("INSERT INTO produtos_dimensoes (produto_id,dimensoes_id) values (?,?)",[produtoId,resultado.insertId])
+            
+        }
+        if(estampa){
+
+
+            for(const e of estampa){
+                const [estampaExistente] = await db.query("SELECT id from estampas where valor = ?",[e]);
+                if(estampaExistente.length > 0){
+                    let query = "INSERT INTO produtos_estampas (produto_id,estampa_id) values (?,?)"
+                    await db.query(query,[produtoId,estampaExistente[0].id])
+                }
+                else{
+                const [novaEstampa] =  await db.query("INSERT INTO estampas (valor) values (?)",[e]);
+                let query = "INSERT INTO produtos_estampas (produto_id,estampa_id) values (?,?)"
+                await db.query(query,[produtoId,novaEstampa.insertId]);
+                }
+            }
+
+            
+
+        }
+        if(genero){
+            
+            for(const g of genero){
+                const [generoExistente] = await db.query("SELECT id from generos where valor = ?",[g])
+            if(generoExistente.length > 0){
+                let query = "INSERT INTO produtos_genero (produto_id,genero_id) values (?,?)"
+                await db.query(query,[produtoId,generoExistente[0].id])
+            }
+            else{
+                const [novoGenero] =  await db.query("INSERT INTO generos (valor) values (?)",[g]);
+            let query = "INSERT INTO produtos_genero (produto_id,genero_id) values (?,?)"
+            await db.query(query,[produtoId,novoGenero.insertId]);
+            }
+            }
+            
+            
+        }
+        if(material){
+
+            for(const m of material){
+                const [materialExistente] = await db.query("SELECT id from material where valor = ?",[m])
+            if(materialExistente.length > 0){
+                let query = "INSERT INTO produtos_materiais (produto_id,material_id) values (?,?)"
+                await db.query(query,[produtoId,materialExistente[0].id])
+            }
+            else{
+                const [novoMaterial] =  await db.query("INSERT INTO material (valor) values (?)",[m]);
+            let query = "INSERT INTO produtos_materiais (produto_id,material_id) values (?,?)"
+            await db.query(query,[produtoId,novoMaterial.insertId]);
+            }
+            }
+            
+        }
+        if(pesos){
+            const {peso, unidadePeso} = pesos;
+            const [novoPeso] =  await db.query("INSERT INTO pesos (valor,unidade) values (?,?)",[peso,unidadePeso]);
+            let query = "INSERT INTO produtos_pesos (produto_id,peso_id) values (?,?)"
+            await db.query(query,[produtoId,novoPeso.insertId]);
+        }
+        if(tamanho){
+
+            for(const t of tamanho){
+                const [tamanhoExistente] = await db.query("SELECT id from tamanhos where valor = ?",[t])
+                if(tamanhoExistente.length > 0){
+                    let query = "INSERT INTO produtos_tamanhos (produto_id,tamanho_id) values (?,?)"
+                    await db.query(query,[produtoId,tamanhoExistente[0].id])
+                }
+                else{
+                    const [novoTamanho] =  await db.query("INSERT INTO tamanhos (valor) values (?)",[t]);
+                let query = "INSERT INTO produtos_tamanhos (produto_id,tamanho_id) values (?,?)"
+                await db.query(query,[produtoId,novoTamanho.insertId]);
+                }
+            }
+            
+
+        }
+        if(voltagem){
+
+            for(const v of voltagem){
+                const [voltagemExistente] = await db.query("SELECT id from voltagens where valor = ?",[v])
+            if(voltagemExistente.length > 0){
+                let query = "INSERT INTO produtos_voltagens (produto_id,voltagens_id) values (?,?)"
+                await db.query(query,[produtoId,voltagemExistente[0].id])
+            }
+            else{
+                const [novaVoltagem] =  await db.query("INSERT INTO voltagens (valor) values (?)",[v]);
+            let query = "INSERT INTO produtos_voltagens (produto_id,voltagens_id) values (?,?)"
+            await db.query(query,[produtoId,novaVoltagem.insertId]);
+            }
+            }
+            
+        }
+        if(imagens){
+            const {imagem1,imagem2,imagem3,imagem4,imagem5} = imagens;
+            
+          if(imagem1){
+            await db.query("INSERT INTO imagens_produto (produto_id,url) values (?,?)",[produtoId,imagem1]);
+          }
+          if(imagem2){
+            await db.query("INSERT INTO imagens_produto (produto_id,url) values (?,?)",[produtoId,imagem2]);
+          }
+          if(imagem3){
+            await db.query("INSERT INTO imagens_produto (produto_id,url) values (?,?)",[produtoId,imagem3]);
+          }
+          if(imagem4){
+            await db.query("INSERT INTO imagens_produto (produto_id,url) values (?,?)",[produtoId,imagem4]);
+          }
+          if(imagem5){
+            await db.query("INSERT INTO imagens_produto (produto_id,url) values (?,?)",[produtoId,imagem5]);
+          }
+            
+        }
+
+
+
+    }
+    catch(err){
+        console.log(err);
+        return res.status(500).json({message:"Não foi possível anunciar o produto"})
+    }
+})
+
+
+function calcularPrazoEPreco(cepOrigem, cepDestino) {
+  // Calculando a diferença entre os dois CEPs
+  const diff = Math.abs(parseInt(cepOrigem?.slice(0,5)) - parseInt(cepDestino?.slice(0,5)));
+  
+  // Calculando o prazo de entrega (em dias)
+  const prazoEmDias = Math.floor(diff / 1000) + 1; // Pelo menos 1 dia
+  
+  // Simulando o preço de envio
+  const precoBase = 10; // Preço base
+  const aumentoPorDistancia = Math.floor(diff / 500); // A cada 500 unidades de diferença, aumenta R$ 2
+  const precoEnvio = precoBase + aumentoPorDistancia * 2; // Aumento no preço
+
+  return {
+    prazoEmDias,
+    precoEnvio: precoEnvio.toFixed(2)
+  };
+}
+
+app.post("/calcular-prazo-preco", autenticarToken,async (req,res) => {
+    const userId = req.usuarioId;
+    const {cepOrigem, cepDestino} = req.body;
+    
+    
+    try{
+        const resposta = await axios.get(`https://viacep.com.br/ws/${cepDestino}/json`);
+        const {prazoEmDias,precoEnvio} = calcularPrazoEPreco(cepOrigem,cepDestino);
+        return res.status(200).json({cepOrigem,
+            cepDestino,
+            prazoEmDias,
+            precoEnvio,
+            localidade:resposta.data.localidade,
+            estado:resposta.data.uf,
+            mensagem:`Prazo estimado de envio ${prazoEmDias} dias.Preço do envio: R$ ${precoEnvio}`
+})
+
+    }
+    catch(err){
+        console.log(err);
+        return res.status(500).json({message:"Não foi possivel calcular o prazo e o preço"})
+    }
+})
+
+app.post("/inserir-frete-valor", autenticarToken, async (req, res) => {
+    const {prazo,valor,localidade,produtoId, estado} = req.body
+    
+    try{
+        const [resultado] = await db.query("SELECT * from frete where produto_id = ? and cidade = ?",[produtoId,localidade]);
+        if(resultado.length === 0){
+            await db.query("INSERT INTO frete (produto_id,cidade,valor,prazo,estado) values (?,?,?,?,?)",[produtoId,localidade,valor,prazo,estado]);
+            return res.status(200).json({message:"Frete inserido com sucesso"});
+        }
+        else{
+            return res.status(200).json({message:"Frete ja existe pra essa localidade"});
+        }
+        
+    }
+    catch(err){
+        console.log(err);
+        return res.status(500).json({message:"Não foi possivel inserir o valor do frete"})
+    }
+})
+       
+        
+
+
 
 
 

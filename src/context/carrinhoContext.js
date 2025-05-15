@@ -61,7 +61,7 @@ const excluirItemCarrinho = async (itemId, corId = null, voltagemId = null, dime
         console.error("Não foi possível excluir o item do carrinho");
     }
 }
-const editarQuantidadeItemCarrinho = async (novaQuantidade,itemId,corId = null,voltagemId = null, dimensoesId = null, pesosId = null,generoId = null, estampasId = null,tamanhosId = null, materiaisId = null,alterar=null) => {
+const editarQuantidadeItemCarrinho = async (novaQuantidade,itemId,corId = null,voltagemId = null, dimensoesId = null, pesosId = null,generoId = null, estampasId = null,tamanhosId = null, materiaisId = null,alterar=null,produtoId = null) => {
     try{
         await axios.put(`http://localhost:5000/cart/${itemId}`,{
         quantidade:Number(novaQuantidade),
@@ -73,6 +73,7 @@ const editarQuantidadeItemCarrinho = async (novaQuantidade,itemId,corId = null,v
         estampasId,
         tamanhosId,
         materiaisId,
+        produtoId,
         alterar
         
         },{withCredentials:true});

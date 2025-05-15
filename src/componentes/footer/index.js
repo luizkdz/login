@@ -146,6 +146,9 @@ function Footer() {
             <a href="https://www.flaticon.com/free-icons/pitch" title="pitch icons">Pitch icons created by Freepik - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/description" title="description icons">Description icons created by Marz Gallery - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/flannel" title="flannel icons">Flannel icons created by creative_designer - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/red" title="red icons">Red icons created by hqrloveq - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/month" title="month icons">Month icons created by chahir - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/price" title="price icons">Price icons created by Freepik - Flaticon</a>
             </div>
         </footer>
     );

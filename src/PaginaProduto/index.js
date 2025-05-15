@@ -177,7 +177,9 @@ function PaginaProduto(){
           try {
             const resposta = await axios.get(`http://localhost:5000/produto/${id}`);
             const produtoBuscado = resposta.data.produto;
+            console.log(produtoBuscado);
             setProduto(produtoBuscado);
+            
             setImagemSelecionada(produtoBuscado.imagens[0] || null);
             setCorSelecionada(produtoBuscado.cor?.[0].id || null );
             setMaterialSelecionado(produtoBuscado?.materiais?.[0].id ||  null );
@@ -202,26 +204,54 @@ function PaginaProduto(){
                ? `${produtoBuscado.dimensoes[0].largura} ${produtoBuscado.dimensoes[0].unidade} x ${produtoBuscado.dimensoes[0].altura} ${produtoBuscado.dimensoes[0].unidade} x ${produtoBuscado.dimensoes[0].comprimento} ${produtoBuscado.dimensoes[0].unidade}` 
                : undefined,
               });
+        
+        if(cep !== "Insira seu cep"){
+         const respostaPrazoPreco = await axios.post(
+            `http://localhost:5000/calcular-prazo-preco`,
+            {
+                cepOrigem: produtoBuscado.cep_origem,
+                cepDestino: cep
+            },
+            {
+                withCredentials: true
+            }
+        );
+        console.log(respostaPrazoPreco.data);
+            setPrazo(respostaPrazoPreco.data.prazoEmDias);
+            setValorFrete(respostaPrazoPreco.data.precoEnvio);
+            setLocalidade(respostaPrazoPreco.data.localidade);
+        
+        try{
+            await axios.post("http://localhost:5000/inserir-frete-valor",
+        {prazo:respostaPrazoPreco.data.prazoEmDias,
+        valor:respostaPrazoPreco.data.precoEnvio,
+        localidade:respostaPrazoPreco.data.localidade,
+        produtoId:produtoBuscado.produto_id,
+        estado:respostaPrazoPreco.data.estado
+        },
+                {withCredentials:true})
 
+        }
+        catch(err){
+            console.error("Não foi possivel inserir o frete");
+        }
+           
+        }
+        
+        
           } catch (err) {
             console.error("Erro ao buscar produto", err);
           }
+       
+        
         };
+
+        
       
         buscarProduto();
-      }, [id]);
+      }, [id,cep]);
       
-      useEffect(() => {
-        if (produto && cep && cep.length === 8) {
-          calcularFretePorCep(
-            produto.produto_id,
-            cep,
-            setLocalidade,
-            setValorFrete,
-            setPrazo
-          );
-        }
-      }, [produto, cep]);
+      
 
       useEffect(() => {
         fetchOtherProducts()
@@ -263,6 +293,18 @@ function PaginaProduto(){
             console.error("Não foi possível carregar os outros produtos");
         }
     }
+
+    const fetchDadosPrazoEnvio = async () => {
+        try{
+            console.log(`produtoe`,produto);
+            
+        
+        }
+        catch(err){
+            console.error("Não foi possivel calcular o prazo e o preço")
+        }
+    }
+
 
     return (
         <div>
@@ -378,11 +420,13 @@ function PaginaProduto(){
                                     <div className="card-variacao" key={nome}>
                                         {nome.charAt(0).toUpperCase() + nome.slice(1)}:{exibirHover}
                                         
-                                        <div className={`container-card-${nome}`}>
+                                        <div style={{display:"flex",gap:"10px",flexWrap:"wrap"}} className={`container-card-${nome}`}>
                                         {opcoes?.map((item) => {
                                             return (
                                             <div
                                                 key={item.id}
+                                                style={{width:"150px"}}
+                                                
                                                 onClick={() => {
                                                 
                                                 // Atualiza a seleção de atributos
@@ -446,7 +490,7 @@ function PaginaProduto(){
                                                     handleHover(nome,null)}}
                                                     className={`card-valor-cor ${
                                                         nome === "dimensoes"
-                                                          ? selecoes[nome] === `${item.largura} ${item.unidade} x ${item.altura} ${item.unidade} x ${item.comprimento} ${item.unidade}` ||  `${produto.largura} ${produto.dimensoes_unidade} x ${produto.altura} ${produto.dimensoes_unidade} x ${produto.comprimento} ${produto.dimensoes_unidade}`
+                                                          ? selecoes[nome] === `${item.largura} ${item.unidade} x ${item.altura} ${item.unidade} x ${item.comprimento} ${item.unidade}`
                                                             ? "selecionado"
                                                             : ""
                                                           : nome === "pesos"
@@ -454,10 +498,10 @@ function PaginaProduto(){
                                                             ? "selecionado"
                                                             : ""
                                                           : nome === "voltagens"
-                                                          ? selecoes[nome] == `${item.valor}V` || `${produto[nome]?.[0].valor}V`
+                                                          ? selecoes[nome] == `${item.valor}V` 
                                                             ? "selecionado"
                                                             : ""
-                                                          : selecoes[nome] === item.valor || `${produto[nome].valor}`
+                                                          : selecoes[nome] === item.valor 
                                                           ? "selecionado"
                                                           : ""
                                                       }`}                                     >
@@ -570,7 +614,7 @@ function PaginaProduto(){
                         <p className="texto-prazo">Os prazos de entrega são contabilizados a partir da confirmação do pagamento e podem sofrer variações caso haja a compra de mais de uma unidade do mesmo produto.</p>
                         </div>
                         </div>
-                        <p className="preco-frete"> {valorFrete === null ? "Indisponível" : `R$ ${valorFrete.toFixed(2)}`}</p> 
+                        <p className="preco-frete"> {valorFrete === null ? "Indisponível" : `R$ ${valorFrete}`}</p> 
                                             
                         </div>
                         

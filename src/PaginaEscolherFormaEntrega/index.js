@@ -21,6 +21,9 @@ function PaginaEscolherFormaEntrega(){
     const [virarCartao, setVirarCartao] = useState(false);
     const [imagemCartao, setImagemCartao] = useState("/images/contactless-metodos-pagamento.png");
     const [prazos, setPrazos] = useState({});
+    const [precoEnvio, setPrecoEnvio] = useState({});
+    const [localidade, setLocalidade] = useState({});
+    const [estadoUF,setEstadoUF] = useState({});
     const {obterCarrinho, carrinhoItens} = useCarrinho();
     const [fretesSelecionados, setFretesSelecionados] = useState({});
     const [estado,setEstado] = useState(null);
@@ -47,6 +50,11 @@ function PaginaEscolherFormaEntrega(){
     const [documentoTitular, setDocumentoTitular] = useState("");
     const [bandeira, setBandeira] = useState("");
     const [selecionarEnderecoEntrega, setSelecionarEnderecoEntrega] = useState("");
+    const [enderecoEscolhido, setAtualizarEnderecoEscolhido] = useState(false);
+    const [parcelasSelecionadas, setParcelasSelecionadas] = useState({});
+    const [numeroParcelas,setNumeroParcelas] = useState(1);
+    const [valorParcela, setValorParcela] = useState(0);
+    const numeroParcelasMaximas = 12
     const handleInputChange = (e) => {
         let value = e.target.value.replace(/\D/g, ''); // remove não dígitos
         value = value.substring(0, 16); // limita a 16 dígitos
@@ -72,7 +80,7 @@ function PaginaEscolherFormaEntrega(){
             imagem:item.imagem_produto,
             produto_id:item.produto_id,
             prazo:prazos[item.produto_id],
-            frete:item.valor_frete,
+            frete:precoEnvio[item.id],
             cores:item.cores,
             dimensoes:`${item.larguras}${item.dimensoes_unidade} x ${item.alturas}${item.dimensoes_unidade} x ${item.comprimentos}${item.dimensoes_unidade}`,
             estampas:item.estampas,
@@ -80,7 +88,7 @@ function PaginaEscolherFormaEntrega(){
             materiais:item.materiais,
             pesos:`${item.pesos}${item.pesos_unidade}`,
             tamanhos:item.tamanhos,
-            voltagens:`${item.voltagens}V`
+            voltagens:`${item.voltagens}V`,
         })});
 
 
@@ -88,7 +96,8 @@ function PaginaEscolherFormaEntrega(){
        const cartaoUsadoParaEnviar = cartaoSelecionado ? {numero:cartaoSelecionado.numero_mascarado,
         expiracao:cartaoSelecionado.data_expiracao} : null;
 
-        
+
+
         const pedido = {
             itens:itensParaEnviar,
             valorFrete:calcularFreteTotal(),
@@ -96,8 +105,11 @@ function PaginaEscolherFormaEntrega(){
             metodoPagamento:selecionarOpcaoDePagamento,
             enderecoEnvio:enderecoEnvio,
             imagemMetodoPagamento:imagemOpcaoPagamento,
-            cartaoUsado:cartaoUsadoParaEnviar
+            cartaoUsado:cartaoUsadoParaEnviar,
+            parcelas:numeroParcelas,
+            valorParcela:valorParcela
         }
+        
 
         await axios.post("http://localhost:5000/confirmar-compra",{
             pedido
@@ -162,6 +174,37 @@ function PaginaEscolherFormaEntrega(){
         try{
             const resposta = await axios.get(`http://localhost:5000/enderecos/${selecionarEndereco}`,{withCredentials:true});
             setEnderecoEnvio(resposta.data);
+            
+            setSelecionarEnderecoEnvio(resposta.data.id_endereco);
+            
+           
+            carrinhoItens.map( async (item) => {
+              const respostaCEP = await axios.post(`http://localhost:5000/calcular-prazo-preco`, {
+            cepOrigem:item.cep_origem,    
+            cepDestino:resposta.data.cep 
+            }, {withCredentials: true});
+
+            setPrazos((prev) => ({
+                ...prev,
+                [item.produto_id]: respostaCEP.data.prazoEmDias
+            }))
+            setPrecoEnvio((prev) => ({
+                ...prev,
+                [item.id]: respostaCEP.data.precoEnvio
+                }));
+            setLocalidade((prev) => ({
+            ...prev,
+            [item.produto_id]: respostaCEP.data.localidade
+            }));
+            setEstadoUF((prev) => ({
+            ...prev,
+            [item.produto_id]: respostaCEP.data.estado
+            }));
+            
+
+        })
+        setAtualizarEnderecoEscolhido(!enderecoEscolhido);
+            
             setSelecionarEnderecoEntrega(resposta.data);
         }
         catch(err){
@@ -185,10 +228,46 @@ function PaginaEscolherFormaEntrega(){
         try{
             const resposta = await axios.get("http://localhost:5000/enderecos",{withCredentials:true});
             setEndereco(resposta.data);
+            
             const enderecoFiltrado = resposta.data.filter((item) => {return item.padrao === 1});
-            setSelecionarEnderecoEnvio(enderecoFiltrado[0].id_endereco);
-            setSelecionarEndereco(enderecoFiltrado[0].id_endereco);
-            setSelecionarEnderecoEntrega(enderecoFiltrado[0].id_endereco);
+            console.log(`re`,enderecoFiltrado[0]);
+            
+
+            
+                setSelecionarEnderecoEnvio(enderecoFiltrado[0].id_endereco);
+                
+                setSelecionarEnderecoEntrega(enderecoFiltrado[0].id_endereco);
+            
+            
+            
+            carrinhoItens.map( async (item) => {
+            const respostaCEP = await axios.post(`http://localhost:5000/calcular-prazo-preco`, {
+            cepOrigem:item.cep_origem,    
+            cepDestino:enderecoFiltrado[0].cep 
+            }, {withCredentials: true});
+            
+            setPrazos((prev) => ({
+                ...prev,
+                [item.produto_id]: respostaCEP.data.prazoEmDias
+            }))
+            setPrecoEnvio((prev) => ({
+                ...prev,
+                [item.id]: respostaCEP.data.precoEnvio
+                }));
+            setLocalidade((prev) => ({
+            ...prev,
+            [item.produto_id]: respostaCEP.data.localidade
+            }));
+            setEstadoUF((prev) => ({
+            ...prev,
+            [item.produto_id]: respostaCEP.data.estado
+            }));
+
+            
+        
+        })
+        
+        
         }
         catch(err){
             console.error("Não foi possivel carregar o endereço");
@@ -205,11 +284,9 @@ function PaginaEscolherFormaEntrega(){
     }
 
     
-    const calcularFreteTotal = () => {
-        return carrinhoItens.reduce((soma, item) => {
-            return soma + Number(item.valor_frete);
-        },0)
-    }
+    const calcularFreteTotal = () =>
+        Object.values(precoEnvio).reduce((total, valor) => total + parseFloat(valor), 0);
+
 
     const calcularPrecoProdutos = () => {
         return carrinhoItens.reduce((soma, item) => {
@@ -218,21 +295,18 @@ function PaginaEscolherFormaEntrega(){
     }
 
     const calcularPrecoTotal = () => {
-       const precoTotal = calcularFreteTotal() + calcularPrecoProdutos();
-        return precoTotal;
+       const precoTotal = calcularFreteTotal() + (precoTotalProdutos || calcularPrecoProdutos())
+        return Number(precoTotal);
     } 
+
+    const [precoTotalProdutos, setPrecoTotalProdutos] = useState(null);
 
 
     const calcularPrazo = async (produtoId) => {
         try{
             const resposta = await axios.get(`http://localhost:5000/calcular-frete/${cep}/${produtoId}`)
             const {cidade,estado, prazo} = resposta.data;
-            setPrazos((prev) => ({
-                ...prev,
-                [produtoId]: prazo
-            }))
-            setCidade(cidade);
-            setEstado(estado);
+            
         
         }
         catch(err){
@@ -306,11 +380,7 @@ function PaginaEscolherFormaEntrega(){
         obterCarrinho();
     }, [step]);
 
-    useEffect(() => {
-        carrinhoItens.forEach((item) => {
-            calcularPrazo(item.produto_id)
-        })
-    },[carrinhoItens]);
+    
 
     useEffect(() => {
         const inicial = {};
@@ -322,9 +392,12 @@ function PaginaEscolherFormaEntrega(){
         setFretesSelecionados(inicial);
       }, [carrinhoItens]);
 
-    useEffect(() => {
+    
+      useEffect(() => {
         fetchEndereco();
-    },[atualizarEnderecos]);
+        console.log(`carrinhoItens`,carrinhoItens);
+    },[carrinhoItens]);
+    
 
     useEffect(() => {
         fetchCartoesDeCredito();
@@ -370,12 +443,21 @@ const classePagamento = entregaConcluida
     function handleMostrarCardFormaEntrega(){
         setMostrarCardFormaEntrega(!mostrarCardFormaEntrega);
     }
+useEffect(() => {
+    setValorParcela(valorTotal)
+},[])
+
+const valorTotal = calcularPrecoTotal();
+
+useEffect(() => {
+    setValorParcela(valorTotal)
+},[]);
 
     return (
         <div className="pagina-toda-forma-entrega">
             <Header props="d"/>
             
-            {step !== 5 ? <div className="container-icones-pagina-forma-entrega">
+            {((step !== 5) && (selecionarOpcaoDePagamento !== "Cartao")) || ((step !== 6) && (selecionarOpcaoDePagamento === "Cartao"))  ? <div className="container-icones-pagina-forma-entrega">
                 <div className="icone-texto-pagina-forma-entrega">
                 <img src = "/images/shopping-cart-pagina-entrega-verde.png" className="imagem-icone-pagina-entrega-verde"/>
                 <p style={{fontSize:"12px"}} >Carrinho</p>
@@ -393,7 +475,7 @@ const classePagamento = entregaConcluida
                 <p style={{fontSize:"12px"}}>Pagamento</p>
                 </div>
             </div> : ""}
-            {step !== 5 ? <div className="container-pagina-forma-entrega">
+            {((step !== 5) && (selecionarOpcaoDePagamento !== "Cartao")) || ((step !== 6) && (selecionarOpcaoDePagamento === "Cartao")) ? <div className="container-pagina-forma-entrega">
                 {step === 1 && (
                     <div className="titulo-forma-entrega">
                     <p style={{fontSize:"24px"}}>Escolha a forma de entrega</p>
@@ -443,7 +525,7 @@ const classePagamento = entregaConcluida
                     )})
                         }    
                         <div >
-                        <button style={{marginBottom:"20px",position:"absolute",left:"0",backgroundColor:"rgb(52, 131, 250)",border:"none"}}className="botao-continuar-forma-entrega" onClick={() => {setStep(1);fetchEnderecoEnvio();console.log(enderecoEnvio)}}>Continuar</button>
+                        <button style={{marginBottom:"20px",position:"absolute",left:"0",backgroundColor:"rgb(52, 131, 250)",border:"none"}}className="botao-continuar-forma-entrega" onClick={() => {setStep(1);fetchEnderecoEnvio();}}>Continuar</button>
                         <button style={{marginBottom:"20px",position:"absolute",left:"150px", backgroundColor:"rgb(52, 131, 250)", border:"none"}}className="botao-continuar-forma-entrega" onClick={() => {setEditarEndereco(false);handleNext();handleAdicionarEndereco()}}>Adicionar Endereço</button>
                         </div>
 
@@ -476,7 +558,7 @@ const classePagamento = entregaConcluida
           }));
         }} checked={fretesSelecionados[item.produto_id] === true} type="radio" className="input-radio-forma-entrega"/> <p>Daqui {prazos[item.produto_id]} dias úteis</p>
                             </div>
-                            <p>R${item.valor_frete}</p>
+                            <p>R${precoEnvio[item.id]}</p>
                             </div>
                             
                            
@@ -575,7 +657,8 @@ const classePagamento = entregaConcluida
                     }}>Continuar</button>
                 </div> : ""}
 
-                {step === 4 && (selecionarOpcaoDePagamento !== "novoCartao") ? <div className="titulo-forma-entrega">
+                {((step === 4) && (selecionarOpcaoDePagamento !== "novoCartao") && (selecionarOpcaoDePagamento !== "Cartao")) &&
+( <div className="titulo-forma-entrega">
                     <p style={{fontSize:"24px"}}>Revise e confirme</p>
                     <p>Faturamento</p>
                     <div className="card-faturamento">
@@ -682,6 +765,7 @@ const classePagamento = entregaConcluida
                                     </div>}) :""}
 
                             <p>R$ {calcularPrecoTotal().toFixed(2)}</p>
+                            
                             </div>
                             </div>
                             <div className="container-modificar-dados-faturamento">
@@ -697,7 +781,132 @@ const classePagamento = entregaConcluida
                            
                     </div>
                     
-                </div> : ""}
+                </div> )}
+                {((step === 5) && (selecionarOpcaoDePagamento === "Cartao")) &&
+( <div className="titulo-forma-entrega">
+                    <p style={{fontSize:"24px"}}>Revise e confirme</p>
+                    <p>Faturamento</p>
+                    <div className="card-faturamento">
+                        <div className="container-card-forma-entrega-">
+                            <div className="container-card-nome-cpf">
+                            <div className="container-texto-forma-entrega">
+                            <div className="container-nome-cpf">
+                            <div className="container-icone-faturamento-nome">
+                            <img src="/images/contract.png" className="logo-icones-pagamento-pagina-entrega"/>
+                            <div className="container-texto-pix">
+                            <p style={{fontWeight:"bold"}}>Luiz Gustavo Cardoso</p>
+                            <p>CPF:111.111.111.11</p>
+                            </div>
+                            </div>
+                            <div className="container-modificar-dados-faturamento">
+                            <a style={{fontSize:"14px",textDecoration:"none",color:"#3483fa"}} href="#">Modificar dados de faturamento</a>
+                            </div>
+                            </div>
+                            
+                            </div>
+                            </div>
+                            
+                            </div>
+                            
+                           
+                    </div>
+                    <p>Detalhe da entrega</p>
+                    <div className="card-faturamento">
+                        <div className="container-card-forma-entrega-">
+                            <div className="container-card-nome-cpf">
+                            <div className="container-texto-forma-entrega">
+                            <div className="container-nome-cpf">
+                            <div className="container-icone-faturamento-nome">
+                            <img src="/images/gps.png" className="logo-icones-pagamento-pagina-entrega"/>
+                            <div className="container-texto-pix">
+                            {endereco.filter((item) => {
+                               return selecionarEndereco !== null ? selecionarEndereco === item.id_endereco : selecionarEnderecoEnvio === item.id_endereco
+                            }).map((item) => {return (
+                                <p style={{fontSize:"16px",fontWeight:"bold"}}>{item.logradouro} - {item.numero} {item.complemento ? `Complemento :${item.complemento}` : ""}</p>
+                            )})}
+                            
+                            <div className="container-endereco-alterar-endereco">
+                            <p style={{fontSize:"14px"}}>Entrega no endereço</p>
+                            <p style={{fontSize:"14px",color:"#3483fa"}}>Alterar endereço</p>
+                            </div>
+                            </div>
+                            </div>
+                            <div className="container-modificar-dados-faturamento">
+                            <a style={{fontSize:"14px",textDecoration:"none",color:"#3483fa"}} href="#">Alterar endereço ou escolher outro</a>
+                            </div>
+                            </div>
+                            
+                            </div>
+                            </div>
+                            
+                            </div>
+                            
+                           
+                    </div>
+                    
+                    {carrinhoItens.map((item,index) => {return (
+                        <div className="card-faturamento">
+                        <div className="container-card-forma-entrega-">
+                            <div className="container-card-nome-cpf">
+                            <div className="container-texto-forma-entrega">
+                            <div className="container-nome-cpf">
+                            <div className="container-icone-faturamento-nome">
+                            <img style={{borderRadius:"50%"}}src={item.imagem_produto} className="logo-icones-pagamento-pagina-entrega"/>
+                            
+                            <div className="container-texto-pix">
+                            <p style={{fontWeight:"bold"}}>Envio {index + 1}</p>
+                            <p style={{fontSize:"14px"}}>Chegará em {prazos[item.produto_id]} dias úteis</p>
+                            <p style={{fontSize:"14px"}}>{item.produto_nome}</p>
+                            <p style={{fontSize:"14px"}}>Quantidade: {item.quantidade}</p>
+                            </div>
+                            </div>
+                            <div className="container-modificar-dados-faturamento">
+                            <a style={{fontSize:"14px",textDecoration:"none",color:"#3483fa"}} href="#">Alterar data de entrega</a>
+                            </div>
+                            </div>
+                            
+                            </div>
+                            </div>
+                            
+                            </div>
+                            
+                           
+                    </div>
+                    )})}
+                    <p>Detalhe do pagamento</p>
+                    <div className="card-faturamento">
+                        <div className="container-card-forma-entrega-">
+                            <div className="container-card-nome-cpf">
+                            <div className="container-texto-forma-entrega">
+                            <div className="container-nome-cpf">
+                            <div className="container-icone-faturamento-nome">
+                            <img src = {imagemOpcaoPagamento} className="logo-icones-pagamento-pagina-entrega"/>
+                            <div className="container-texto-pix">
+                            <p style={{fontWeight:"bold"}}>{selecionarOpcaoDePagamento}</p>
+                                 {selecionarOpcaoDePagamento === "Cartao" ?
+                                cartoesDeCreditoSalvos.filter((item) => {return item.id_cartao === selecionarIdCartao}).map((item) => {return <div style={{display:"flex",gap:"30px"}}>
+                                    <p>{item.numero_mascarado}</p>
+                                    <p>{item.data_expiracao}</p>
+                                    </div>}) :""}
+
+                            <p>R$ {calcularPrecoTotal().toFixed(2)}</p>
+                            <p>{numeroParcelas}x R${valorParcela}</p>
+                            </div>
+                            </div>
+                            <div className="container-modificar-dados-faturamento">
+                            <a style={{fontSize:"14px",textDecoration:"none",color:"#3483fa"}} href="#">Alterar forma de pagamento</a>
+                            </div>
+                            </div>
+                            
+                            </div>
+                            </div>
+                            
+                            </div>
+                            
+                           
+                    </div>
+                    
+                </div> )}
                 {step === 4 && (selecionarOpcaoDePagamento === "novoCartao") ? <div style={{alignItems:"center"}}className="titulo-forma-entrega">
                     <p style={{fontSize:"24px"}}>Adicione um novo cartão</p>
                     <div style={{width:"700px"}}className="card-forma-entrega-pagamento">
@@ -780,18 +989,61 @@ const classePagamento = entregaConcluida
                     <div>
                     
                     </div>
-                </div> : ""}
+                </div> : ""}                
+                
+                {step === 4 && (selecionarOpcaoDePagamento === "Cartao") ? <div className="titulo-forma-entrega">
+                    <p style={{fontSize:"24px"}}>Selecione o parcelamento</p>
+    
+                    <div className="card-faturamento">
+                        <div className="container-card-forma-entrega-">
+                            <div className="container-card-nome-cpf">
+                            <div className="container-texto-forma-entrega">
+                            <div className="container-nome-cpf">
+                            <div className="container-icone-faturamento-nome">
+                            <img src = {imagemOpcaoPagamento} className="logo-icones-pagamento-pagina-entrega"/>
+                            <div className="container-texto-pix">
+                            <p style={{fontWeight:"bold"}}>{selecionarOpcaoDePagamento}</p>
+                                 {selecionarOpcaoDePagamento === "Cartao" ?
+                                cartoesDeCreditoSalvos.filter((item) => {return item.id_cartao === selecionarIdCartao}).map((item) => {return <div style={{display:"flex",gap:"30px"}}>
+                                    <p>{item.numero_mascarado}</p>
+                                    <p>{item.data_expiracao}</p>
+                                    </div>}) :""}
 
+                            </div>
+                            </div>
+                            
+                            </div>
+                            
+                            </div>
+                            </div>
+                            
+                            </div>
+                            
+                           
+                    </div>
+                    <div className="card-faturamento">
+                        {Array.from({length:numeroParcelasMaximas}).map((_,index) => {
+                            return (
+                                <div style={{display:"flex"}}>
+                                <input checked ={numeroParcelas === (index + 1)} value={index + 1} onChange={() => {setNumeroParcelas(index + 1);setValorParcela((valorTotal/(index + 1)).toFixed(2))}} type="radio"/> <p>{index+1}x de R${(valorTotal/(index + 1)).toFixed(2)}</p>
+                                </div>
+                            )
+                        })}
+
+                           
+                           
+                    </div>
+                    
+                </div> : ""}
                 
                 
-                {step !== 5 ? <div className="card-resumo-compra-pagina-entrega">
+                {step ? <div className="card-resumo-compra-pagina-entrega">
                     <p style={{fontWeight:"bold"}}>Resumo da compra</p>
                     <div className="preco-produto-frete-pagina-entrega">
                     <div className="container-produto-preco-pagina-entrega">
                     <p>Produtos</p>
-                    <p>R${calcularPrecoProdutos().toFixed(2)}</p>
+                    <p>R${precoTotalProdutos?.toFixed(2) || calcularPrecoProdutos()?.toFixed(2)}</p>
                     </div>
-                    
                     <div className="container-frete-pagina-entrega">
                         <p>Frete</p>
                         <p>R${calcularFreteTotal().toFixed(2)}</p>
@@ -804,8 +1056,8 @@ const classePagamento = entregaConcluida
                         <p>Você pagará</p>
                         <p>R${calcularPrecoTotal().toFixed(2)}</p>
                     </div>
-                    {step === 4 ? <button onClick={() => {handleConfirmarCompra();handleNext()}} className="botao-confirmar-compra-checkout">Confirmar Compra</button> : ""}
-                    
+                    {((step === 4)  && (selecionarOpcaoDePagamento !== "Cartao")) || ((step === 5) && (selecionarOpcaoDePagamento === "Cartao"))  ? <button onClick={() => {handleConfirmarCompra();handleNext()}} className="botao-confirmar-compra-checkout">Confirmar Compra</button> : ""}
+                    {step === 4  && (selecionarOpcaoDePagamento === "Cartao") ? <button onClick={() => {handleNext()}} className="botao-confirmar-compra-checkout">Continuar compra</button> : ""}
                 </div> : ""}
                 
             </div> : ""}
@@ -826,7 +1078,7 @@ const classePagamento = entregaConcluida
 >
   Selecione uma opção para continuar
 </div>
-            {step === 5 ? <div>
+            {((step === 5) && (selecionarOpcaoDePagamento !== "Cartao")) || ((step === 6) && (selecionarOpcaoDePagamento === "Cartao")) ? <div>
             <div className="container-pagamento-finalizado">
                     <p style={{color:"white",fontSize:"20px"}}>Para finalizar a sua compra é só realizar o pagamento com Pix!</p>
                     <img src="/images/bag-shopping.png" className="icone-pagamento-concluido"/>

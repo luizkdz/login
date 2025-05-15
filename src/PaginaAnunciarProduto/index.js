@@ -4,7 +4,6 @@ import Header from '../componentes/header';
 import './styles.css';
 import axios from 'axios';
 
-
 function PaginaAnunciarProduto(){
     const [nomeProduto,setNomeProduto] = useState("");
 
@@ -16,7 +15,12 @@ function PaginaAnunciarProduto(){
     const [peso,setPeso] = useState("");
     const [voltagem,setVoltagem] = useState("");
     const [tamanho,setTamanho] = useState("");
-
+    const [comprimento,setComprimento] = useState("");
+    const [largura,setLargura] = useState("");
+    const [altura,setAltura] = useState("");
+    const [disableComprimento,setDisableComprimento] = useState(false);
+    const [disableLargura, setDisableLargura] = useState(false);
+    const [disableAltura, setDisableAltura] = useState(false);
     const [disableCor, setDisableCor] = useState(false);
     const [disableMaterial, setDisableMaterial] = useState(false);
     const [disableDimensao, setDisableDimensao] = useState(false);
@@ -44,6 +48,465 @@ function PaginaAnunciarProduto(){
 
     const [step,setStep] = React.useState(1);
     const isPoppingState = useRef(false);
+
+    const [unidadeDimensoes, setUnidadeDimensoes] = useState("CM");
+    const [unidadePeso, setUnidadePeso] = useState("Kg");
+    const [sugestoesCor, setSugestoesCor] = useState([]);
+    const [mostrarSugestoesCor,setMostrarSugestoesCor] = useState(false);
+    const [idCor, setIdCor] = useState("");
+    const [sugestoesMateriais, setSugestoesMateriais] = useState([]);
+    const [mostrarSugestoesMateriais, setMostrarSugestoesMateriais] = useState(false);
+    const [idMaterial, setIdMaterial] = useState("");
+
+    const [sugestoesEstampas, setSugestoesEstampas] = useState([]);
+    const [mostrarSugestoesEstampas,setMostrarSugestoesEstampas] = useState(false);
+    const [idEstampa, setIdEstampa] = useState("");
+
+
+    const [sugestoesGenero, setSugestoesGenero] = useState([]);
+    const [mostrarSugestoesGenero,setMostrarSugestoesGenero] = useState(false);
+    const [idGenero, setIdGenero] = useState("");
+    
+    const [sugestoesTamanho, setSugestoesTamanho] = useState([]);
+    const [mostrarSugestoesTamanho, setMostrarSugestoesTamanho] = useState(false);
+    const [idTamanho, setIdTamanho] = useState("");
+    
+    const [sugestoesVoltagem, setSugestoesVoltagem] = useState([]);
+    const [mostrarSugestoesVoltagem, setMostrarSugestoesVoltagem] = useState(false);
+    const [idVoltagem, setIdVoltagem] = useState("");
+
+
+    const [coresSelecionadas, setCoresSelecionadas] = useState([]);
+
+    const [materiaisSelecionadas, setMateriaisSelecionados] = useState([]);
+
+    const [estampasSelecionadas, setEstampasSelecionadas] = useState([]);
+
+    const [generosSelecionados,setGenerosSelecionados] = useState([]);
+
+    const [tamanhosSelecionados, setTamanhosSelecionados] = useState([]);
+
+    const [voltagensSelecionadas,setVoltagensSelecionadas] = useState([]);
+
+    const [numeroMaximoParcelas, setNumeroMaximoParcelas] = useState(2);
+
+    const [numeroParcelasGratis, setNumeroParcelasGratis] = useState(1);
+
+    const [precoProdutoPix, setPrecoProdutoPix] = useState("");
+    
+    const [taxaJurosAoMes, setTaxaJurosAoMes] = useState(0.1);
+   
+    const [aceitaPix, setAceitaPix] = useState("nao");
+    
+    const [aceitaParcelar, setAceitaParcelar] = useState("nao");
+
+    const [erroDigiteUmNome, setErroDigiteUmNome] = useState(false);
+    
+    const [erroPreenchaOsCampos, setErroPreenchaOsCampos] = useState(false);
+    
+    const [erroFoto, setErroFoto] = useState(false);
+    
+    const [erroOpiniaoClientes, setErroOpiniaoClientes] = useState(false);
+
+    const [erroDescricaoProduto, setErroDescricaoProduto] = useState(false);
+
+    const [erroPrecoProdutoEstoque, setErroPrecoProdutoEstoque] = useState(false);
+
+    const [erroCepIncompleto, setErroCepIncompleto] = useState(false);
+
+    const handleMostrarErroCep = () => {
+        setErroCepIncompleto(true);
+        setTimeout(() => {
+            setErroCepIncompleto(false);
+        },3000)
+    }
+
+    const handleMostrarErroPrecoEstoque = () => {
+        setErroPrecoProdutoEstoque(true);
+        setTimeout(() => {
+            setErroPrecoProdutoEstoque(false);
+        },3000)
+    }
+    
+    
+    const handleErroDescricaoProduto = () => {
+        setErroDescricaoProduto(true);
+        setTimeout(() => {
+            setErroDescricaoProduto(false);
+        },3000)
+    }
+    
+    
+    
+    const handleErroOpiniaoClientes = () => {
+        setErroOpiniaoClientes(true);
+        setTimeout(() => {
+            setErroOpiniaoClientes(false);
+        },3000)
+    }
+
+
+    const handleMostrarErroFoto = () => {
+        setErroFoto(true);
+        setTimeout(() => {
+            setErroFoto(false);
+        },3000)
+    }
+
+
+    const handleErroDigiteUmNome = () => {
+        setErroDigiteUmNome(true);
+        setTimeout(() => {
+            setErroDigiteUmNome(false);
+        },3000)
+    }
+
+    const handleErroPreenchaOsCampos = () => {
+        setErroPreenchaOsCampos(true);
+        setTimeout(() => {
+            setErroPreenchaOsCampos(false);
+        },3000)
+    }
+
+
+    const calcularParcelas = (preco, numParcelas, numParcelasGratis, taxaJuros) => {
+        const parcelas = [];
+        const jurosMensal = taxaJuros / 100;
+      
+        for (let i = 1; i <= numParcelas; i++) {
+          let tipo = i <= numParcelasGratis ? "sem juros" : "com juros";
+      
+          let valorTotal;
+          if (tipo === "sem juros") {
+            valorTotal = preco;
+          } else {
+            const n = (i - numeroParcelasGratis) ;
+            const fator = Math.pow(1 + jurosMensal, n);
+            const parcelaComJuros = (preco * jurosMensal * fator) / (fator - 1);
+            valorTotal = (parcelaComJuros) * (n) ;
+          }
+      
+          parcelas.push({
+            numeroParcelas: i,
+            tipo,
+            valorParcela: (valorTotal / i).toFixed(2),
+            valorTotal: valorTotal.toFixed(2),
+          });
+        }
+      
+        return parcelas;
+      };
+
+   const resultado = calcularParcelas(Number(precoProduto),Number(numeroMaximoParcelas),Number(numeroParcelasGratis),Number(taxaJurosAoMes));
+    const adicionarVoltagem = (valor = voltagem) => {
+        if(valor && !voltagensSelecionadas.includes(valor) && voltagensSelecionadas.length < 3){
+            setVoltagensSelecionadas([...voltagensSelecionadas,valor])
+            setVoltagem("")
+        }
+    }
+
+    const removerVoltagem = (voltagemParaRemover) => {
+        setVoltagensSelecionadas(voltagensSelecionadas.filter((v) => {return v !== voltagemParaRemover}));
+    }
+
+    
+    const adicionarTamanho = (valor = tamanho) => {
+        if(valor && !tamanhosSelecionados.includes(valor) && tamanhosSelecionados.length < 3){
+            setTamanhosSelecionados([...tamanhosSelecionados,valor]);
+            setTamanho("");
+        }
+    }
+
+    const removerTamanho = (tamanhoParaRemover) => {
+        setTamanhosSelecionados(tamanhosSelecionados.filter((t) => {return t !== tamanhoParaRemover}));
+    }
+    
+    
+    const adicionarGenero = (valor = genero) => {
+        if(valor && !generosSelecionados.includes(valor) && generosSelecionados.length < 3){
+            setGenerosSelecionados([...generosSelecionados,valor]);
+            setGenero("")
+        }
+    }
+
+    const removerGenero = (generoParaRemover) => {
+        setGenerosSelecionados(generosSelecionados.filter((g) => {return g !== generoParaRemover}));
+
+    }
+    
+    
+    const adicionarEstampa = (valor=estampa) => {
+        if(valor && !estampasSelecionadas.includes(valor) && estampasSelecionadas.length < 3){
+            setEstampasSelecionadas([...estampasSelecionadas,valor]);
+            setEstampa("");
+        }
+    }
+
+    const removerEstampa = (estampaParaRemover) => {
+        setEstampasSelecionadas(estampasSelecionadas.filter((e) => {return e !== estampaParaRemover}));
+
+    }
+
+
+    
+    const adicionarMaterial = (valor = material) => {
+        if(valor && !materiaisSelecionadas.includes(valor) && materiaisSelecionadas.length < 3){
+            setMateriaisSelecionados([...materiaisSelecionadas,valor]);
+            setMaterial("");
+        }
+    }
+
+    const removerMaterial = (materialParaRemover) => {
+        setMateriaisSelecionados(materiaisSelecionadas.filter((m) => {return m !== materialParaRemover}));
+
+    }
+
+    const adicionarCor = (valor = cor) => {
+        if(valor && !coresSelecionadas.includes(valor) && coresSelecionadas.length < 3){
+            setCoresSelecionadas([...coresSelecionadas,valor]);
+            setCor("");
+        }
+        
+    }
+
+    const removerCor = (corParaRemover) => {
+        setCoresSelecionadas(coresSelecionadas.filter((c) => {return c !== corParaRemover}))
+    };
+
+    const handleAnunciarProduto = async () => {
+        try{
+            await axios.post("http://localhost:5000/anunciar-produto",{
+                nomeProduto,
+                cor:coresSelecionadas,
+                material:materiaisSelecionadas,
+                estampa:estampasSelecionadas,
+                genero:generosSelecionados,
+                pesos:{peso,
+                    unidadePeso
+                },
+                voltagem:voltagensSelecionadas,
+                tamanho:tamanhosSelecionados,
+                dimensoes:{comprimento,
+                    largura,
+                    altura,
+                    unidadeDimensoes
+                },
+                estoque,
+                precoProduto,
+                descricao,
+                opiniaoClientes,
+                imagens:{imagem1:valorLink[0],
+                    imagem2:valorLink[1],
+                    imagem3:valorLink[2],
+                    imagem4:valorLink[3],
+                    imagem5:valorLink[4]
+                },
+                cep,
+                precoProdutoPix,
+                numeroParcelas:resultado[resultado.length -1].numeroParcelas,
+                precoTotalParcelado:resultado[resultado.length -1].valorTotal,
+                desconto:((Number(precoProduto) - Number(precoProdutoPix) ) /Number(precoProduto)) * 100,
+                numeroParcelasGratis,
+                taxaJurosAoMes,
+                
+            },{withCredentials:true})
+        }
+        catch(err){
+            console.log(err);
+            console.error("Não foi possível anunciar o produto");
+        }
+    }
+
+
+    const selecionarSugestoesVoltagem = (valor) => {
+        setVoltagem(valor);
+        setMostrarSugestoesVoltagem(false);
+    }
+    
+    
+    const handleChangeVoltagem = (e) => {    
+        const valor = e.target.value;
+        setVoltagem(valor);
+        if (!disableVoltagem && valor.trim()) {
+          fetchVoltagemBanco(valor);
+        } else {
+          setSugestoesVoltagem([]);
+          setMostrarSugestoesVoltagem(false);
+        }
+      };
+    
+    
+    const fetchVoltagemBanco = async (nomeVoltagem) => {
+        try{
+            const resposta = await axios.get(`http://localhost:5000/buscar-voltagens-produto/${nomeVoltagem}`,{withCredentials:true})
+            if(resposta.data){
+                setSugestoesVoltagem(resposta.data);
+                setMostrarSugestoesVoltagem(true);
+            }
+        }
+        catch(err){
+            console.error("Não foi possivel carregar os materiais");
+        }
+    }
+
+
+
+    const selecionarSugestaoTamanho = (valor) => {
+        setTamanho(valor);
+        setMostrarSugestoesTamanho(false);
+    }
+    
+    
+    const handleChangeTamanho = (e) => {    
+        const valor = e.target.value;
+        setTamanho(valor);
+        if (!disableTamanho && valor.trim()) {
+          fetchTamanhoBanco(valor);
+        } else {
+          setSugestoesTamanho([]);
+          setMostrarSugestoesTamanho(false);
+        }
+      };
+    
+    
+    const fetchTamanhoBanco = async (nomeTamanho) => {
+        try{
+            const resposta = await axios.get(`http://localhost:5000/buscar-tamanhos-produto/${nomeTamanho}`,{withCredentials:true})
+            if(resposta.data){
+                setSugestoesTamanho(resposta.data);
+                setMostrarSugestoesTamanho(true);
+            }
+        }
+        catch(err){
+            console.error("Não foi possivel carregar os materiais");
+        }
+    }
+    
+    
+    
+    
+    const selecionarSugestaoGenero = (valor) => {
+        setGenero(valor);
+        setMostrarSugestoesGenero(false);
+    }
+    
+    
+    const handleChangeGenero = (e) => {    
+        const valor = e.target.value;
+        setGenero(valor);
+        if (!disableGenero && valor.trim()) {
+          fetchGeneroBanco(valor);
+        } else {
+          setSugestoesGenero([]);
+          setMostrarSugestoesGenero(false);
+        }
+      };
+    
+    
+    const fetchGeneroBanco = async (nomeGenero) => {
+        try{
+            const resposta = await axios.get(`http://localhost:5000/buscar-genero-produto/${nomeGenero}`,{withCredentials:true})
+            if(resposta.data){
+                setSugestoesGenero(resposta.data);
+                setMostrarSugestoesGenero(true);
+            }
+        }
+        catch(err){
+            console.error("Não foi possivel carregar os materiais");
+        }
+    }
+
+
+    const fetchEstampaBanco = async (nomeEstampa) => {
+        try{
+            const resposta = await axios.get(`http://localhost:5000/buscar-estampa-produto/${nomeEstampa}`,{withCredentials:true})
+            if(resposta.data){
+                setSugestoesEstampas(resposta.data);
+                setMostrarSugestoesEstampas(true);
+            }
+        }
+        catch(err){
+            console.error("Não foi possivel carregar os materiais");
+        }
+    }
+
+    const handleChangeEstampas = (e) => {    
+        const valor = e.target.value;
+        setEstampa(valor);
+        if (!disableEstampa && valor.trim()) {
+          fetchEstampaBanco(valor);
+        } else {
+          setSugestoesEstampas([]);
+          setMostrarSugestoesEstampas(false);
+        }
+      };
+
+      const selecionarSugestaoEstampa = (valor) => {
+        setEstampa(valor);
+        setMostrarSugestoesEstampas(false);
+    }
+    
+    const fetchMaterialBanco = async (nomeMaterial) => {
+        try{
+            const resposta = await axios.get(`http://localhost:5000/buscar-materiais-produto/${nomeMaterial}`,{withCredentials:true})
+            if(resposta.data){
+                setSugestoesMateriais(resposta.data);
+                setMostrarSugestoesMateriais(true);
+            }
+        }
+        catch(err){
+            console.error("Não foi possivel carregar os materiais");
+        }
+    }
+
+    const handleChangeMaterial = (e) => {    
+        const valor = e.target.value;
+        setMaterial(valor);
+        if (!disableMaterial && valor.trim()) {
+          fetchMaterialBanco(valor);
+        } else {
+          setSugestoesMateriais([]);
+          setMostrarSugestoesMateriais(false);
+        }
+      };
+
+      const selecionarSugestaoMateriais = (valor) => {
+        setMaterial(valor);
+        setMostrarSugestoesMateriais(false);
+    }
+    
+
+
+    const fetchCoresBanco = async (nomeCor) => {
+        try{
+            const resposta = await axios.get(`http://localhost:5000/buscar-cores-produto/${encodeURIComponent(nomeCor.trim())}`,{withCredentials:true});
+            if(resposta.data){
+                setSugestoesCor(resposta.data);
+                setMostrarSugestoesCor(true);
+            }
+        
+        }
+        catch(err){
+            console.error("Não foi possivel carregar as cores");
+        }
+    }
+
+    const handleChangeCor = (e) => {    
+        const valor = e.target.value;
+        setCor(valor);
+        if (!disableCor && valor.trim()) {
+          fetchCoresBanco(valor);
+        } else {
+          setSugestoesCor([]);
+          setMostrarSugestoesCor(false);
+        }
+      };
+
+    const selecionarSugestaoCor = (valor) => {
+        setCor(valor);
+        setMostrarSugestoesCor(false);
+    }
+
 
     const handleMostrarMaisInformacoes = () => {
         setFade(false);
@@ -86,6 +549,8 @@ function PaginaAnunciarProduto(){
     }
         else{
             setErroCep("Digite um CEP válido.Tente novamente");
+            setCidade("");
+            setEstado("");
         }
     }
     const handleNext = () => {
@@ -159,100 +624,303 @@ function PaginaAnunciarProduto(){
                     <input onChange={(e) => {setNomeProduto(e.target.value)}} placeholder="Exemplo:celular nokia nomepesquisa etc" style={{width:"80%",height:"50px",borderRadius:"6px",border:"1px solid #c1c1c1",paddingLeft:"40px"}}/>
                     <img src="/images/search.png" style={{position:"absolute",left:"10px",top:"16px",width:"20px",height:"20px"}}/>
                     </div>
-                    <button onClick={() => {handleNext()}} style={{height:"50px",width:"100px",backgroundColor:"#111111",border:"none",borderRadius:"6px",color:"white",fontWeight:"bold"}}>Próximo</button>
+                    <button onClick={() => {
+                        if(nomeProduto != ""){
+                            handleNext()
+                        }
+                        else{
+                            handleErroDigiteUmNome();
+                        }
+                    
+                    }} style={{height:"50px",width:"100px",backgroundColor:"#111111",border:"none",borderRadius:"6px",color:"white",fontWeight:"bold"}}>Próximo</button>
                     
                     </div>
                     <p style={{fontSize:"12px"}}>Adicione as principais caractéristicas do produto</p>
                     </div>
                 </div>
                 </div>
+                <div
+  style={{
+    position: "fixed",
+    bottom: erroDigiteUmNome ? "20px" : "-100px", // começa fora da tela
+    left: "50%",
+    transform: "translateX(-50%)",
+    backgroundColor: "red",
+    color: "#ffffff",
+    padding: "20px",
+    width: "600px",
+    borderRadius: "6px",
+    margin: "20px",
+    transition: "bottom 0.3s ease-in-out", // efeito suave
+  }}
+>
+  Digite um nome para continuar
+</div>
             </div>: ""}
-            {step === 3 ? <div style={{flexDirection:"row",justifyContent:"space-evenly",padding:"3rem",paddingBottom:"100px"}} className="secao-identificar-produto">
+            {step === 3 ? <div style={{flexDirection:"row",justifyContent:"space-evenly",padding:"3rem",paddingBottom:"100px",height:"2500px",alignItems:"start"}} className="secao-identificar-produto">
                 
                 <div style={{display:"flex"}}>
                 
-                <div style={{height:"600px"}}className="card-informacoes-produto-pagina-anunciar">
+                <div style={{}} className="card-informacoes-produto-pagina-anunciar">
                     <h2>Preencha as informações do seu produto</h2>
                     <div className="container-informacoes-produto-imagem-pagina-venda">
                     <div className="container-informacoes-produto-pagina-venda">
                     
                     <div>
                     <p style={{color:disableCor ? "grey" : ""}}>Cor</p>
-                    <input disabled={disableCor} value = {cor} onChange={(e) => {setCor(e.target.value)}} style={{width:"200px",height:"40px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
-                    <div style={{gap:"10px",top:"35px",right:"10px",display:"flex",alignItems:"center"}}>
-                    <input value = {disableCor} onChange={() => {setDisableCor(!disableCor);setCor("")}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
+                    <input disabled={disableCor} value = {cor} onChange={(e) => {handleChangeCor(e)}} style={{width:"200px",height:"40px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
+                    
+                    <div>
+                    {mostrarSugestoesCor && sugestoesCor.length > 0 && (
+        <ul style={{
+          listStyle: "none",
+          margin: 0,
+          padding: "5px",
+          
+          top: "65px",
+          left: 0,
+          right: 0,
+          backgroundColor: "white",
+          border: "1px solid #ccc",
+          maxHeight: "150px",
+          overflowY: "auto",
+          zIndex: 10
+        }}>
+          {sugestoesCor.map((item, index) => (
+            <li
+              key={index}
+              onClick={() => {selecionarSugestaoCor(item.valor);setIdCor(item.id);setCor(item.valor);adicionarCor(item.valor)}}
+              style={{
+                padding: "8px",
+                cursor: "pointer",
+                borderBottom: "1px solid #eee"
+              }}
+            >
+              {item.valor}
+            </li>
+          ))}
+        </ul>
+      )}
+      </div>
+      {coresSelecionadas.map((item) => { return (
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <p>{item}</p><img onClick={() => {removerCor(item)}} src="/images/cross.png" style={{width:"16px",height:"16px"}}/>
+        </div>
+        )
+      })}
+      <button disabled={disableCor} onClick={() => {adicionarCor();setSugestoesCor(false)}} style={{color:"white",marginTop:"20px",borderRadius:"6px",backgroundColor:disableCor ? "grey" : "#111111",border:"none",width:"100%",height:"50px",fontWeight:"bold"}}>Adicionar cor</button>
+    {coresSelecionadas.length >= 3 ? <p style={{color:"red"}}>Limite de cores atingido!</p> : ""}
+    <div style={{gap:"10px",top:"35px",right:"10px",display:"flex",alignItems:"center"}}>
+                    <input checked={disableCor} value = {disableCor} onChange={() => {setDisableCor(!disableCor);setCor("");setMostrarSugestoesCor(false)}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
                     <label style={{fontSize:"14px"}}htmlFor='naoTem'>Nenhuma</label>
                     </div>
                     </div>
                     <div>
                     <p style={{color:disableMaterial ? "grey" : ""}} >Material</p>
-                    <input disabled={disableMaterial} value = {material} onChange={(e) => {setMaterial(e.target.value)}} style={{width:"200px",height:"40px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
+                    <input disabled={disableMaterial} value = {material} onChange={(e) => {handleChangeMaterial(e)}} style={{width:"200px",height:"40px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
+                    <div>
+                    {mostrarSugestoesMateriais && sugestoesMateriais.length > 0 && (
+        <ul style={{
+          listStyle: "none",
+          margin: 0,
+          padding: "5px",
+          
+          top: "65px",
+          left: 0,
+          right: 0,
+          backgroundColor: "white",
+          border: "1px solid #ccc",
+          maxHeight: "150px",
+          overflowY: "auto",
+          zIndex: 10
+        }}>
+          {sugestoesMateriais.map((item, index) => (
+            <li
+              key={index}
+              onClick={() => {selecionarSugestaoMateriais(item.valor);setIdMaterial(item.id);adicionarMaterial(item.valor)}}
+              style={{
+                padding: "8px",
+                cursor: "pointer",
+                borderBottom: "1px solid #eee"
+              }}
+            >
+              {item.valor}
+            </li>
+          ))}
+        </ul>
+      )}
+      </div>
+      {materiaisSelecionadas.map((item) => { return (
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <p>{item}</p><img onClick={() => {removerMaterial(item)}} src="/images/cross.png" style={{width:"16px",height:"16px"}}/>
+        </div>
+        )
+      })}
+      <button disable={disableMaterial} onClick={() => {adicionarMaterial();setSugestoesMateriais(false)}} style={{color:"white",marginTop:"20px",borderRadius:"6px",backgroundColor:disableMaterial ? "grey" :"#111111",border:"none",width:"100%",height:"50px",fontWeight:"bold"}}>Adicionar material</button>
+      {materiaisSelecionadas.length >= 3 ? <p style={{color:"red"}}>Limite de materiais atingido!</p> : ""}             
                     <div style={{gap:"10px",top:"35px",right:"10px",display:"flex",alignItems:"center"}}>
-                    <input value = {disableMaterial} onChange={() => {setDisableMaterial(!disableMaterial);setMaterial("")}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
+                    <input checked={disableMaterial} value = {disableMaterial} onChange={() => {setDisableMaterial(!disableMaterial);setMaterial("");setMostrarSugestoesMateriais(false)}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
+                    
                     <label  style={{fontSize:"14px"}}htmlFor='naoTem'>Nenhum</label>
                     </div>
                     </div>
-                    <div>
-                    <p style={{color:disableDimensao ? "grey" : ""}} >Comprimento</p>
-                   
-                    <div style={{position:"relative"}}>
-                    <input disabled={disableDimensao} value = {dimensao} onChange={(e) => {setDimensao(e.target.value)}} style={{width:"200px",height:"40px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
-                    <select style={{position:"absolute",right:"0px",bottom:"10px"}}>
-                        <option>Unidade</option>
-                        <option>centímetros</option>
-                        <option>metros</option>
-                    </select>
-                    </div>
-                    <div style={{gap:"10px",top:"35px",right:"10px",display:"flex",alignItems:"center"}}>
-                    <input value = {disableDimensao} onChange={() => {setDisableDimensao(!disableDimensao);setDimensao("")}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
-                    <label style={{fontSize:"14px"}}htmlFor='naoTem'>Nenhuma</label>
-                    </div>
-                    </div>
-                    <div>
-                    <p style={{color:disableDimensao ? "grey" : ""}} >Altura</p>
                     
+                    
+                    <div>
+                    <p style={{color:disableComprimento || disableDimensao ? "grey" : ""}} >Comprimento</p>
                     <div style={{position:"relative"}}>
-                    <input disabled={disableDimensao} value = {dimensao} onChange={(e) => {setDimensao(e.target.value)}} style={{width:"200px",height:"40px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
-                    <select style={{position:"absolute",right:"0px",bottom:"10px"}}>
-                        <option>Unidade</option>
-                        <option>centímetros</option>
-                        <option>metros</option>
-                    </select>
+                    <input disabled={disableComprimento || disableDimensao} value = {comprimento} onChange={(e) => {setComprimento(e.target.value)}} style={{width:"200px",height:"40px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
+                        <div>
+                            
+                    </div>
+                    
                     </div>
                     <div style={{gap:"10px",top:"35px",right:"10px",display:"flex",alignItems:"center"}}>
-                    <input value = {disableDimensao} onChange={() => {setDisableDimensao(!disableDimensao);setDimensao("")}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
+                    <input checked={disableComprimento || disableDimensao} value = {disableComprimento} onChange={() => {setDisableComprimento(!disableComprimento);setComprimento("")}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
                     <label style={{fontSize:"14px"}}htmlFor='naoTem'>Nenhuma</label>
                     </div>
                     </div>
                     <div>
-                    <p style={{color:disableDimensao ? "grey" : ""}} >Largura</p>
-                   
+                    <p style={{color:disableLargura || disableDimensao ? "grey" : ""}} >Largura</p>
                     <div style={{position:"relative"}}>
-                    <input disabled={disableDimensao} value = {dimensao} onChange={(e) => {setDimensao(e.target.value)}} style={{width:"200px",height:"40px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
-                    <select style={{position:"absolute",right:"0px",bottom:"10px"}}>
-                        <option>Unidade</option>
-                        <option>centímetros</option>
-                        <option>metros</option>
-                    </select>
+                    <input disabled={disableLargura || disableDimensao} value = {largura} onChange={(e) => {setLargura(e.target.value)}} style={{width:"200px",height:"40px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
+                        <div>
+                            
+                    </div>
+                    
                     </div>
                     <div style={{gap:"10px",top:"35px",right:"10px",display:"flex",alignItems:"center"}}>
-                    <input value = {disableDimensao} onChange={() => {setDisableDimensao(!disableDimensao);setDimensao("")}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
+                    <input checked={disableLargura || disableDimensao} value = {disableLargura} onChange={() => {setDisableLargura(!disableLargura);setLargura("")}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
                     <label style={{fontSize:"14px"}}htmlFor='naoTem'>Nenhuma</label>
                     </div>
                     </div>
+                    <div>
+                    <p style={{color:disableAltura || disableDimensao ? "grey" : ""}} >Altura</p>
+                    <div style={{position:"relative"}}>
+                    <input disabled={disableAltura || disableDimensao} value = {altura} onChange={(e) => {setAltura(e.target.value)}} style={{width:"200px",height:"40px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
+                    
+                    
+                    </div>
+                    
+                    <div style={{gap:"10px",top:"35px",right:"10px",display:"flex",alignItems:"center"}}>
+                    <input checked={disableAltura || disableDimensao} value = {disableAltura} onChange={() => {setDisableAltura(!disableAltura);setAltura("")}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
+                    <label style={{fontSize:"14px"}}htmlFor='naoTem'>Nenhuma</label>
+                    </div>
+                    </div>
+                    <div>
+                    <p style={{color:disableDimensao ? "grey" : ""}} >Unidade de medida</p>
+                    <div style={{position:"relative"}}>
+                    <select disabled={disableDimensao} value={unidadeDimensoes} onChange={(e) => {setUnidadeDimensoes(e.target.value)}} style={{outline:"none",border:"none" ,right:"0px",bottom:"2px",height:"40px"}}>
+                        <option value="cm">CM</option>
+                        <option value="m">M</option>
+                        </select>
+                        <div>
+                            
+                    </div>
+                    
+                    </div>
+                    <div style={{gap:"10px",top:"35px",right:"10px",display:"flex",alignItems:"center"}}>
+                    <input checked={disableDimensao} value = {disableDimensao} onChange={() => {setDisableDimensao(!disableDimensao);setLargura("");setComprimento("");setAltura("")}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
+                    
+                    <label style={{fontSize:"14px"}}htmlFor='naoTem'>Nenhuma</label>
+                    </div>
+                    
+                    </div>
+                    
+                    
                     <div>
                     <p style={{color:disableEstampa ? "grey" : ""}} >Estampa</p>
-                    <input disabled={disableEstampa} value = {estampa} onChange={(e) => {setEstampa(e.target.value)}} style={{width:"200px",height:"40px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
+                    <input disabled={disableEstampa} value = {estampa} onChange={(e) => {handleChangeEstampas(e)}} style={{width:"200px",height:"40px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
+                    <div>
+                    {mostrarSugestoesEstampas && sugestoesEstampas.length > 0 && (
+        <ul style={{
+          listStyle: "none",
+          margin: 0,
+          padding: "5px",
+          
+          top: "65px",
+          left: 0,
+          right: 0,
+          backgroundColor: "white",
+          border: "1px solid #ccc",
+          maxHeight: "150px",
+          overflowY: "auto",
+          zIndex: 10
+        }}>
+          {sugestoesEstampas.map((item, index) => (
+            <li
+              key={index}
+              onClick={() => {selecionarSugestaoEstampa(item.valor);setIdEstampa(item.id);adicionarEstampa(item.valor)}}
+              style={{
+                padding: "8px",
+                cursor: "pointer",
+                borderBottom: "1px solid #eee"
+              }}
+            >
+              {item.valor}
+            </li>
+          ))}
+        </ul>
+      )}
+      </div>
+      {estampasSelecionadas.map((item) => { return (
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <p>{item}</p><img onClick={() => {removerEstampa(item)}} src="/images/cross.png" style={{width:"16px",height:"16px"}}/>
+        </div>
+        )
+      })}
+      <button disabled={disableEstampa} onClick={() => {adicionarEstampa();setSugestoesEstampas(false)}} style={{color:"white",marginTop:"20px",borderRadius:"6px",backgroundColor:disableEstampa ? "grey" : "#111111",border:"none",width:"100%",height:"50px",fontWeight:"bold"}}>Adicionar estampa</button>
+      {estampasSelecionadas.length >= 3 ? <p style={{color:"red"}}>Limite de estampas atingido!</p>: ""}
                     <div style={{gap:"10px",top:"35px",right:"10px",display:"flex",alignItems:"center"}}>
-                    <input value = {disableEstampa} onChange={() => {setDisableEstampa(!disableEstampa);setEstampa("")}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
+                    <input checked={disableEstampa} value = {disableEstampa} onChange={() => {setDisableEstampa(!disableEstampa);setEstampa("");setMostrarSugestoesEstampas(false)}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
                     <label style={{fontSize:"14px"}}htmlFor='naoTem'>Nenhuma</label>
                     </div>
                     </div>
                     <div>
                     <p style={{color:disableGenero ? "grey" : ""}} >Genero</p>
-                    <input disabled={disableGenero} value = {genero} onChange={(e) => {setGenero(e.target.value)}} style={{width:"200px",height:"40px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
-                    <div style={{gap:"10px",top:"35px",right:"10px",display:"flex",alignItems:"center"}}>
-                    <input value = {disableGenero} onChange={() => {setDisableGenero(!disableGenero);setGenero("")}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
+                    <input disabled={disableGenero} value = {genero} onChange={(e) => {handleChangeGenero(e)}} style={{width:"200px",height:"40px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
+                    <div>
+                    {mostrarSugestoesGenero && sugestoesGenero.length > 0 && (
+        <ul style={{
+          listStyle: "none",
+          margin: 0,
+          padding: "5px",
+          
+          top: "65px",
+          left: 0,
+          right: 0,
+          backgroundColor: "white",
+          border: "1px solid #ccc",
+          maxHeight: "150px",
+          overflowY: "auto",
+          zIndex: 10
+        }}>
+          {sugestoesGenero.map((item, index) => (
+            <li
+              key={index}
+              onClick={() => {selecionarSugestaoGenero(item.valor);setIdGenero(item.id);adicionarGenero(item.valor)}}
+              style={{
+                padding: "8px",
+                cursor: "pointer",
+                borderBottom: "1px solid #eee"
+              }}
+            >
+              {item.valor}
+            </li>
+          ))}
+        </ul>
+      )}
+      </div>
+      {generosSelecionados.map((item) => { return (
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <p>{item}</p><img onClick={() => {removerGenero(item)}} src="/images/cross.png" style={{width:"16px",height:"16px"}}/>
+        </div>
+        )
+      })}
+      <button disabled={disableGenero} onClick={() => {adicionarGenero();setSugestoesGenero(false)}} style={{color:"white",marginTop:"20px",borderRadius:"6px",backgroundColor:disableGenero ? "grey" : "#111111",border:"none",width:"100%",height:"50px",fontWeight:"bold"}}>Adicionar genero</button>
+      {generosSelecionados.length >= 3 ? <p style={{color:"red"}}>Limite de generos atingido!</p> : ""}
+                <div style={{gap:"10px",top:"35px",right:"10px",display:"flex",alignItems:"center"}}>
+                    <input checked={disableGenero} value = {disableGenero} onChange={() => {setDisableGenero(!disableGenero);setGenero("");setMostrarSugestoesGenero(false)}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
                     <label style={{fontSize:"14px"}}htmlFor='naoTem'>Nenhum</label>
                     </div>
                     </div>
@@ -260,30 +928,110 @@ function PaginaAnunciarProduto(){
                     <p style={{color:disablePeso ? "grey" : ""}} >Peso</p>
                     <div style={{position:"relative"}}>
                     <input disabled={disablePeso} value = {peso} onChange={(e) => {setPeso(e.target.value)}} style={{width:"200px",height:"40px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
-                    <select style={{position:"absolute",right:"0",bottom:"10px"}}>
-                        <option>Unidade</option>
-                        <option>kg</option>
-                        <option>gramas</option>
+                    <select disabled = {disablePeso} value={unidadePeso} onChange={(e) => {setUnidadePeso(e.target.value)}} style={{outline:"none",border:"none" ,position:"absolute",right:"0px",bottom:"2px",height:"100%"}}>
+                        <option value="kg">Kg</option>
+                        <option value="g">g</option>
                     </select>
                     </div>
                     <div style={{gap:"10px",top:"35px",right:"10px",display:"flex",alignItems:"center"}}>
-                    <input value = {disablePeso} onChange={() => {setDisablePeso(!disablePeso);setPeso("")}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
+                    <input checked={disablePeso} value = {disablePeso} onChange={() => {setDisablePeso(!disablePeso);setPeso("")}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
                     <label style={{fontSize:"14px"}}htmlFor='naoTem'>Nenhum</label>
                     </div>
                     </div>
                     <div>
                     <p style={{color:disableVoltagem ? "grey" : ""}} >Voltagem</p>
-                    <input disabled={disableVoltagem} value = {voltagem} onChange={(e) => {setVoltagem(e.target.value)}} style={{width:"200px",height:"40px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/> 
+                    <input disabled={disableVoltagem} value = {voltagem} onChange={(e) => {handleChangeVoltagem(e)}} style={{width:"200px",height:"40px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/> 
+                    <div>
+                    {mostrarSugestoesVoltagem && sugestoesVoltagem.length > 0 && (
+        <ul style={{
+          listStyle: "none",
+          margin: 0,
+          padding: "5px",
+          
+          top: "65px",
+          left: 0,
+          right: 0,
+          backgroundColor: "white",
+          border: "1px solid #ccc",
+          maxHeight: "150px",
+          overflowY: "auto",
+          zIndex: 10
+        }}>
+          {sugestoesVoltagem.map((item, index) => (
+            <li
+              key={index}
+              onClick={() => {selecionarSugestoesVoltagem(item.valor);setIdVoltagem(item.id);adicionarVoltagem(item.valor)}}
+              style={{
+                padding: "8px",
+                cursor: "pointer",
+                borderBottom: "1px solid #eee"
+              }}
+            >
+              {item.valor}
+            </li>
+          ))}
+        </ul>
+      )}
+      </div>
+      {voltagensSelecionadas.map((item) => { return (
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <p>{item}</p><img onClick={() => {removerVoltagem(item)}} src="/images/cross.png" style={{width:"16px",height:"16px"}}/>
+        </div>
+        )
+      })}
+      <button disabled={disableVoltagem} onClick={() => {adicionarVoltagem();setSugestoesVoltagem(false)}} style={{color:"white",marginTop:"20px",borderRadius:"6px",backgroundColor:disableVoltagem ? "grey" : "#111111",border:"none",width:"100%",height:"50px",fontWeight:"bold"}}>Adicionar voltagem</button>
+      {voltagensSelecionadas.length >= 3 ? <p style={{color:"red"}}>Limite de voltagens atingido!</p>: ""}
+      
                     <div style={{gap:"10px",top:"35px",right:"10px",display:"flex",alignItems:"center"}}>
-                    <input value = {disableVoltagem} onChange={() => {setDisableVoltagem(!disableVoltagem);setVoltagem("")}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
+                    <input checked={disableVoltagem} value = {disableVoltagem} onChange={() => {setDisableVoltagem(!disableVoltagem);setVoltagem("");setMostrarSugestoesVoltagem(false)}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
                     <label style={{fontSize:"14px"}}htmlFor='naoTem'>Nenhuma</label>
                     </div>
                     </div>
                     <div>
                     <p style={{color:disableTamanho ? "grey" : ""}} >Tamanho</p>
-                    <input disabled={disableTamanho} value = {tamanho} onChange={(e) => {setTamanho(e.target.value)}} style={{width:"200px",height:"40px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/> 
+                    <input disabled={disableTamanho} value = {tamanho} onChange={(e) => {handleChangeTamanho(e)}} style={{width:"200px",height:"40px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/> 
+                    <div>
+                    {mostrarSugestoesTamanho && sugestoesTamanho.length > 0 && (
+        <ul style={{
+          listStyle: "none",
+          margin: 0,
+          padding: "5px",
+          
+          top: "65px",
+          left: 0,
+          right: 0,
+          backgroundColor: "white",
+          border: "1px solid #ccc",
+          maxHeight: "150px",
+          overflowY: "auto",
+          zIndex: 10
+        }}>
+          {sugestoesTamanho.map((item, index) => (
+            <li
+              key={index}
+              onClick={() => {selecionarSugestaoTamanho(item.valor);setIdTamanho(item.id);adicionarTamanho(item.valor)}}
+              style={{
+                padding: "8px",
+                cursor: "pointer",
+                borderBottom: "1px solid #eee"
+              }}
+            >
+              {item.valor}
+            </li>
+          ))}
+        </ul>
+      )}
+      </div>
+      {tamanhosSelecionados.map((item) => { return (
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <p>{item}</p><img onClick={() => {removerTamanho(item)}} src="/images/cross.png" style={{width:"16px",height:"16px"}}/>
+        </div>
+        )
+      })}
+      <button disabled={disableTamanho} onClick={() => {adicionarTamanho();setSugestoesTamanho(false)}} style={{color:"white",marginTop:"20px",borderRadius:"6px",backgroundColor:disableTamanho ? "grey" : "#111111",border:"none",width:"100%",height:"50px",fontWeight:"bold"}}>Adicionar tamanho</button>
+      {tamanhosSelecionados.length >= 3 ? <p style={{color:"red"}}>Limite de tamanhos atingido!</p>: ""}
                     <div style={{gap:"10px",display:"flex",alignItems:"center"}}>
-                    <input value = {disableTamanho} onChange={() => {setDisableTamanho(!disableTamanho);setTamanho("")}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
+                    <input checked={disableTamanho} value = {disableTamanho} onChange={() => {setDisableTamanho(!disableTamanho);setTamanho("");setMostrarSugestoesTamanho(false)}} style={{width:"16px",height:"16px"}}type="checkbox" id="naoTem"/>
                     <label style={{fontSize:"14px"}}htmlFor='naoTem'>Nenhum</label>
                     </div>
                     </div>
@@ -293,9 +1041,9 @@ function PaginaAnunciarProduto(){
                     </div>
                     </div>
                 </div>
-                <div style={{display:"flex",flexDirection:"column", height:"600px"}} className="container-card-informacoes-condicao-produto">
+                <div style={{display:"flex",flexDirection:"column"}} className="container-card-informacoes-condicao-produto">
                 <div style={{display:"flex",alignItems:"center",gap:"20px"}}>
-                <div style={{}}className="card-informacoes-condicao-produto-pagina-anunciar">
+                <div style={{}} className="card-informacoes-condicao-produto-pagina-anunciar">
                 <h2>Qual é a condição do seu produto?</h2>
                     <p onClick={() => {trocarImagem("/images/giftbox.png");setCondicaoProduto("novo")}}className="paragrafo-condicao-produto"style={{backgroundColor:condicaoProduto === "novo" ? "#f1f1f1" : "", padding:"20px"}}>Novo</p>
                     <p onClick={() => {trocarImagem("/images/receiving.png");setCondicaoProduto("usado")}} className="paragrafo-condicao-produto" style={{backgroundColor:condicaoProduto === "usado" ? "#f1f1f1" : "",padding:"20px"}}>Usado</p>
@@ -312,10 +1060,37 @@ function PaginaAnunciarProduto(){
                     opacity: fade ? 1 : 0}}/>
                 </div>
                 <div style={{display:"flex",justifyContent:"end",paddingTop:"3rem",paddingBottom:"3rem"}}>
-                <button onClick={() => {handleNext()}} style={{color:"white",borderRadius:"6px",backgroundColor:"#111111",border:"none",width:"200px",height:"50px",fontWeight:"bold"}}>Próximo</button>
+                <button onClick={() => {if(coresSelecionadas.length !== 0 || disableCor && materiaisSelecionadas.length !== 0 || disableMaterial && comprimento !== "" || disableComprimento && largura !== "" || disableLargura && altura !== "" || disableAltura && estampasSelecionadas.length !== 0 || disableEstampa && generosSelecionados.length !== 0 || disableGenero && peso != "" || disablePeso && voltagensSelecionadas.length !== 0 || disableVoltagem && tamanhosSelecionados.length !== 0 || disableTamanho)
+                    {handleNext()
+
+                    }
+                    else{
+                        handleErroPreenchaOsCampos();
+                    }
+                    }} style={{color:"white",borderRadius:"6px",backgroundColor:"#111111",border:"none",width:"200px",height:"50px",fontWeight:"bold"}}>Próximo</button>
+                </div>
+                <div style={{display:"flex",flexDirection:"column",gap:"100px"}}>
+                <img src="/images/imagem-gpt-promocao.png" style={{height:"300px",width:"100%"}}/>
+                <img src="/images/imagem-gpt-tenis.png" style={{height:"1000px",width:"100%"}}/>
                 </div>
                 </div>
-                
+                <div
+  style={{
+    position: "fixed",
+    bottom: erroPreenchaOsCampos ? "20px" : "-100px", // começa fora da tela
+    left: "50%",
+    transform: "translateX(-50%)",
+    backgroundColor: "red",
+    color: "#ffffff",
+    padding: "20px",
+    width: "600px",
+    borderRadius: "6px",
+    margin: "20px",
+    transition: "bottom 0.3s ease-in-out", // efeito suave
+  }}
+>
+  * Preencha os campos para continuar
+</div>  
             </div>: ""}
             {step === 4 ? <div style={{padding:"3rem"}} className="secao-identificar-produto">
                 <h2>Adicione o link para as fotos</h2>
@@ -413,13 +1188,35 @@ function PaginaAnunciarProduto(){
         
 })}
 </div>
-<button onClick={() => {handleNext()}} style={{color:"white",borderRadius:"6px",backgroundColor:"#111111",border:"none",width:"200px",height:"50px",fontWeight:"bold"}}>Próximo</button>
+<button onClick={() => {if(valorLink[0] !== ""){
+    handleNext()
+    }
+    else{
+        handleMostrarErroFoto();
+    }}} style={{color:"white",borderRadius:"6px",backgroundColor:"#111111",border:"none",width:"200px",height:"50px",fontWeight:"bold"}}>Próximo</button>
 </div>
 </div>
 <div style={{display:"flex",justifyContent:"end"}}>
 
 </div>
 </div>
+<div
+  style={{
+    position: "fixed",
+    bottom: erroFoto ? "20px" : "-100px", // começa fora da tela
+    left: "50%",
+    transform: "translateX(-50%)",
+    backgroundColor: "red",
+    color: "#ffffff",
+    padding: "20px",
+    width: "600px",
+    borderRadius: "6px",
+    margin: "20px",
+    transition: "bottom 0.3s ease-in-out", // efeito suave
+  }}
+>
+  * Preencha com pelo menos uma foto
+</div> 
             </div>
             : ""}
             {step === 5 ? <div style={{padding:"3rem"}} className="secao-identificar-produto">
@@ -435,8 +1232,31 @@ function PaginaAnunciarProduto(){
                         <img src="/images/talk.png" style={{width:"150px",height:"150px"}}/>
                         </div>
                         
-                        <button onClick={() => {handleNext()}} style={{marginTop:"20px",marginBottom:"20px",color:"white",borderRadius:"6px",backgroundColor:"#111111",border:"none",width:"200px",height:"50px",fontWeight:"bold"}}>Próximo</button>
+                        <button onClick={() => {if(opiniaoClientes.length !== 0){
+                            handleNext()
+                        }
+                        else{
+                            handleErroOpiniaoClientes();
+                        }
+                    }} style={{marginTop:"20px",marginBottom:"20px",color:"white",borderRadius:"6px",backgroundColor:"#111111",border:"none",width:"200px",height:"50px",fontWeight:"bold"}}>Próximo</button>
                         </div>
+                        <div
+  style={{
+    position: "fixed",
+    bottom: erroOpiniaoClientes ? "20px" : "-100px", // começa fora da tela
+    left: "50%",
+    transform: "translateX(-50%)",
+    backgroundColor: "red",
+    color: "#ffffff",
+    padding: "20px",
+    width: "600px",
+    borderRadius: "6px",
+    margin: "20px",
+    transition: "bottom 0.3s ease-in-out", // efeito suave
+  }}
+>
+  * Preencha com a opinião dos clientes
+</div> 
                     </div>: ""}
                     {step === 6 ? <div style={{padding:"3rem"}}className="secao-identificar-produto">
                         <div style={{paddingBottom:"20px"}}>
@@ -450,9 +1270,30 @@ function PaginaAnunciarProduto(){
                         </div>
                         <img src="/images/description.png" style={{width:"150px",height:"150px"}}/>
                         </div>
-                        <button onClick={() => {handleNext()}} style={{marginTop:"20px",marginBottom:"20px",color:"white",borderRadius:"6px",backgroundColor:"#111111",border:"none",width:"200px",height:"50px",fontWeight:"bold"}}>Próximo</button>
+                        <button onClick={() => {if(descricao.length !== 0){
+                          handleNext()  
+                        }
+                        else{
+                            handleErroDescricaoProduto();
+                        } }} style={{marginTop:"20px",marginBottom:"20px",color:"white",borderRadius:"6px",backgroundColor:"#111111",border:"none",width:"200px",height:"50px",fontWeight:"bold"}}>Próximo</button>
                         </div>
-                        
+                        <div
+  style={{
+    position: "fixed",
+    bottom: erroDescricaoProduto ? "20px" : "-100px", // começa fora da tela
+    left: "50%",
+    transform: "translateX(-50%)",
+    backgroundColor: "red",
+    color: "#ffffff",
+    padding: "20px",
+    width: "600px",
+    borderRadius: "6px",
+    margin: "20px",
+    transition: "bottom 0.3s ease-in-out", // efeito suave
+  }}
+>
+  * Preencha com a descrição do produto
+</div> 
                     </div>: ""}
             {step === 7 ? <div className="secao-identificar-produto">
             <p>Etapa 2 de 2</p>
@@ -461,22 +1302,83 @@ function PaginaAnunciarProduto(){
                 vamos definir as condições de venda</h2>
                 <img src="/images/online-shop.png" style={{width:"200px",height:"200px"}}/>
                 </div>
-                <div className="card-condicoes-de-venda">
-                    <div style={{display:"flex",flexDirection:"column",gap:"50px"}}>
+                <div style={{width:"700px"}} className="card-condicoes-de-venda">
+                    <div style={{display:"flex",flexDirection:"column",gap:"50px",justifyContent:"center"}}>
+                    
+                    <div>
                     <p>Qual é o preço do seu produto?</p>
                     <div style={{position:"relative",display:"flex",alignItems:"center"}}>
                     <p style={{position:"absolute"}}>R$</p><input type="number" value={precoProduto} onChange={(e) => {const val = e.target.value; if(val.length < 8) setPrecoProduto(val)}} style={{paddingLeft:"25px",width:"200px",height:"30px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
                     </div>
                     <p style={{fontSize:"12px"}}>*Lembre-se isso não inclui o valor do frete</p>
+                    </div>
+                    
+                    <div style={{display:"flex",gap:"100px"}}>
+                    <div style={{marginBottom:"20px"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:"50px"}}>
+                    <div >
+                    <p>Você aceita pix?</p>
+                    <div style={{display:"flex",gap:"20px"}}>
+                    <input checked = {aceitaPix === "sim"} value ={aceitaPix} onChange={() => {setAceitaPix("sim")}} type="radio"/><p>Sim</p>
+                    </div>
+                    <div style={{display:"flex",gap:"20px"}}>
+                    <input checked ={aceitaPix === "nao"} value={aceitaPix} onChange={() => {setAceitaPix("nao")}} type="radio"/><p>Não</p>
+                    </div>
+                    </div>
+                    <img src="/images/icone-pix.png" style={{width:"70px",height:"70px"}}/>
+                    </div>
+                    
+                    {aceitaPix === "sim" ? <div style={{display:"flex",flexDirection:"column",gap:"40px",alignItems:"center"}}>
+                        <div style={{marginTop:"50px",display:"flex",flexDirection:"column",gap:"50px"}}>
+                        <p>Qual o preço do produto no Pix?</p>
+                    <div style={{display:"flex",gap:"50px",alignItems:"center"}}>
+                      
+                    <div style={{position:"relative",display:"flex",alignItems:"center"}}>
+                    <p style={{position:"absolute"}}>R$</p><input type="number" value={precoProdutoPix} onChange={(e) => {const val = e.target.value; if(val.length < 8) setPrecoProdutoPix(val)}} style={{paddingLeft:"25px",width:"200px",height:"30px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
+                    </div>
+                    <img src="/images/money-metodos-pagamento.png" style={{width:"100px",height:"100px"}}/>
+                    </div>
+                    </div>  
+                    </div> : ""}
+                    
+                    
+                    </div>
+                    <div>
+                    
+                    
+                    </div>
+                    </div>
                     <p>Quantas unidades você tem disponível para venda?</p>
                     <div style={{position:"relative",display:"flex",alignItems:"center"}}>
-                    <p style={{position:"absolute",right:"170px"}}>unidades</p><input type="number" value = {estoque} onChange={(e) => {const val = e.target.value; if(val.length < 8) setEstoque(val);}}style={{paddingLeft:"25px",width:"200px",height:"30px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
+                    <p style={{position:"absolute",left:"220px"}}>unidades</p><input type="number" value = {estoque} onChange={(e) => {const val = e.target.value; if(val.length < 8) setEstoque(parseInt(val));}}style={{paddingLeft:"25px",width:"200px",height:"30px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
                     </div>
                     <div style={{display:"flex",justifyContent:"end"}}>
-                    <button onClick={() => {handleNext()}} style={{color:"white",borderRadius:"6px",backgroundColor:"#111111",border:"none",width:"100%",height:"50px",fontWeight:"bold"}}>Próximo</button>
+                    <button onClick={() => {if(precoProduto.length !== 0 && estoque.length !== 0 && estoque >= 1){
+                handleNext()
+                    }
+                    else{
+                        handleMostrarErroPrecoEstoque();
+                    } }} style={{color:"white",borderRadius:"6px",backgroundColor:"#111111",border:"none",width:"100%",height:"50px",fontWeight:"bold"}}>Próximo</button>
                     </div>
                     </div>
                 </div>
+                <div
+  style={{
+    position: "fixed",
+    bottom: erroPrecoProdutoEstoque ? "20px" : "-150px", // começa fora da tela
+    left: "50%",
+    transform: "translateX(-50%)",
+    backgroundColor: "red",
+    color: "#ffffff",
+    padding: "20px",
+    width: "600px",
+    borderRadius: "6px",
+    margin: "20px",
+    transition: "bottom 0.3s ease-in-out", // efeito suave
+  }}
+>
+  * Preencha pelo menos o preço do produto e a quantidade em estoque
+</div> 
             </div> : ""}
             
             {step === 8 ? <div>
@@ -485,13 +1387,10 @@ function PaginaAnunciarProduto(){
                 
                 <div className="card-valor-do-frete">
                 
-                    <h2>Confira o valor do frete</h2>
+                    <h2>Confira o frete</h2>
                     
-                    <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"20px"}}>
+                    <div style={{marginBottom:"20px",display:"flex",flexDirection:"column",alignItems:"center",gap:"20px"}}>
                     <img src="/images/shop-frete.png" style={{width:"100px",height:"100px"}}/>
-                    <div style={{position:"relative",display:"flex",alignItems:"center"}}>
-                    <p style={{color:freteSelecionado === "frete-gratis" ? "grey" : "", position:"absolute"}}>R$</p><input type="number" disabled={freteSelecionado === "frete-gratis"} value= {precoFrete} onChange={(e) => {const val = e.target.value; if(val.length < 8) setPrecoFrete(val)}} style={{paddingLeft:"25px",width:"200px",height:"30px",borderTop:"none",borderRight:"none",borderLeft:"none",outline:"none"}}/>
-                    </div>
                     <p>Oferecer frete grátis?</p>
                     <div style={{display:"flex",gap:"10px",width:"300px"}}>
                     <input type="radio" checked={freteSelecionado === "frete-gratis"} value ={freteSelecionado} onChange={() => {setFreteSelecionado("frete-gratis");setPrecoFrete("")}}/><p>Quero oferecer frete grátis</p>
@@ -500,14 +1399,14 @@ function PaginaAnunciarProduto(){
                     <div style={{display:"flex",gap:"10px",width:"300px"}}>
                     <input type="radio" checked ={freteSelecionado === "frete-pago"} value={freteSelecionado} onChange={() => {setFreteSelecionado("frete-pago")}} /><p>Não oferecer frete grátis</p>
                     </div>
-                    <p style={{fontSize:"12px",width:"300px"}}>O comprador pagará pelo envio</p>
+                    {freteSelecionado === "frete-pago" ? <p style={{marginTop:"-15px",fontSize:"12px",width:"300px"}}>*O comprador pagará pelo envio</p> : ""}
                     </div>
                     <div className="card-de-onde-sera-enviado">
                     <p>De onde será enviado o produto?</p>
                     <div style={{position:"relative",display:"flex",alignItems:"center"}}>
-                    <p style={{position:"absolute",left:"10px",bottom:"5px"}}>CEP:</p><input minLength={8} maxLength={8} value = {cep} onBlur={() => {if(cep.length < 8){setErroCep("CEP deve ter 8 dígitos") } else if(/^\d{8}$/.test(cep)){
+                    <p style={{position:"absolute",left:"10px",bottom:"5px"}}>CEP:</p><input minLength={8} maxLength={8} value = {cep} onBlur={() => {if(cep.length < 8){setErroCep("CEP deve ter 8 dígitos");setCidade("");setEstado(""); } else if(/^\d{8}$/.test(cep)){
                             calcularCidadeEstado(cep)}
-                    }} onChange={(e) =>{setCep(e.target.value)}} style={{fontSize:"16px",borderTop:"none",borderRight:"none",borderLeft:"none",paddingLeft:"50px",width:"300px",paddingTop:"10px",paddingBottom:"10px",height:"35px",outline:"none"}}/>
+                    }} onChange={(e) =>{setCep(e.target.value);setCidade("");setEstado("")}} style={{fontSize:"16px",borderTop:"none",borderRight:"none",borderLeft:"none",paddingLeft:"50px",width:"300px",paddingTop:"10px",paddingBottom:"10px",height:"35px",outline:"none"}}/>
                             
                     </div>
                     {erroCep && <p style={{color:"red"}}>{erroCep}</p>}
@@ -525,54 +1424,80 @@ function PaginaAnunciarProduto(){
                         <p>Preço do produto</p>
                         <p>R$ {Number(precoProduto).toFixed(2)}</p>
                         </div>
-                        <div style={{display:"flex",justifyContent:"space-between"}} >
-                        <p>Preço Frete</p>
-                        <p>{precoFrete != 0 ? `R$ ${Number(precoFrete).toFixed(2)}` : "Frete grátis"}</p>
+                        <div style={{display:"flex",justifyContent:"space-between"}}>
+                        <p>Frete</p>
+                        <p>{freteSelecionado === "frete-gratis" ? "Grátis" : "Calculado no checkout"}</p>
                         </div>
+                        {precoProdutoPix ? <div style={{display:"flex",justifyContent:"space-between"}}>
+                        <p>Preço no Pix</p>
+                        <p style={{color:"green"}}>R${Number(precoProdutoPix).toFixed(2)}</p>
+                        </div>: ""}
+                        {resultado[resultado.length - 1].numeroParcelas && resultado[resultado.length - 1].valorParcela ? <div style={{display:"flex",justifyContent:"space-between"}}>
+                        <p>Número de parcelas:</p>
+                        <p>{resultado[resultado.length - 1].numeroParcelas}x R${resultado[resultado.length - 1].valorParcela}</p>
+                        </div> : ""}
                         <div style={{display:"flex",justifyContent:"space-between"}} >
                         <p>Você recebe</p>
-                        <p style={{color:"#3b9e62"}}>R$ {calcularPrecoTotal()?.toFixed(2)} </p>
+                        <div>
+                        <p style={{color:"#3b9e62",marginLeft:"13px"}}>Entre R$ {Number(precoProdutoPix).toFixed(2) || Number(precoProduto).toFixed(2)} - R${Number(precoProduto).toFixed(2)} </p>
+                        {freteSelecionado === "frete-gratis" ? <p style={{color:"red"}}>- R$ Valor do frete</p> : ""}
+                        </div>
                         </div>
                         <div className="informacoes-anuncio-produto">
                             <div style={{display:"flex",alignItems:"center",gap:"20px"}}>
                             {valorLink[0]!== "" && valorLink[0] !== undefined ? <img src={valorLink[0]} style={{width:"200px",height:"200px"}}/> : ""}
-                            <div style={{width:"100%",display:"flex",justifyContent:"space-between",flexDirection:"column"}}>
+                            <div style={{width:"340px",display:"flex",justifyContent:"space-between",flexDirection:"column"}}>
                             <div style={{display:"flex",justifyContent:"space-between"}}>
-                            <p>Nome:</p>
-                            <p >{nomeProduto}</p>
+                            <p style={{fontWeight:"bold"}}>{nomeProduto ? `Nome:`: ""}</p>
+                            <div style={{display:"flex",flexWrap:"wrap",gap:"5px",justifyContent:"end"}}>
+                            <p style={{fontSize:"13px"}}>{nomeProduto}</p>
+                            </div>
                             </div>
                             <div style={{display:"flex",justifyContent:"space-between"}}>
-                            <p>Cor:</p>
-                            <p >{cor}</p>
+                            <p style={{fontWeight:"bold"}}>{coresSelecionadas.length !== 0 ? `Cores:` : ""}</p>
+                            <div style={{display:"flex",flexWrap:"wrap",gap:"5px",justifyContent:"end"}}>
+                            {coresSelecionadas.map((item) => {return <p style={{fontSize:"13px"}}>{item}</p>})}
+                            </div>
                             </div>
                             <div style={{display:"flex",justifyContent:"space-between"}}>
-                            <p>Material:</p>
-
-                            <p>{material}</p>
+                            <p style={{fontWeight:"bold"}}>{materiaisSelecionadas.length !== 0 ? `Materiais:` : ""}</p>
+                            <div style={{display:"flex",flexWrap:"wrap",gap:"5px",justifyContent:"end"}}>
+                            {materiaisSelecionadas.map((item) => {return <p style={{fontSize:"13px"}} >{item}</p>})}
+                            </div>
                             </div>
                             <div style={{display:"flex",justifyContent:"space-between"}}>
-                            <p>Dimensão:</p>
-                            <p >{dimensao}</p>
+                            <p style={{fontWeight:"bold"}}>{largura || altura || comprimento ? `Dimensão:` : ""} </p>
+                            <div style={{display:"flex",flexWrap:"wrap",gap:"5px",justifyContent:"end"}}>
+                            <p style={{fontSize:"13px"}}>{largura ? `${largura} x`: ""} {altura ? `${altura} x` : ""} {comprimento ? `${comprimento}` : ""} {largura || altura || comprimento ? unidadeDimensoes : ""} </p>
+                            </div>
                             </div>
                             <div style={{display:"flex",justifyContent:"space-between"}}>
-                            <p>Estampa:</p>
-                            <p >{estampa}</p>
+                            <p style={{fontWeight:"bold"}}>{estampasSelecionadas.length !== 0 ? `Estampas:` : ""}</p>
+                            <div style={{display:"flex",flexWrap:"wrap",gap:"5px",justifyContent:"end"}}>
+                            {estampasSelecionadas.map((item) => {return <p style={{fontSize:"13px"}}>{item}</p>})}
+                            </div>
                             </div>
                             <div style={{display:"flex",justifyContent:"space-between"}} >
-                            <p>Genero:</p>
-                            <p >{genero}</p>
+                            <p style={{fontWeight:"bold"}}>{generosSelecionados.length !== 0 ? `Generos:` : ""}</p>
+                            <div style={{display:"flex",flexWrap:"wrap",gap:"5px"}}>
+                            <p>{generosSelecionados.map((item) => {return <p style={{fontSize:"13px"}}>{item}</p>})}</p>
+                            </div>
                             </div>
                             <div style={{display:"flex",justifyContent:"space-between"}}>
-                            <p>Peso:</p>
-                            <p >{peso}</p>
+                            <p style={{fontWeight:"bold"}}>{peso ? `Peso:` : ""}</p>
+                            <p style={{fontSize:"13px"}}>{peso}{peso ? unidadePeso : ""}</p>
                             </div>
                             <div style={{display:"flex",justifyContent:"space-between"}}>  
-                            <p>Voltagem:</p>
-                            <p >{voltagem}</p>
+                            <p style={{fontWeight:"bold"}}>{voltagensSelecionadas.length !== 0 ? `Voltagens:` : ""}</p>
+                            <div style={{display:"flex",flexWrap:"wrap",gap:"5px",justifyContent:"end"}}>
+                            <p>{voltagensSelecionadas.map((item => {return <p style={{fontSize:"13px"}}>{item}V</p>}))}</p>
+                            </div>
                             </div>
                             <div style={{display:"flex",justifyContent:"space-between"}}>
-                            <p>Tamanho</p>
-                            <p>{tamanho}</p>
+                            <p style={{fontWeight:"bold"}}>{tamanhosSelecionados.length !== 0 ? `Tamanhos:` : ""}</p>
+                            <div style={{display:"flex",flexWrap:"wrap",gap:"5px",justifyContent:"end"}}>
+                            <p>{tamanhosSelecionados.map((item) => {return <p style={{fontSize:"13px"}}>{item}</p>})}</p>
+                            </div>
                             </div>
                             </div>
                             </div>
@@ -591,11 +1516,36 @@ function PaginaAnunciarProduto(){
                         </div>
 
                         <div style={{paddingTop:"20px",paddingBottom:"10px"}}>
-                        <button onClick={() => {handleNext()}} style={{color:"white",borderRadius:"6px",backgroundColor:"#111111",border:"none",width:"100%",height:"50px",fontWeight:"bold"}}>Anunciar</button>
+                        <button onClick={() => {
+                            if(cidade && estado){
+                                handleNext();
+                                handleAnunciarProduto()
+                            }
+                            else{
+                                handleMostrarErroCep();
+                            }
+                            }} style={{color:"white",borderRadius:"6px",backgroundColor:"#111111",border:"none",width:"100%",height:"50px",fontWeight:"bold"}}>Anunciar</button>
                         </div>
                     </div>
                        
             </div>
+            <div
+  style={{
+    position: "fixed",
+    bottom: erroCepIncompleto ? "20px" : "-150px", // começa fora da tela
+    left: "50%",
+    transform: "translateX(-50%)",
+    backgroundColor: "red",
+    color: "#ffffff",
+    padding: "20px",
+    width: "600px",
+    borderRadius: "6px",
+    margin: "20px",
+    transition: "bottom 0.3s ease-in-out", // efeito suave
+  }}
+>
+  * Preencha o cep de onde será enviado
+</div> 
  </div>: ""}
              {step === 9 ? 
              <div className="secao-identificar-produto">

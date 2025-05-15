@@ -204,7 +204,7 @@ const handleMostrarOpcoesSegundoInput = () => {
     };
 
 
-    const atualizarItemSalvo = async (quantidade,itemId,corId = null,voltagemId = null, dimensoesId = null, pesosId = null,generoId = null, estampasId = null,tamanhosId = null, materiaisId = null,alterar = null) => {
+    const atualizarItemSalvo = async (quantidade,itemId,corId = null,voltagemId = null, dimensoesId = null, pesosId = null,generoId = null, estampasId = null,tamanhosId = null, materiaisId = null,produtoId = null,alterar = null) => {
         try {
             await axios.put(`http://localhost:5000/itens-salvos/${itemId}`,{
                 quantidade,
@@ -216,6 +216,7 @@ const handleMostrarOpcoesSegundoInput = () => {
                 estampasId,
                 tamanhosId,
                 materiaisId,
+                produtoId,
                 alterar
             },{withCredentials:true});
             await carregarItensSalvos();
@@ -559,9 +560,9 @@ const handleMostrarOpcoesSegundoInput = () => {
                        const encontrado = carrinhoItens.find((item) => item.id === itemSelecionado.cart_item_id);
                        
                        if(encontrado){
-                        editarQuantidadeItemCarrinho(quantidadeSelecionada,encontrado.id,corSelecionada,voltagemSelecionada,dimensoesSelecionada,pesoSelecionado,generoSelecionado,estampaSelecionada,tamanhoSelecionado,materialSelecionado,"alterar")}
+                        editarQuantidadeItemCarrinho(quantidadeSelecionada,encontrado.id,corSelecionada,voltagemSelecionada,dimensoesSelecionada,pesoSelecionado,generoSelecionado,estampaSelecionada,tamanhoSelecionado,materialSelecionado,encontrado.produto_id,"alterar")}
                         else{
-                        atualizarItemSalvo(quantidadeSelecionada,produtoAlterar.id,corSelecionada,voltagemSelecionada,dimensoesSelecionada,pesoSelecionado,generoSelecionado,estampaSelecionada,tamanhoSelecionado,materialSelecionado, "alterar");
+                        atualizarItemSalvo(quantidadeSelecionada,produtoAlterar.id,corSelecionada,voltagemSelecionada,dimensoesSelecionada,pesoSelecionado,generoSelecionado,estampaSelecionada,tamanhoSelecionado,materialSelecionado,produtoAlterar.produto_id, "alterar");
                         };handleMostrarModalAlterar()}}className="botao-atualizar-alterar">Atualizar</button>
                 </div>
             </div>

@@ -39,16 +39,16 @@ function CardCarrinho({item,precoTotal,precoTotalPix,adicionarItemSalvo,mostrarM
                     
                     </div>
                     <div className="container-botao-alterar-quantidade">
-                    <img src={item.quantidade === 1 ? "/images/minus-grey.png" : "/images/minus.png"} className="botao-menos-quantidade" onClick={() => editarQuantidadeItemCarrinho(item.quantidade - 1, item.id,item.cores_ids)}/>
+                    <img src={item.quantidade === 1 ? "/images/minus-grey.png" : "/images/minus.png"} className="botao-menos-quantidade" onClick={() => editarQuantidadeItemCarrinho(item.quantidade - 1, item.id,item.cores_ids,item.voltagem_ids,item.dimensoes_ids,item.pesos_ids,item.generos_ids,item.estampas_ids,item.tamanhos_ids,item.materiais_ids,item.produto_id)}/>
                     <p>{item.quantidade}</p>
-                    <img src = "/images/plus.png" className="botao-mais-quantidade" onClick={() => editarQuantidadeItemCarrinho(item.quantidade + 1, item.id,item.cores_ids,item.voltagem_ids,item.dimensoes_ids,item.pesos_ids,item.generos_ids,item.estampas_ids,item.tamanhos_ids,item.materiais_ids)}/>
+                    <img src = "/images/plus.png" className="botao-mais-quantidade" onClick={() => editarQuantidadeItemCarrinho(item.quantidade + 1, item.id,item.cores_ids,item.voltagem_ids,item.dimensoes_ids,item.pesos_ids,item.generos_ids,item.estampas_ids,item.tamanhos_ids,item.materiais_ids,item.produto_id)}/>
                     </div>
                     <div className="container-preco-preco-pix-desconto">
                         <div className="container-preco-desconto">
                         <p style = {{fontSize: "12px", color:`#00a650`}}>{calcularDesconto(item.desconto)}</p>
                         <p style = {{fontSize: "12px", textDecoration: "line-through"}}>R${precoTotal}</p>
                         </div>
-                        <p style={{fontSize:"20px",marginLeft:"10px"}}>R${precoTotalPix.toFixed(2)}</p>
+                        <p style={{fontSize:"20px",marginLeft:"10px"}}>R${precoTotalPix || precoTotal}</p>
                         
                     </div>
                     </div>

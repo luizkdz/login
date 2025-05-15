@@ -85,7 +85,7 @@ function PaginaDetalhesPedido(){
                            
                                 <img src={item.url} style={{width:"80px",height:"80px"}}/>
                                 
-                                <div>
+                                <div style={{width:"500px"}}>
                                     <p>{item.nome}</p>
                                     <p>{item.cor_nome ? `Cor:${item.cor_nome}` : ""}</p>
                                     <p>{item.voltagem ? `Voltagem:${item.voltagem}` : ""}</p>
@@ -97,9 +97,7 @@ function PaginaDetalhesPedido(){
                                     <p>{item.materiais ? `Materiais:${item.materiais}` : ""}</p>
                                     <p>Quantidade: {item.quantidade}</p>
                                 </div>
-                                <div style={{display:"flex",flexDirection:"column",gap:"20px"}}>
                                 
-                                </div>
                                 </div>
                             )})}
                             <button style={{backgroundColor:"#111111",border:"none",borderRadius:"6px",color:"white",width:"100%",height:"40px"}}>Quero trocar ou cancelar</button>
@@ -132,11 +130,11 @@ function PaginaDetalhesPedido(){
                     </div>
                     <div style={{display:"flex",justifyContent:'space-between'}}>
                     <p>Produto:</p>
-                {pedido.itens?.map((item) => {return (<p>R${item.preco_unitario?.toFixed(2)}</p>)})}
+                <p>R${(pedido.total - pedido.preco_frete).toFixed(2)}</p>
                 </div>
                 <div style={{display:"flex",justifyContent:'space-between'}}>
                     <p>Frete</p>
-                    <p>R${calcularValorFreteTotal()?.toFixed(2)}</p>
+                    <p>R${pedido.preco_frete?.toFixed(2)}</p>
                     </div>
                     <div style={{display:"flex",justifyContent:'space-between'}}>
                     <p>Total:</p>
@@ -154,6 +152,7 @@ function PaginaDetalhesPedido(){
                     <img src={imagemPagamento[pedido.metodo_pagamento]} style={{height:"50px",width:"50px"}}/>
                     <div>
                     <p style={{fontSize:"14px"}}>R${pedido.total?.toFixed(2)}</p>
+                    <p style={{fontSize:"14px"}}>{pedido.parcelas}x de R${pedido.valor_parcela?.toFixed(2)}</p>
                     <p style={{fontSize:"12px"}}>{pedido.metodo_pagamento}</p>
                     <p style={{fontSize:"12px"}}>{pedido.metodo_pagamento === "Cartao" ? pedido.cartao_mascarado : ""}</p>
                     <p style={{fontSize:"12px"}}>{dataFormatada(pedido.data_pedido)}</p>
