@@ -10,13 +10,15 @@ import crypto from "crypto";
 import session from "express-session";
 import passport from "../server/passport.js";
 import axios from "axios";
+import Stripe from "stripe"
 
 dotenv.config();
 
 const app = express();
 const port = 5000;
-
-
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY,{
+    apiVersion:"2023-10-16",
+});
 const emailTransporter = process.env.EMAIL_TRANSPORTER;
 const senhaEmail = process.env.SENHA_EMAIL;
 
@@ -202,9 +204,11 @@ app.post("/cadastrar", async (req,res) => {
         if(emailJaExiste[0].length > 0 ){
             return res.status(400).send("O email já é cadastrado");
         }
-        await db.query("INSERT INTO usuarios (nome,email,senha_hash) VALUES (?,?,?)", [nome,email, hashedPassword]);
+        const [resultado] = await db.query("INSERT INTO usuarios (nome,email,senha_hash) VALUES (?,?,?)", [nome,email, hashedPassword]);
     
-    return res.status(200).send("O usuario foi criado com sucesso");
+        const idUsuario = resultado.insertId;
+
+    return res.status(200).json(idUsuario);
 }
 catch(error){
     return res.status(500).send("Erro ao cadastrar usuario");
@@ -953,7 +957,9 @@ app.get("/cart", async (req,res) => {
         ) AS imagem_produto,
         COALESCE(MIN(f.valor), MIN(f_default.valor), 0) AS valor_frete,
         m.nome AS marca_nome, 
-        u_dono_produto.nome AS usuario_nome_dono_produto
+        u_dono_produto.nome AS usuario_nome_dono_produto,
+        u_dono_produto.id AS usuario_id_dono_produto
+
     FROM cart_items ci
     LEFT JOIN produtos p ON p.id = ci.produto_id
     LEFT JOIN cart_item_cores cic ON cic.cart_item_id = ci.id
@@ -2371,7 +2377,7 @@ app.post("/confirmar-compra", autenticarToken, async (req,res) => {
         }
              
         
-        return res.status(200).json({message:"Pedido salvo com sucesso"});
+        return res.status(200).json({pedidoId:pedidoId});
     }
     catch(err){
         console.log(err);
@@ -2710,7 +2716,7 @@ app.post("/anunciar-produto", autenticarToken, async(req,res) => {
         }
         if(dimensoes){
 
-            const {largura,altura,comprimento,unidade} = dimensoes;
+            const {largura,altura,comprimento,unidadeDimensoes} = dimensoes;
             const columns = [];
             const params = [];
             
@@ -2726,7 +2732,7 @@ app.post("/anunciar-produto", autenticarToken, async(req,res) => {
                 columns.push(`comprimento`)
                 params.push(comprimento);
             }
-            if(unidade){
+            if(unidadeDimensoes){
                 columns.push(`unidade`)
                 params.push(unidade);
             }
@@ -2924,11 +2930,431 @@ app.post("/inserir-frete-valor", autenticarToken, async (req, res) => {
         return res.status(500).json({message:"Não foi possivel inserir o valor do frete"})
     }
 })
-       
+
+app.post("/adicionar-nova-venda",autenticarToken, async (req,res) => {
+    const userId = req.usuarioId;
+    const {statusVenda,itens,vendedorId, metodoPagamento, total, enderecoLogradouro, enderecoCidade, enderecoNumero, enderecoComplemento, enderecoEstado, parcelas, valorParcelas, precoFrete, pedidoId} = req.body;
+    
+    try{
+        const columns = [];
+        const params = [];
+
+        if(vendedorId){
+            columns.push(`id_vendedor`);
+            params.push(vendedorId);
+        }
+        if(statusVenda){
+            columns.push(`status_venda`);
+            params.push(statusVenda);
+        }
+        if(metodoPagamento){
+            columns.push(`metodo_pagamento`);
+            params.push(metodoPagamento);
+        }
+
+        
+        if(total){
+            columns.push(`total`);
+            params.push(total);
+        }
+        if(enderecoLogradouro){
+            columns.push(`endereco_logradouro`);
+            params.push(enderecoLogradouro);
+        }
+        if(enderecoCidade){
+            columns.push(`endereco_cidade`);
+            params.push(enderecoCidade);
+        }
+        if(enderecoNumero){
+            columns.push(`endereco_numero`);
+            params.push(enderecoNumero);
+        }
+        if(enderecoComplemento){
+            columns.push(`endereco_complemento`);
+            params.push(enderecoComplemento);
+        }
+        if(enderecoEstado){
+            columns.push(`endereco_estado`);
+            params.push(enderecoEstado);
+        }
+        if(parcelas){
+            columns.push(`parcelas`);
+            params.push(parcelas);
+        }
+        if(valorParcelas){
+            columns.push(`valor_parcelas`);
+            params.push(valorParcelas);
+        }
+        if(precoFrete){
+            columns.push(`preco_frete`);
+            params.push(precoFrete);
+        }
+        if(pedidoId){
+            columns.push(`pedido_id`);
+            params.push(pedidoId);
+        }
+        if(userId){
+            columns.push(`id_comprador`);
+            params.push(userId);
+        }
+        
+        const placeholders = columns.join(", ");
+        const valuePlaceholders = columns.map(() => "?").join(", ");
+        
+        let query = `INSERT INTO vendas (${placeholders}) values (${valuePlaceholders})`;
+
+        const [resultado] = await db.query(query,params);
+
+        if(itens){
+            for(const item of itens){
+                const params =[];
+                const columns = [];
+                columns.push(`id_venda`)
+                params.push(resultado.insertId); 
+                
+                if(item.usuario_id_dono_produto){
+                    columns.push(`id_vendedor`);
+                    params.push(item.usuario_id_dono_produto);
+                    }
+            
+                if(item.produto_id){
+                    columns.push(`produto_id`)
+                    params.push(item.produto_id);
+                }
+                if(item.cor_nome){
+                    columns.push(`cor_nome`)
+                    params.push(item.cor_nome);
+                }
+                if(item.voltagem){
+                    columns.push(`voltagem`)
+                    params.push(item.voltagem);
+                }
+                if(item.dimensoes){
+                    columns.push(`dimensoes`)
+                    params.push(item.dimensoes);
+                }
+                if(item.pesos){
+                    columns.push(`pesos`)
+                    params.push(item.pesos);
+                }
+                if(item.generos){
+                    columns.push(`generos`)
+                    params.push(item.generos);
+                }
+                if(item.estampas){
+                    columns.push(`estampas`)
+                    params.push(item.estampas);
+                }
+                if(item.tamanhos){
+                    columns.push(`tamanhos`)
+                    params.push(item.tamanhos);
+                }
+                if(item.materiais){
+                    columns.push(`materiais`)
+                    params.push(item.materiais);
+                }
+                if(item.quantidade){
+                    columns.push(`quantidade`)
+                    params.push(item.quantidade);
+                }
+                if(item.preco){
+                    columns.push(`preco_unitario`)
+                    params.push(item.preco);
+                }
+                if(item.quantidade && item.preco){
+                    columns.push(`sub_total`)
+                    params.push(Number(item.preco * item.quantidade));
+                }
+
+                const placeholders = columns.join(", ");
+                const valuePlaceholders = columns.map(() => "? ").join(", ");
+
+                await db.query(`INSERT INTO itens_venda (${placeholders}) values (${valuePlaceholders})`,params);
+                
+            }
+        }
+    return res.status(200).json(resultado.insertId);
+    }
+    catch(err){
+        console.log(err);
+        return res.status(500).json({message:"Não foi possivel adicionar nova venda"});
+    }})
+     
+app.post("/criar-pagamento-cartao",autenticarToken, async (req, res) => {
+  const { valorTotal,paymentMethodId } = req.body;
+  const userId = req.usuarioId;
+
+    
+
+  try {
+    console.log(`paymentMethodId e`,paymentMethodId);
+    const [resultado] = await db.query("SELECT stripe_customer_id from usuarios where id = ?",[userId]);
+    const customerId = resultado[0].stripe_customer_id;
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(valorTotal * 100), // centavos
+      currency: "brl",
+      customer:customerId,
+      payment_method: paymentMethodId,
+      off_session:true,
+      confirm:true
+    });
+
+    return res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Erro ao criar pagamento" });
+  }
+});
+    
+
+app.post("/criar-boleto", async (req, res) => {
+  const { valorTotal, nome, email } = req.body;
+
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(valorTotal * 100),
+      currency: "brl",
+      payment_method_types: ["boleto"],
+    });
+
+    const confirmedPaymentIntent = await stripe.paymentIntents.confirm(
+      paymentIntent.id,
+      {
+        payment_method_data: {
+          type: "boleto",
+          boleto:{
+            tax_id:"000.000.000-00"
+          },
+          billing_details: {
+            name: nome,
+            email: email,
+            address:{
+                line1:"Rua exemplo, 123",
+                city:"Sao Paulo",
+                state:"SP",
+                postal_code:"01000-000",
+                country:"BR"
+            }
+          },
+        },
+      }
+    );
+
+    const boletoUrl = confirmedPaymentIntent.next_action?.boleto_display_details?.hosted_voucher_url;
+    const vencimento = confirmedPaymentIntent.next_action?.boleto_display_details?.expires_at;
+
+    res.json({
+      boletoUrl,
+      vencimento,
+      clientSecret:confirmedPaymentIntent.client_secret
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: "Falha ao gerar boleto", detalhes: err.message });
+  }
+});
+
+
+app.post("/criar-costumer",autenticarToken, async (req,res) => {
+    
+    const {nome,email,idUsuario} = req.body;
+    try{
+        const customer = await stripe.customers.create({
+            name:nome,
+            email:email,
+        })
+        await db.query("UPDATE usuarios set stripe_customer_id = ? where id = ?",[customer.id,idUsuario]);
         
 
+        res.status(200).json({customerId:customer.id});
+    }
+    catch(err){
+        console.log(err);
+        return res.status(500).json({message:"Não foi possivel criar o customer"})
+    }
+})
 
 
+app.get(`/listar-cartoes-stripe`,autenticarToken,async (req,res) => {
+    const userId = req.usuarioId;
 
+    try{
+        const [resultado] = await db.query("SELECT stripe_customer_id from usuarios where id = ?",[userId]);
+        const customerId = resultado[0].stripe_customer_id;
+
+        const paymentMethods = await stripe.paymentMethods.list({
+            customer:customerId,
+            type:"card"
+        });
+
+        const fingerPrintsSet = new Set();
+        const cartoesUnicos = [];
+
+        for (const metodo of paymentMethods.data){
+            const fingerPrint = metodo.card.fingerprint;
+            if(!fingerPrintsSet.has(fingerPrint)){
+                fingerPrintsSet.add(fingerPrint);
+                cartoesUnicos.push(metodo);
+            }
+        }
+
+        return res.status(200).json(cartoesUnicos);
+
+    }
+    catch(err){
+        console.log(err);
+        return res.status(500).json({message:"Não foi possivel listar os cartões"});
+    }
+})
+
+app.post("/salvar-cartao-stripe",autenticarToken, async(req,res) => {
+    const userId = req.usuarioId;
+    
+    try{
+        const [resultado] = await db.query("SELECT stripe_customer_id from usuarios where id = ?",[userId]);
+        console.log(userId);
+        console.log(resultado[0].stripe_customer_id);
+        const customerId = resultado[0].stripe_customer_id;
+
+        const setupIntent = await stripe.setupIntents.create({
+            customer:customerId,
+            usage:"off_session"
+        })
+        
+    return res.status(200).json({clientSecret:setupIntent.client_secret});
+    }
+        catch(err){
+            console.log(err);
+            return res.status(500).json({message:"Não foi possivel salvar o cartão"});
+        }
+})
+
+app.post("/salvar-cartao-id",autenticarToken, async(req,res) => {
+    const userId = req.usuarioId;
+
+    const {paymentMethodId,nomeTitularCartao} = req.body;
+
+    
+    try{
+        const [resultado] = await db.query("SELECT stripe_customer_id from usuarios where id = ?",[userId]);
+        const customerId = resultado[0].stripe_customer_id;
+
+
+        await stripe.paymentMethods.attach(paymentMethodId,{customer:customerId})
+
+        await stripe.customers.update(customerId, {
+      invoice_settings: { default_payment_method: paymentMethodId },
+    });
+
+    const paymentMethod = await stripe.paymentMethods.retrieve(paymentMethodId);
+    const { brand, last4, exp_month, exp_year } = paymentMethod.card;
+
+    const bandeira = brand;
+    const numeroMascaradoCartao = `**** **** **** ${last4}`;
+    const dataExpiracao = `${String(exp_month).padStart(2, "0")}/${exp_year}`;
+
+    // Salvar no banco
+    await db.query(
+      `INSERT INTO cartoes_salvos 
+        (numero_mascarado, id_usuario, nome_titular, bandeira, data_expiracao, stripe_payment_method_id)
+        VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        numeroMascaradoCartao,
+        userId,
+        nomeTitularCartao,
+        bandeira,
+        dataExpiracao,
+        paymentMethodId,
+      ]
+    );
+
+     return res.status(200).json({message:"Cartão salvo com sucesso"})
+        
+}
+
+    catch(err){
+        console.log(err);
+        return res.status(500).json({message:"Não foi possivel salvar o cartão"});
+    }
+})
+
+app.get("/carregar-vendas", autenticarToken,async (req,res) => {
+    const userId = req.usuarioId;
+    try{
+        
+        
+        const [itensVenda] = await db.query("SELECT *,(SELECT i.url FROM imagens_produto i WHERE i.produto_id = p.id LIMIT 1) AS url from itens_venda iv left join vendas v on id_venda = v.id left join produtos p on p.id = iv.produto_id where v.id_vendedor = ?",[userId]);
+        
+        const vendasAgrupadas = {};
+
+        for(const row of itensVenda){
+            const idVenda = row.id_venda;
+            if(!vendasAgrupadas[idVenda]){
+                vendasAgrupadas[idVenda]={
+                    venda:{
+                        id:row.id_venda,
+                        total:row.total,
+                        metodo_pagamento:row.metodo_pagamento,
+                        data_venda:row.data_venda,
+                        status_venda:row.status_venda,
+                        endereco_logradouro:row.endereco_logradouro,
+                        endereco_cidade:row.endereco_cidade,
+                        endereco_numero:row.endereco_numero,
+                        endereco_complemento:row.endereco_complemento,
+                        endereco_estado:row.endereco_estado,
+                        parcelas:row.parcelas,
+                        valor_parcelas:row.valor_parcelas,
+                        preco_frete:row.preco_frete,
+                        pedido_id:row.pedido_id,
+                        id_comprador:row.id_comprador,
+                        id_vendedor:row.id_vendedor
+                    },
+                    itens:[]
+                }
+                        }
+                vendasAgrupadas[idVenda].itens.push({
+                    url:row.url,
+                    nome:row.nome,
+                    produto_id:row.produto_id,
+                    quantidade:row.quantidade,
+                    preco_unitario:row.preco_unitario,
+                    sub_total:row.preco_total,
+                    cor_nome:row.cor_nome,
+                    voltagem:row.voltagem,
+                    dimensoes:row.dimensoes,
+                    pesos:row.pesos,
+                    generos:row.generos,
+                    estampas:row.estampas,
+                    tamanhos:row.tamanhos,
+                    materiais:row.materiais,
+                })
+
+        }
+
+        const resultadoFinal = Object.values(vendasAgrupadas);
+        
+        
+        return res.status(200).json(resultadoFinal);
+    }
+    catch(err){
+        console.log(err);
+        return res.status(500).json({message:"Não foi possível carregar as vendas"});
+    }
+})
+
+
+app.post("/confirmar-pagamento-boleto/:idPagamento", async (req,res) => {
+    
+    const {idPagamento} = req.params;
+    try{
+        await db.query("UPDATE vendas set status_venda = 'pago' where id = ?",[idPagamento]);
+        return res.status(200).json({message:"O pagamento foi atualizado com sucesso"});
+    }
+    catch(err){
+        console.log(err);
+        return res.status(500).json({message:"Não foi possivel confirmar o pagamento"});
+    }
+})
 
 app.listen(port, () => {console.log("servidor rodando na porta " + `${port}`)});
