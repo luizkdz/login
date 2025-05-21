@@ -14,6 +14,9 @@ function CriarConta(){
         e.preventDefault();
         try{
             const resposta = await axios.post("http://localhost:5000/cadastrar", {nome, email, senha}, {include:true}, {withCredentials: true});
+            
+             await axios.post("http://localhost:5000/criar-costumer",{nome,email,idUsuario:resposta.data},{withCredentials:true});
+            
             alert(resposta.data);
             window.location.href = "/";
         }

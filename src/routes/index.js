@@ -13,6 +13,7 @@ import PaginaMeusPedidos from "../PaginaMeusPedidos/index.js";
 import PaginaDetalhesPedido from "../PaginaDetalhesPedido/index.js";
 import PaginaVendas from "../PaginaVendas/index.js";
 import PaginaAnunciarProduto from "../PaginaAnunciarProduto/index.js";
+import PaginaTodasAsVendas from "../PaginaTodasAsVendas/index.js";
 
 function Rotas() {
   return (
@@ -30,8 +31,9 @@ function Rotas() {
       <Route path="/minha-conta/enderecos" element={<PaginaEnderecos/>} />
       <Route path="/meus-pedidos" element={<PaginaMeusPedidos/>}></Route>
       <Route path="/meus-pedidos/:idPedido" element={<PaginaDetalhesPedido/>}></Route>
-      <Route path="/minha-conta/vendas" element={<PaginaVendas/>}></Route>
+      <Route path="/minha-conta/resumo-vendas" element={<PaginaVendas/>}></Route>
       <Route path="/minha-conta/vendas/anunciar" element={<PaginaAnunciarProduto/>}></Route>
+      <Route path="/minha-conta/vendas" element={<PaginaTodasAsVendas/>}></Route>
     </Routes>
   );
 }

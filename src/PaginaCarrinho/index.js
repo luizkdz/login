@@ -9,6 +9,7 @@ import axios from 'axios';
 import CardCarrinho from '../componentes/card-carrinho/index.js';
 import CardProdutoSalvo from '../componentes/card-produto-salvo/index.js';
 import InputProdutoAlterar from '../componentes/inputProdutoAlterar/index.js';
+import { useCep } from '../context/CepContext.js';
 
     
 
@@ -36,6 +37,8 @@ function PaginaCarrinho() {
     const [pesoSelecionado,setPesoSelecionado] = useState("");
     const [dimensoesSelecionada,setDimensoesSelecionada] = useState("d");
     const [produtoAlterar, setProdutoAlterar] = useState("");
+    const [precoEnvio, setPrecoEnvio] = useState({});
+    const cep = useCep();
     const estadosSelecionados = {
         cor: corSelecionada,
         material: materialSelecionado,
@@ -257,19 +260,46 @@ const handleMostrarOpcoesSegundoInput = () => {
 
     const calcularPrecoTotal = (item) => {
         return carrinhoItens.reduce((soma,item) => {
-            const preco = Number(item.preco_pix);
+            const preco = Number(item.preco);
             const quantidade = Number(item.quantidade);
             return soma + preco * quantidade
         },0);
     }
 
-    const calcularFreteTotal = () => {
-        return carrinhoItens.reduce((soma,item) => {
-            const precoFrete = Number(item.valor_frete);
-            return soma + precoFrete;
-        },0);
-    }
+    const calcularFreteTotal = () =>
+        Object.values(precoEnvio).reduce((total, valor) => total + parseFloat(valor), 0);
 
+const fetchPrecoEnvio = async () => {
+        try{
+            if(cep !== "Insira seu cep"){
+                console.log(cep);
+            carrinhoItens.map( async (item) => {
+              const respostaCEP = await axios.post(`http://localhost:5000/calcular-prazo-preco`, {
+            cepOrigem:item.cep_origem,    
+            cepDestino:cep.cep
+            }, {withCredentials: true});
+
+            setPrecoEnvio((prev) => ({
+                ...prev,
+                [item.id]: respostaCEP.data.precoEnvio
+                }));
+
+        }) 
+            }
+            
+            }
+            
+
+        catch(err){
+            console.error("Não foi possivel carregar o endereço de envio");
+        }
+        
+        
+    }
+useEffect(() => {
+    fetchPrecoEnvio();
+},[cep]);    
+    
     const precoTotalMaisFrete = calcularPrecoTotal() + calcularFreteTotal();
     return (
         
@@ -291,7 +321,8 @@ const handleMostrarOpcoesSegundoInput = () => {
                 
                 precoTotal = precoTotal.toFixed(2);
                 
-                let precoTotalPix = parseFloat(item.quantidade) * parseFloat(item.preco_pix);
+                let precoTotalPix = Number(item.quantidade) * Number(item.preco_pix);
+                precoTotalPix = parseFloat(precoTotalPix)
 
                 return (
                     <div className="card-carrinho">
@@ -299,7 +330,7 @@ const handleMostrarOpcoesSegundoInput = () => {
                     
                     <div className="container-preco-frete">
                         <p>Frete</p>
-                        <p>R${item.valor_frete}</p>
+                        <p>R${precoEnvio[item.id]}</p>
                     </div>
                     </div>
                 )
@@ -361,7 +392,7 @@ const handleMostrarOpcoesSegundoInput = () => {
                         
                         precoTotal = precoTotal.toFixed(2);
 
-                        let precoTotalPix = parseFloat(item.quantidade) * parseFloat(item.preco);
+                        let precoTotalPix = (parseFloat(item.quantidade) * parseFloat(item.preco)).toFixed(2);
                         return (
                             
                         

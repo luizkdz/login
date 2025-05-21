@@ -40,7 +40,7 @@ function PaginaEnderecos() {
 
     const handleTornarPadrao = async (enderecoId) => {
         try{
-            await axios.put(`http://localhost:5000/enderecos/${enderecoId}`,{withCredentials:true})
+            await axios.put(`http://localhost:5000/enderecos/${enderecoId}`,{},{withCredentials:true})
         }
         catch(err){
             console.error("Não foi possivel tornar endereço padrão");
