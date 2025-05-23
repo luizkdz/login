@@ -330,7 +330,7 @@ Object.keys(novosFiltros).forEach((key) => {
                 {sugestoes.length > 0 ? <p>Sugestão de consultas:</p> : ""} 
                   <div className={sugestoes.length > 0 ? `card-sugestao-produto`: ""}>
                     {console.log(`sugestoese`,sugestoes)}
-                    {sugestoes ? sugestoes : ""}
+                    {sugestoes ? sugestoes.slice(0,10) : ""}
                     </div>
                     </div>
             {tipo === "busca" ? <h1 className="resultado-pesquisa">Resultados para {nomeProduto.slice(0,20)}</h1> : ""}

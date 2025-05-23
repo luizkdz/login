@@ -19,7 +19,7 @@ const obterCarrinho = async () => {
         }
     }
 
-const adicionarAoCarrinho = async (produtoId, quantidade, corId = null, voltagemId = null, dimensoesId = null, pesosId = null, generoId = null, estampasId = null, tamanhosId = null, materiaisId) => {
+const adicionarAoCarrinho = async (produtoId, quantidade, corId = null, voltagemId = null, dimensoesId = null, pesosId = null, generoId = null, estampasId = null, tamanhosId = null, materiaisId,freteSelecionado = null) => {
     try {
         const resposta = await axios.post("http://localhost:5000/cart", {
             produtoId,
@@ -32,6 +32,7 @@ const adicionarAoCarrinho = async (produtoId, quantidade, corId = null, voltagem
             estampasId,
             tamanhosId,
             materiaisId,
+            freteSelecionado
         }, { withCredentials: true });
 
         console.log(`dimensoesId e`, dimensoesId);

@@ -157,7 +157,7 @@ function PaginaEnderecos() {
 
                     )})}
                 <div style={{marginTop:"20px",marginBottom:"20px",display:"flex",justifyContent:"end"}}>
-                <button onClick ={() => {handleNext();handleAdicionarNovoEndereco();setMostrarModalEditarEndereco(false);}} style={{padding:"10px",border:"2px solid rgb(0, 134, 255)",backgroundColor:"rgb(0, 134, 255)",borderRadius:"6px"}}><p style={{color:"white",fontWeight:"bold"}}>Adicionar novo endereço</p></button>
+                <button onClick ={() => {handleNext();handleAdicionarNovoEndereco();setMostrarModalEditarEndereco(false);}} style={{cursor:"pointer",padding:"10px",border:"2px solid rgb(0, 134, 255)",backgroundColor:"rgb(0, 134, 255)",borderRadius:"6px"}}><p style={{color:"white",fontWeight:"bold"}}>Adicionar novo endereço</p></button>
                 </div>
                 </div> : ""}
             {step === 2 && mostrarEditarEndereco ? <ModalEditarEndereco enderecoId={enderecoId} handleBack={handleBack} /> : ""}

@@ -4,8 +4,10 @@ import Header from '../componentes/header';
 import MenuLateral from '../componentes/menu-lateral';
 import './styles.css';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function PaginaTodasAsVendas(){
+    const navigate = useNavigate();
         const [menuHover,setMenuHover] = useState(false);
         const [vendas,setVendas] = useState([]);
 
@@ -89,11 +91,11 @@ useEffect(() => {
                     </div>
                 </div>
                 <div style={{padding:"20px",display:"flex",flexDirection:"column",gap:"20px"}}>
-                    {vendas.reverse().map((item,index) => {return (
+                    {vendas.length > 0 ? vendas.slice().reverse().map((item,index) => {return (
                     <div>
                     <div style={{width:"100%"}} className="card-vendas-produtos">
                     <div style={{display:"flex",justifyContent:"space-between"}}>
-                    <p style={{color:"green"}}>{item.venda.status_venda === "pago" ? "Pagamento Aprovado" : "Pagamento pendente"}</p>
+                    {item.venda.status_venda === "pago" ? <p style={{color:"green"}}>Pagamento Aprovado</p> : <p style={{color:"#FACC15"}}>Pagamento pendente</p>}
                     <p>Id venda: {item.venda.id}</p>
                     </div>
                     <p>Pedido Id: {item.venda.pedido_id}</p>
@@ -175,7 +177,7 @@ useEffect(() => {
                 <div style={{display:"flex",paddingTop:"20px"}}>
                 
                 </div>
-                <div style={{display:"flex",backgroundColor:"#111111",border:"1px solid grey",borderRadius:"6px",padding:"20px",alignItems:"center",gap:"20px"}}>
+                <div style={{cursor:"pointer",display:"flex",backgroundColor:"#111111",border:"1px solid grey",borderRadius:"6px",padding:"20px",alignItems:"center",gap:"20px"}}>
                 <img src="/images/user-blue.png" style={{width:"30px",height:"30px"}}/>
                 <div>
                 <p style={{color:"#f1f1f1"}}>ID comprador: {item.venda.id_comprador}</p>
@@ -186,7 +188,11 @@ useEffect(() => {
                 
                 </div>
                 
-                )})}
+                )}): <div style={{display:"flex",flexDirection:"column",padding:"20px",alignItems:"center"}}>
+                        <h2>Aqui aparecerá suas vendas quando você vender um produto</h2>
+                        <img src="/images/trend.png" style={{marginTop:"20px",width:"200px",height:"200px"}}/>
+                        <button onClick={() => {navigate("/minha-conta/vendas/anunciar")}} style={{marginTop:"20px",backgroundColor:"#111111",border:"none",borderRadius:"6px",color:"#ffffff",width:"100%",height:"40px"}}>Anuncie um novo produto</button>
+                    </div>}
                 </div>
             </div>
             

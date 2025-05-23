@@ -57,6 +57,7 @@
     background-color: #111111;
     color:#F5F5F5;
     border-radius: 6px;
+    cursor:pointer
 }
 
 .titulo-forma-entrega{
@@ -245,6 +246,7 @@
     font-weight: bold;
     margin-top: 20px;
     border-radius: 12px;
+    cursor:pointer
 }
 
 .container-pagamento-finalizado{

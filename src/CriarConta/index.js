@@ -57,8 +57,8 @@ function CriarConta(){
         <input className="input-email-senha" placeholder = "Email" type = "email" required onChange={(e) => setEmail(e.target.value)}></input>
         <label htmlFor="senha">Senha:</label>
         <input className="input-email-senha" placeholder = "Senha" required onChange={(e) => setSenha(e.target.value)}></input>
-        <button className="botao-entrar" type="submit">Cadastrar</button>
-         <button className="botao-entrar" onClick={handleBack}>Voltar</button>
+        <button style={{cursor:"pointer"}} className="botao-entrar" type="submit">Cadastrar</button>
+         <button style={{cursor:"pointer"}} className="botao-entrar" onClick={handleBack}>Voltar</button>
         </div>
         </form>
        

@@ -56,9 +56,9 @@ function EsqueciSenha() {
                     {mostrarEmailNaoEnviado && (
                         <div><p>Ocorreu um erro, o email não foi enviado ❌</p></div>
                     )}
-                    <button className="botao-entrar" type="submit">Enviar email</button>
+                    <button style={{cursor:"pointer"}}className="botao-entrar" type="submit">Enviar email</button>
                     
-                    <button className="botao-entrar" onClick={() => handleVoltar()}>Voltar</button>
+                    <button style={{cursor:"pointer"}} className="botao-entrar" onClick={() => handleVoltar()}>Voltar</button>
                 </div>
                 </form>
                 

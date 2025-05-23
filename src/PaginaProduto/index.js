@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import './styles.css';
 import { useState,useEffect } from 'react';
 import axios from 'axios';
@@ -16,6 +16,8 @@ import CardAnuncio from '../componentes/card-anuncio/index.js';
 import CardAnuncioPaginaProduto from '../componentes/card-anuncio-pagina-produto/index.js';
 
 function PaginaProduto(){
+
+    const navigate = useNavigate();
 
     const cards = [{titulo:"CASHBACK ELECTROLUX",
         logo:"/images/html-5.png",
@@ -180,14 +182,14 @@ function PaginaProduto(){
             console.log(produtoBuscado);
             setProduto(produtoBuscado);
             
-            setImagemSelecionada(produtoBuscado.imagens[0] || null);
-            setCorSelecionada(produtoBuscado.cor?.[0].id || null );
-            setMaterialSelecionado(produtoBuscado?.materiais?.[0].id ||  null );
-            setVoltagemSelecionada(produtoBuscado?.voltagens?.[0].id || null);
-            setGeneroSelecionado(produtoBuscado?.generos?.[0].id || null);
-            setTamanhoSelecionado(produtoBuscado?.tamanhos?.[0].id || null);
-            setEstampaSelecionada(produtoBuscado?.estampas?.[0].id || null);
-            setPesoSelecionado(produtoBuscado?.pesos?.[0].id || null);
+            setImagemSelecionada(produtoBuscado?.imagens[0] || null);
+            setCorSelecionada(produtoBuscado?.cor?.[0]?.id || null );
+            setMaterialSelecionado(produtoBuscado?.materiais?.[0]?.id ||  null );
+            setVoltagemSelecionada(produtoBuscado?.voltagens?.[0]?.id || null);
+            setGeneroSelecionado(produtoBuscado?.generos?.[0]?.id || null);
+            setTamanhoSelecionado(produtoBuscado?.tamanhos?.[0]?.id || null);
+            setEstampaSelecionada(produtoBuscado?.estampas?.[0]?.id || null);
+            setPesoSelecionado(produtoBuscado?.pesos?.[0]?.id || null);
 
             setDimensoesSelecionada(produtoBuscado?.dimensoes?.[0].id ||  null);
             setSelecoes({
@@ -198,13 +200,12 @@ function PaginaProduto(){
                 tamanhos: produtoBuscado.tamanhos?.[0]?.valor,
                 estampas: produtoBuscado.estampas?.[0]?.valor,
                 pesos: produtoBuscado?.pesos?.[0]?.valor && produtoBuscado?.pesos?.[0]?.unidade 
-           ? `${produtoBuscado.pesos[0].valor} ${produtoBuscado.pesos[0].unidade}` 
+           ? `${produtoBuscado?.pesos[0]?.valor} ${produtoBuscado?.pesos[0]?.unidade}` 
            : undefined,
                 dimensoes: produtoBuscado?.dimensoes?.[0]?.largura && produtoBuscado?.dimensoes?.[0]?.altura && produtoBuscado?.dimensoes?.[0]?.comprimento
-               ? `${produtoBuscado.dimensoes[0].largura} ${produtoBuscado.dimensoes[0].unidade} x ${produtoBuscado.dimensoes[0].altura} ${produtoBuscado.dimensoes[0].unidade} x ${produtoBuscado.dimensoes[0].comprimento} ${produtoBuscado.dimensoes[0].unidade}` 
+               ? `${produtoBuscado?.dimensoes[0]?.largura} ${produtoBuscado.dimensoes[0].unidade} x ${produtoBuscado?.dimensoes[0]?.altura} ${produtoBuscado?.dimensoes[0]?.unidade} x ${produtoBuscado?.dimensoes[0]?.comprimento} ${produtoBuscado?.dimensoes[0]?.unidade}` 
                : undefined,
               });
-        
         if(cep !== "Insira seu cep"){
          const respostaPrazoPreco = await axios.post(
             `http://localhost:5000/calcular-prazo-preco`,
@@ -216,7 +217,7 @@ function PaginaProduto(){
                 withCredentials: true
             }
         );
-        console.log(respostaPrazoPreco.data);
+           
             setPrazo(respostaPrazoPreco.data.prazoEmDias);
             setValorFrete(respostaPrazoPreco.data.precoEnvio);
             setLocalidade(respostaPrazoPreco.data.localidade);
@@ -370,7 +371,7 @@ function PaginaProduto(){
                         <p>Nossa loja garante sua compra <a href="#">Saiba mais</a></p>
                         <p>R$ {produto.produto_preco}</p>
                         <p>{produto.produto_parcelas_máximas}x de R${calcularPrecoParcelado(produto.produto_preco_parcelado,produto.produto_parcelas_máximas)}</p>
-                        <p>ou R$<strong className="paragrafo-preco-produto">{produto.produto_preco_pix}</strong> no Pix</p>
+                        {produto.produto_preco_pix ? <p>ou R$<strong className="paragrafo-preco-produto">{produto.produto_preco_pix}</strong> no Pix</p>: ""}
                         <div className="container-cartao">
                             <div className="secao-container-cartao">
                             <a href="#">Cartão de crédito</a>
@@ -541,7 +542,19 @@ function PaginaProduto(){
                                             </div>
                             
                         <div className="container-botoes">
-                        <button className="botao-comprar-agora"><img src="/images/shopping-bag.png" className="imagem-bolsa"/>Comprar agora</button>
+                        <button onClick={() => {adicionarAoCarrinho(
+    id,
+    quantidadeSelecionada,
+    corSelecionada || (produto.cor?.[0]?.id || null),
+    voltagemSelecionada || (produto.voltagens?.[0]?.id || null),
+    dimensoesSelecionada || (produto.dimensoes?.[0]?.id || null),
+    pesoSelecionado || (produto.pesos?.[0]?.id || null),
+    generoSelecionado || (produto.generos?.[0]?.id || null),
+    estampaSelecionada || (produto.estampas?.[0]?.id || null),
+    tamanhoSelecionado || (produto.tamanhos?.[0]?.id || null),
+    materialSelecionado || (produto.materiais?.[0]?.id || null),
+    produto.frete_selecionado
+  );navigate("/carrinho")}} className="botao-comprar-agora"><img src="/images/shopping-bag.png" className="imagem-bolsa"/>Comprar agora</button>
                         <button className="botao-adicionar-carrinho" onClick={ () => {console.log(produto
 );adicionarAoCarrinho(
     id,
@@ -553,7 +566,8 @@ function PaginaProduto(){
     generoSelecionado || (produto.generos?.[0]?.id || null),
     estampaSelecionada || (produto.estampas?.[0]?.id || null),
     tamanhoSelecionado || (produto.tamanhos?.[0]?.id || null),
-    materialSelecionado || (produto.materiais?.[0]?.id || null)
+    materialSelecionado || (produto.materiais?.[0]?.id || null),
+    produto.frete_selecionado
   );setUltimoProdutoAtualizado(produto);abrirModalCarrinho() }}><img src="/images/carrinho-de-compras.png" className="imagem-carrinho-botao"/>Adicionar ao carrinho</button>
                         <div className="card-cep">
                             <div className="container-imagem-cep">
@@ -614,7 +628,7 @@ function PaginaProduto(){
                         <p className="texto-prazo">Os prazos de entrega são contabilizados a partir da confirmação do pagamento e podem sofrer variações caso haja a compra de mais de uma unidade do mesmo produto.</p>
                         </div>
                         </div>
-                        <p className="preco-frete"> {valorFrete === null ? "Indisponível" : `R$ ${valorFrete}`}</p> 
+                        {produto.frete_selecionado === "frete-gratis" ? <p style={{color:"green"}} className="preco-frete">Frete grátis</p> : <p className="preco-frete"> {valorFrete === null ? "Indisponível" : `R$ ${valorFrete}`}</p>  }
                                             
                         </div>
                         

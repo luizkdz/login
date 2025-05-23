@@ -11,7 +11,7 @@ import PaginaMinhaConta from "../PaginaMinhaConta/index.js";
 import PaginaEnderecos from "../PaginaEnderecos/index.js";
 import PaginaMeusPedidos from "../PaginaMeusPedidos/index.js";
 import PaginaDetalhesPedido from "../PaginaDetalhesPedido/index.js";
-import PaginaVendas from "../PaginaVendas/index.js";
+import PaginaVendas from "../PaginaResumoVendas/index.js";
 import PaginaAnunciarProduto from "../PaginaAnunciarProduto/index.js";
 import PaginaTodasAsVendas from "../PaginaTodasAsVendas/index.js";
 

@@ -151,6 +151,10 @@ function Footer() {
             <a href="https://www.flaticon.com/free-icons/price" title="price icons">Price icons created by Freepik - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/right-chevron" title="right chevron icons">Right chevron icons created by th studio - Flaticon</a>
             <a href="https://www.flaticon.com/free-icons/megaphone" title="megaphone icons">Megaphone icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/increase" title="increase icons">Increase icons created by Canticons - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/sales" title="sales icons">Sales icons created by Flat Icons - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/house" title="house icons">House icons created by Freepik - Flaticon</a>
+            <a href="https://www.flaticon.com/free-icons/magnifying-glass" title="magnifying glass icons">Magnifying glass icons created by Creative Stall Premium - Flaticon</a>
             </div>
         </footer>
     );

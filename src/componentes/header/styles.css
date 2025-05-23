@@ -80,9 +80,9 @@
 /* Ícone da lupa */
 .icone-lupa {
     position: absolute;
-    right: 0px; 
-    width: 70px;
-    height: 40px;
+    right: 10px; 
+    width: 25px;
+    height: 25px;
     cursor: pointer;
 }
 

@@ -43,10 +43,9 @@ function CardProdutoSalvo({item,precoTotal,precoTotalPix,adicionarItemSalvo,excl
                     </div>
                     <div className="container-preco-preco-pix-desconto">
                         <div className="container-preco-desconto">
-                        <p style = {{fontSize: "12px", color:`#00a650`}}>{calcularDesconto(item.desconto)}</p>
-                        <p style = {{fontSize: "12px", textDecoration: "line-through"}}>R${precoTotal}</p>
+                        
                         </div>
-                        <p style={{fontSize:"20px",marginLeft:"10px"}}>R${precoTotalPix.toFixed(2)}</p>
+                        <p style={{fontSize:"20px",marginLeft:"10px"}}>R${precoTotal}</p>
                         
                     </div>
                     </div>

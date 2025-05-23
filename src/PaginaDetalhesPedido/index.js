@@ -3,10 +3,11 @@ import Footer from '../componentes/footer';
 import Header from '../componentes/header';
 import './styles.css';
 import MenuLateral from '../componentes/menu-lateral';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+    
 function PaginaDetalhesPedido(){
-
+    const navigate = useNavigate();
     const [menuHover,setMenuHover] = useState(false);
     const {idPedido} = useParams();
 
@@ -59,7 +60,7 @@ function PaginaDetalhesPedido(){
                 <div style={{display:"flex",margin:"0 auto",flexDirection:"column",padding:"20px"}}>
                 <div style={{display:"flex",justifyContent:"space-between"}}>
                 <h2>Detalhes do pedido</h2>
-                <button style={{backgroundColor:"#111111",color:"#ffffff", border:"2px solid #111111",borderRadius:"6px",fontSize:"20px",padding:"5px",display:"flex",gap:"10px",alignItems:"center"}}><img src="/images/seta-para-tras.png" style={{width:"25px",height:"25px"}}/>Voltar</button>
+                <button onClick={() => navigate("/meus-pedidos")} style={{cursor:"pointer",backgroundColor:"#111111",color:"#ffffff", border:"2px solid #111111",borderRadius:"6px",fontSize:"20px",padding:"5px",display:"flex",gap:"10px",alignItems:"center"}}><img src="/images/seta-para-tras.png" style={{width:"25px",height:"25px"}}/>Voltar</button>
                 </div>
                     
                    <div className="card-meus-pedidos">
@@ -140,7 +141,7 @@ function PaginaDetalhesPedido(){
                     <p>Total:</p>
                     <p>R${pedido.total?.toFixed(2)}</p>
                     </div>
-                    <div onClick={() => {setMostrarDetalhesPagamentoEnvio(!mostrarDetalhesPagamentoEnvio)}}style={{display:"flex",alignItems:"center",gap:"10px"}}>
+                    <div onClick={() => {setMostrarDetalhesPagamentoEnvio(!mostrarDetalhesPagamentoEnvio)}}style={{cursor:"pointer",display:"flex",alignItems:"center",gap:"10px"}}>
                     <p style={{color:"#3483fa"}}>Detalhes do pagamento e envio</p>
                     
                     <img src="/images/setinha-dropdown-azul.png" style={{width:"16px",height:"16px"}}/>

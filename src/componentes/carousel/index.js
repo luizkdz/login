@@ -63,7 +63,7 @@ function Carousel({produtos: produtosProp, setProdutos :setProdutosProp,itensPas
               <p className="nome-produto">{item.nome.length > 20 ? item.nome.slice(0,17) + "..." : item.nome}</p>
               <p>R$ {item.preco}</p>
               <p className="preco-parcelado">{item.parcelas_máximas}x de R$ {calcularPrecoParcelado(item.preco_parcelado,item.parcelas_máximas)}</p>
-              <p>ou R$<strong>{item.preco_pix}</strong> no Pix</p>
+              {item.preco_pix ? <p>ou R$<strong>{item.preco_pix}</strong> no Pix</p> : ""}
               <p>{item.entrega}</p>
               
             </div>

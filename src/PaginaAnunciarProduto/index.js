@@ -3,10 +3,11 @@ import Footer from '../componentes/footer';
 import Header from '../componentes/header';
 import './styles.css';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function PaginaAnunciarProduto(){
     const [nomeProduto,setNomeProduto] = useState("");
-
+    const navigate = useNavigate();
     const [cor,setCor] = useState("");
     const [material,setMaterial] = useState("");
     const [dimensao,setDimensao] = useState("");
@@ -43,14 +44,14 @@ function PaginaAnunciarProduto(){
     const [erroCep,setErroCep] = useState("");
     const [precoProduto,setPrecoProduto] = useState("");
     const [mostrarMaisInformacoes, setMostrarMaisInformacoes] = useState(false);
-    const [condicaoProduto, setCondicaoProduto] = useState("");
+    const [condicaoProduto, setCondicaoProduto] = useState(1);
     const [freteSelecionado, setFreteSelecionado] = useState("frete-gratis");
 
     const [step,setStep] = React.useState(1);
     const isPoppingState = useRef(false);
 
-    const [unidadeDimensoes, setUnidadeDimensoes] = useState("CM");
-    const [unidadePeso, setUnidadePeso] = useState("Kg");
+    const [unidadeDimensoes, setUnidadeDimensoes] = useState("cm");
+    const [unidadePeso, setUnidadePeso] = useState("kg");
     const [sugestoesCor, setSugestoesCor] = useState([]);
     const [mostrarSugestoesCor,setMostrarSugestoesCor] = useState(false);
     const [idCor, setIdCor] = useState("");
@@ -113,6 +114,8 @@ function PaginaAnunciarProduto(){
     const [erroPrecoProdutoEstoque, setErroPrecoProdutoEstoque] = useState(false);
 
     const [erroCepIncompleto, setErroCepIncompleto] = useState(false);
+
+    const [produtoId,setProdutoId] = useState("");
 
     const handleMostrarErroCep = () => {
         setErroCepIncompleto(true);
@@ -275,7 +278,7 @@ function PaginaAnunciarProduto(){
 
     const handleAnunciarProduto = async () => {
         try{
-            await axios.post("http://localhost:5000/anunciar-produto",{
+            const resposta = await axios.post("http://localhost:5000/anunciar-produto",{
                 nomeProduto,
                 cor:coresSelecionadas,
                 material:materiaisSelecionadas,
@@ -305,11 +308,14 @@ function PaginaAnunciarProduto(){
                 precoProdutoPix,
                 numeroParcelas:resultado[resultado.length -1].numeroParcelas,
                 precoTotalParcelado:resultado[resultado.length -1].valorTotal,
-                desconto:((Number(precoProduto) - Number(precoProdutoPix) ) /Number(precoProduto)) * 100,
+                desconto:(precoProdutoPix ? ((Number(precoProduto) - Number(precoProdutoPix) ) /Number(precoProduto)) * 100 : null),
                 numeroParcelasGratis,
                 taxaJurosAoMes,
-                
+                condicaoProduto,
+                freteSelecionado
             },{withCredentials:true})
+
+            setProdutoId(resposta.data);
         }
         catch(err){
             console.log(err);
@@ -590,21 +596,9 @@ function PaginaAnunciarProduto(){
             {step === 1 ? <div className="secao-anunciar-produto">
                 <h2>O que você está anunciando?</h2>
                 <div className="container-anunciar-produto">
-                <div onClick={() => {handleNext()}} className="card-anunciar-produto">
+                <div style={{marginTop:"20px",cursor:"pointer",}}onClick={() => {handleNext()}} className="card-anunciar-produto">
                     <img src="/images/sneakers-pagina-anunciar.png" className="imagem-card-anunciar-produto"/>
                     <p>Produtos</p>
-                </div>
-                <div className="card-anunciar-produto">
-                    <img src="/images/car-pagina-anunciar.png" className="imagem-card-anunciar-produto"/>
-                    <p>Veículos</p>
-                </div>
-                <div className="card-anunciar-produto">
-                    <img src="/images/office-building-pagina-anunciar.png" className="imagem-card-anunciar-produto"/>
-                    <p>Imóveis</p>
-                </div>
-                <div className="card-anunciar-produto">
-                    <img src="/images/help-desk-pagina-anunciar.png" className="imagem-card-anunciar-produto"/>
-                    <p>Serviços</p>
                 </div>
                 </div>
                 
@@ -1045,14 +1039,14 @@ function PaginaAnunciarProduto(){
                 <div style={{display:"flex",alignItems:"center",gap:"20px"}}>
                 <div style={{}} className="card-informacoes-condicao-produto-pagina-anunciar">
                 <h2>Qual é a condição do seu produto?</h2>
-                    <p onClick={() => {trocarImagem("/images/giftbox.png");setCondicaoProduto("novo")}}className="paragrafo-condicao-produto"style={{backgroundColor:condicaoProduto === "novo" ? "#f1f1f1" : "", padding:"20px"}}>Novo</p>
-                    <p onClick={() => {trocarImagem("/images/receiving.png");setCondicaoProduto("usado")}} className="paragrafo-condicao-produto" style={{backgroundColor:condicaoProduto === "usado" ? "#f1f1f1" : "",padding:"20px"}}>Usado</p>
-                    <p onClick={() => {trocarImagem("/images/product.png");setCondicaoProduto("recondicionado")}} className="paragrafo-condicao-produto" style={{backgroundColor:condicaoProduto === "recondicionado" ? "#f1f1f1" : "",padding:"20px"}}>Recondicionado</p>
-                    <p onClick={() => {trocarImagem("/images/exclusive.png");setCondicaoProduto("exclusivo")}} className="paragrafo-condicao-produto" style={{backgroundColor:condicaoProduto === "exclusivo" ? "#f1f1f1" : "",padding:"20px"}}>Exclusivo</p>
-                    <p onClick={() => {trocarImagem("/images/transport.png");setCondicaoProduto("importado")}} className="paragrafo-condicao-produto" style={{backgroundColor:condicaoProduto === "importado" ? "#f1f1f1" : "",padding:"20px"}}>Importado</p>
-                    <p onClick={() => {trocarImagem("/images/social-media.png");setCondicaoProduto("digital")}} className="paragrafo-condicao-produto" style={{backgroundColor:condicaoProduto === "digital" ? "#f1f1f1" : "",padding:"20px"}}>Digital</p>
-                    <p onClick={() => {trocarImagem("/images/personalized.png");setCondicaoProduto("personalizado")}} className="paragrafo-condicao-produto" style={{backgroundColor:condicaoProduto === "personalizado" ? "#f1f1f1" : "",padding:"20px"}}>Personalizado</p>
-                    <p onClick={() => {trocarImagem("/images/licensing.png");setCondicaoProduto("licenciado")}} className="paragrafo-condicao-produto" style={{backgroundColor:condicaoProduto === "licenciado" ? "#f1f1f1" : "", padding:"20px"}}>Licenciado</p>
+                    <p onClick={() => {trocarImagem("/images/giftbox.png");setCondicaoProduto(1)}}className="paragrafo-condicao-produto"style={{backgroundColor:condicaoProduto === 1 ? "#f1f1f1" : "", padding:"20px"}}>Novo</p>
+                    <p onClick={() => {trocarImagem("/images/receiving.png");setCondicaoProduto(2)}} className="paragrafo-condicao-produto" style={{backgroundColor:condicaoProduto === 2 ? "#f1f1f1" : "",padding:"20px"}}>Usado</p>
+                    <p onClick={() => {trocarImagem("/images/product.png");setCondicaoProduto(3)}} className="paragrafo-condicao-produto" style={{backgroundColor:condicaoProduto === 3 ? "#f1f1f1" : "",padding:"20px"}}>Recondicionado</p>
+                    <p onClick={() => {trocarImagem("/images/exclusive.png");setCondicaoProduto(4)}} className="paragrafo-condicao-produto" style={{backgroundColor:condicaoProduto === 4 ? "#f1f1f1" : "",padding:"20px"}}>Exclusivo</p>
+                    <p onClick={() => {trocarImagem("/images/transport.png");setCondicaoProduto(5)}} className="paragrafo-condicao-produto" style={{backgroundColor:condicaoProduto === 5 ? "#f1f1f1" : "",padding:"20px"}}>Importado</p>
+                    <p onClick={() => {trocarImagem("/images/social-media.png");setCondicaoProduto(6)}} className="paragrafo-condicao-produto" style={{backgroundColor:condicaoProduto === 6 ? "#f1f1f1" : "",padding:"20px"}}>Digital</p>
+                    <p onClick={() => {trocarImagem("/images/personalized.png");setCondicaoProduto(7)}} className="paragrafo-condicao-produto" style={{backgroundColor:condicaoProduto === 7 ? "#f1f1f1" : "",padding:"20px"}}>Personalizado</p>
+                    <p onClick={() => {trocarImagem("/images/licensing.png");setCondicaoProduto(8)}} className="paragrafo-condicao-produto" style={{backgroundColor:condicaoProduto === 8 ? "#f1f1f1" : "", padding:"20px"}}>Licenciado</p>
                       
                 </div>
                 <img src={imagemCondicaoProduto} style={{width:"100px",height:"100px",objectFit: 'cover',
@@ -1426,20 +1420,17 @@ function PaginaAnunciarProduto(){
                         </div>
                         <div style={{display:"flex",justifyContent:"space-between"}}>
                         <p>Frete</p>
-                        <p>{freteSelecionado === "frete-gratis" ? "Grátis" : "Calculado no checkout"}</p>
+                        <p style={{color:freteSelecionado === "frete-gratis" ? "green" : ""}}>{freteSelecionado === "frete-gratis" ? "Grátis" : "Calculado no checkout"}</p>
                         </div>
                         {precoProdutoPix ? <div style={{display:"flex",justifyContent:"space-between"}}>
                         <p>Preço no Pix</p>
                         <p style={{color:"green"}}>R${Number(precoProdutoPix).toFixed(2)}</p>
                         </div>: ""}
-                        {resultado[resultado.length - 1].numeroParcelas && resultado[resultado.length - 1].valorParcela ? <div style={{display:"flex",justifyContent:"space-between"}}>
-                        <p>Número de parcelas:</p>
-                        <p>{resultado[resultado.length - 1].numeroParcelas}x R${resultado[resultado.length - 1].valorParcela}</p>
-                        </div> : ""}
+                        
                         <div style={{display:"flex",justifyContent:"space-between"}} >
                         <p>Você recebe</p>
                         <div>
-                        <p style={{color:"#3b9e62",marginLeft:"13px"}}>Entre R$ {Number(precoProdutoPix).toFixed(2) || Number(precoProduto).toFixed(2)} - R${Number(precoProduto).toFixed(2)} </p>
+                        {precoProdutoPix && aceitaPix === "sim" ? <p style={{color:"#3b9e62",marginLeft:"13px"}}>Entre R$ {Number(precoProdutoPix).toFixed(2) || Number(precoProduto).toFixed(2)} - R${Number(precoProduto).toFixed(2)} </p> : <p style={{color:"#3b9e62"}}>R${Number(precoProduto).toFixed(2)}</p>}
                         {freteSelecionado === "frete-gratis" ? <p style={{color:"red"}}>- R$ Valor do frete</p> : ""}
                         </div>
                         </div>
@@ -1503,8 +1494,8 @@ function PaginaAnunciarProduto(){
                             </div>
                             
                             <p>{estoque ? `Estoque:${estoque} unidades` : ""}</p>
-                            <div style={{display:"flex",gap:"20px",alignItems:"center"}}>
-                            <p onClick={() => {handleMostrarMaisInformacoes()}} style={{color:"rgb(52, 131, 250)"}}>Mostrar mais informações</p><img src="/images/setinha-dropdown-azul.png" style={{width:"16px",height:"16px"}}/>
+                            <div onClick={() => {handleMostrarMaisInformacoes()}} style={{cursor:"pointer",display:"flex",gap:"20px",alignItems:"center"}}>
+                            <p  style={{color:"rgb(52, 131, 250)"}}>Mostrar mais informações</p><img src="/images/setinha-dropdown-azul.png" style={{width:"16px",height:"16px"}}/>
                             </div>
                             <div style={{transition: 'opacity 0.3s ease', opacity: fade ? 1 : 0}}>
                             {mostrarMaisInformacoes ? <div>
@@ -1524,7 +1515,7 @@ function PaginaAnunciarProduto(){
                             else{
                                 handleMostrarErroCep();
                             }
-                            }} style={{color:"white",borderRadius:"6px",backgroundColor:"#111111",border:"none",width:"100%",height:"50px",fontWeight:"bold"}}>Anunciar</button>
+                            }} style={{cursor:"pointer",color:"white",borderRadius:"6px",backgroundColor:"#111111",border:"none",width:"100%",height:"50px",fontWeight:"bold"}}>Anunciar</button>
                         </div>
                     </div>
                        
@@ -1562,8 +1553,8 @@ function PaginaAnunciarProduto(){
                         <p>{nomeProduto}</p>
                     </div>
                     <div style={{display:"flex",gap:"20px"}}>
-                    <button onClick={() => {handleNext()}} style={{color:"white",borderRadius:"6px",backgroundColor:"#3483fa",border:"none",width:"200px",height:"50px"}}>Ver anúncio</button>
-                    <button onClick={() => {handleNext()}} style={{borderRadius:"6px",color:"#3483fa",border:"none",width:"200px",height:"50px"}}>Ir para vendas</button>
+                    <button onClick={() => {navigate(`/produto/${produtoId}`)}} style={{cursor:"pointer",color:"white",borderRadius:"6px",backgroundColor:"#3483fa",border:"none",width:"200px",height:"50px"}}>Ver anúncio</button>
+                    <button onClick={() => {navigate(`/minha-conta/vendas`)}} style={{cursor:"pointer",borderRadius:"6px",color:"#3483fa",border:"none",width:"200px",height:"50px"}}>Ir para vendas</button>
                     </div>
                      
                      </div>

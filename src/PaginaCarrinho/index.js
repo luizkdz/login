@@ -10,11 +10,12 @@ import CardCarrinho from '../componentes/card-carrinho/index.js';
 import CardProdutoSalvo from '../componentes/card-produto-salvo/index.js';
 import InputProdutoAlterar from '../componentes/inputProdutoAlterar/index.js';
 import { useCep } from '../context/CepContext.js';
+import { useNavigate } from 'react-router-dom';
 
     
 
 function PaginaCarrinho() {
-
+    const navigate = useNavigate();
     const [mostrarProdutosSalvos,setMostrarProdutosSalvos] = useState(false);
     const [itensSalvos, setItensSalvos] = useState([]);
     const [selecionarAlterar, setSelecionarAlterar] = useState(false);
@@ -357,13 +358,13 @@ useEffect(() => {
                 <p>Frete:</p>
                 <p>R${calcularFreteTotal().toFixed(2)}</p>
                 </div>
-                <p style={{fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}} >Inserir código de cupom</p>
+                <p style={{cursor:"pointer",fontSize:"14px",color:"var(--andes-color-blue-500, #3483fa)"}} >Inserir código de cupom</p>
                 <div className="container-total">
                 <p>Total</p>
                 <p>R${precoTotalMaisFrete.toFixed(2)}</p>
                 </div>
                 <div className="container-botao">
-                    <button>Continuar a Compra</button>
+                    <button style={{cursor:"pointer"}} onClick={() => {navigate("/checkout")}}>Continuar a Compra</button>
                 </div>
             </div> : <div className="card-resumo-da-compra">
                 <div className="titulo-resumo-da-compra">

@@ -5,8 +5,12 @@ import MenuLateral from '../componentes/menu-lateral';
 import Chart from 'chart.js/auto';
 import './styles.css';
 import axios from 'axios';
+import { isNumber } from 'chart.js/helpers';
+import { useNavigate } from 'react-router-dom';
 
 function PaginaVendas(){
+
+    const navigate = useNavigate();
         const [menuHover,setMenuHover] = useState(false);
         const [vendas,setVendas] = useState([]);
 
@@ -29,14 +33,18 @@ const fetchVendas = async () => {
 }
 
 const totalVendas = vendas.length;
-const totalReceita = vendas.reduce((acc,venda)=> acc + venda.itens.reduce((item) => {return Number(item.preco_unitario * item.quantidade)}),0,0);
+const totalReceita = vendas.reduce((acc, venda) => 
+  acc + venda.itens.reduce((itemAcc, item) => 
+    itemAcc + Number(item.preco_unitario) * Number(item.quantidade), 0
+  )
+, 0);
 const clientesUnicos = new Set(vendas.map((item) => item.venda.id_comprador));
 const totalClientes = clientesUnicos.size;
 const mediaClientes = ((vendas.length)/totalClientes/(vendas.length));
 const clientesRepetidos = vendas.length - (vendas.length/totalClientes);
 const ticketMedio = (
   vendas.reduce((acc, venda) => acc + venda.venda.total, 0) / vendas.length
-).toFixed(2);
+);
 
     useEffect(() => {
         const ctx = document.getElementById('meuGrafico').getContext('2d');
@@ -223,7 +231,7 @@ const ticketMedio = (
                 <h2>Vendas</h2>
                 
                 </div>
-                <div style={{display:"flex",justifyContent:"space-between"}}>
+                <div style={{display:"flex",justifyContent:"space-between",gap:"50px"}}>
                 <div style={{display:"flex",gap:"20px"}}>
                 <div className="card-dashboard-vendas">
                     <h3>Total de vendas</h3>
@@ -231,7 +239,7 @@ const ticketMedio = (
                 </div>
                 <div className="card-dashboard-vendas">
                     <h3>Ticket Médio</h3>
-                    <p>R${ticketMedio}</p>
+                    <p>{!isNaN(ticketMedio) ? `R$${ticketMedio}` : `R$0.00`}</p>
                 </div>
                 <div className="card-dashboard-vendas">
                     <h3>Clientes</h3>
@@ -239,7 +247,7 @@ const ticketMedio = (
                 </div>
                 <div className="card-dashboard-vendas">
                     <h3>Receita</h3>
-                    <p>R${totalReceita.toFixed(2)}</p>
+                    <p>R${totalReceita}</p>
                 </div>
                 
                 </div>
@@ -261,13 +269,13 @@ const ticketMedio = (
                 </div>
                 <div style={{display:"flex",justifyContent:"space-between"}}>
                 <div style={{width:"200px",padding:"10px",alignItems:"start"}}className="card-dashboard-vendas">
-                    <div style={{display:"flex",alignItems:"center",gap:"10px",paddingBottom:"10px",paddingTop:"10px"}}><h3>Saldo:</h3><p style={{fontSize:"18px"}}>R${totalReceita.toFixed(2)}</p></div>
+                    <div style={{display:"flex",alignItems:"center",gap:"10px",paddingBottom:"10px",paddingTop:"10px"}}><h3>Saldo:</h3><p style={{fontSize:"18px"}}>R${totalReceita}</p></div>
                     
-                    <p style={{borderTop:"1px solid grey",color:"rgb(0, 134, 255)"}}>Ver na plataforma</p>
+                    <p style={{cursor:"pointer",borderTop:"1px solid grey",color:"rgb(0, 134, 255)"}}>Ver na plataforma</p>
                 </div>
                 <div style={{display:"flex",gap:"260px",padding:"20px"}}>
-                    <button style={{backgroundColor:"rgb(0, 134, 255)",border:"none",borderRadius:"6px",color:"#ffffff",width:"200px",height:"40px",fontWeight:"bold"}}>Novo anúncio</button>
-                    <button style={{backgroundColor:"rgb(0, 134, 255)",border:"none",borderRadius:"6px",color:"#ffffff",width:"200px",height:"40px",fontWeight:"bold"}}>Meus anúncios</button>
+                    <button onClick={() => {navigate("/minha-conta/vendas/anunciar")}} style={{cursor:"pointer",backgroundColor:"rgb(0, 134, 255)",border:"none",borderRadius:"6px",color:"#ffffff",width:"200px",height:"40px",fontWeight:"bold"}}>Novo anúncio</button>
+                    <button style={{cursor:"pointer",backgroundColor:"rgb(0, 134, 255)",border:"none",borderRadius:"6px",color:"#ffffff",width:"200px",height:"40px",fontWeight:"bold"}}>Meus anúncios</button>
                 </div>
                 </div>
                 <div style={{display:"flex"}}>
@@ -280,10 +288,10 @@ const ticketMedio = (
                 <div style={{display:menuHover ? "none" : ""}}>
                 <h3>Últimas vendas</h3>
                 <div style={{display:"flex",flexDirection:"column",gap:"20px"}}>
-                {vendas.slice(-2).reverse().map((item,index) => {return (
+                {vendas.length > 0 ? vendas.slice(-2).reverse().map((item,index) => {return (
                     <div className="card-vendas-produtos">
                     <div style={{display:"flex",justifyContent:"space-between"}}>
-                    <p style={{color:"green"}}>{item.venda.status_venda === "pago" ? "Pagamento Aprovado" : "Pagamento pendente"}</p>
+                    <p style={{color:item.venda.status_venda === "pago" ? "green" : "#FACC15"}}>{item.venda.status_venda === "pago" ? "Pagamento Aprovado" : "Pagamento pendente"}</p>
                     <p>{item.venda.pedido_id}</p>
                     </div>
                     <p style={{color:"rgb(0, 134, 255)"}}>{item.itens[0].nome}</p>
@@ -293,7 +301,7 @@ const ticketMedio = (
                     <p>Quantidade:</p>
                     <p>{item.itens[0].quantidade}</p>
                     </div>
-                <button style={{backgroundColor:"#111111",border:"none",borderRadius:"6px",color:"#ffffff",width:"100%",height:"40px"}}>Ver detalhes</button>
+                <button onClick={() => {navigate("/minha-conta/vendas")}} style={{cursor:"pointer",backgroundColor:"#111111",border:"none",borderRadius:"6px",color:"#ffffff",width:"100%",height:"40px"}}>Ver detalhes</button>
                 </div>
                 <div style={{display:"flex",paddingTop:"20px"}}>
                 {item.itens.length > 1 ? 
@@ -302,12 +310,16 @@ const ticketMedio = (
                 
                 </div>
                 </div>
-                )})}
+                )}) : <div style={{display:"flex",flexDirection:"column",alignItems:"center",padding:"20px"}}>
+                    <h3>Aqui mostrará as duas últimas vendas realizadas</h3>
+                    <img src="/images/sales.png" style={{width:"100px",height:"100px"}}/>
+                    <button onClick={() => {navigate("/minha-conta/vendas/anunciar")}} style={{marginTop:"20px",backgroundColor:"rgb(0, 134, 255)",border:"none",borderRadius:"6px",color:"#ffffff",width:"100%",height:"40px"}}>Anuncie um novo produto</button>
+                    </div>}
                 
-                <div style={{display:"flex",alignItems:"center",gap:"5px"}}>
+                {vendas.length > 0 ? <div onClick={() => {navigate("/minha-conta/vendas")}} style={{cursor:"pointer",display:"flex",alignItems:"center",gap:"5px"}}>
                 <p style={{color:"rgb(0, 134, 255)"}}>Ver todas as vendas</p>
                 <img src="/images/right-chevron-blue.png" style={{width:"16px",height:"16px"}}/>
-                </div>
+                </div> : ""}
                 
                 </div>
                 </div>

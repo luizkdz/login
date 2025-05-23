@@ -1,9 +1,12 @@
+import { useNavigate } from 'react-router-dom';
 import Footer from '../componentes/footer';
 import Header from '../componentes/header';
 import './styles.css'
 
 
 function PaginaMinhaConta(){
+
+    const navigate = useNavigate();
     return(
         <div className="pagina-toda-minha-conta">
             <Header props="p"/>
@@ -19,9 +22,9 @@ function PaginaMinhaConta(){
                             <h2>Seus pedidos</h2>
                             <img src= "/images/cube-blue.png" style={{width:"40px",height:"40px"}}/>
                         </div>
-                        <button style={{backgroundColor:"rgb(0, 134, 255)",padding:"10px",borderRadius:"6px",border:"none",color:"white"}}>Acompanhe seus pedidos</button>
+                        <button onClick={() => {navigate("/meus-pedidos")}} style={{cursor:"pointer",backgroundColor:"rgb(0, 134, 255)",padding:"10px",borderRadius:"6px",border:"none",color:"white"}}>Acompanhe seus pedidos</button>
                         <div style={{marginTop:"10px"}}>
-                        <p className="paragrafo-hover-minha-conta" style={{fontSize:"14px"}}>Imprimir 2ª via do boleto bancário</p>
+                        
                         </div>
                     </div>
                     <div className="card-pedidos">
@@ -31,10 +34,7 @@ function PaginaMinhaConta(){
                         </div>
 
                         <div style={{marginTop:"10px"}}>
-                        <p className="paragrafo-hover-minha-conta" style={{fontSize:"14px"}}>Solicitar troca e devoluções</p>
-                        <p className="paragrafo-hover-minha-conta" style={{fontSize:"14px"}}>Central de atendimento</p>
-                        <p className="paragrafo-hover-minha-conta" style={{fontSize:"14px"}}>Serviços gerais</p>
-                        <p className="paragrafo-hover-minha-conta" style={{fontSize:"14px"}}>Favoritos</p>
+                        
                         </div>
                     </div>
                     <div className="card-pedidos">
@@ -44,7 +44,8 @@ function PaginaMinhaConta(){
                         </div>
                         
                         <div style={{marginTop:"10px"}}>
-                        <p className="paragrafo-hover-minha-conta" style={{fontSize:"14px"}}>Endereços de entrega e cartões de crédito</p>
+                        <p onClick={() => {navigate("/minha-conta/enderecos")}} className="paragrafo-hover-minha-conta" style={{fontSize:"14px"}}>Endereços de entrega</p>
+                        <p className="paragrafo-hover-minha-conta" style={{fontSize:"14px"}}>Cartões de crédito</p>
                         </div>
                     </div>
                     <div className="card-pedidos">
@@ -55,10 +56,10 @@ function PaginaMinhaConta(){
                         
                         <div style={{marginTop:"10px"}}>
                         <p className="paragrafo-hover-minha-conta" style={{fontSize:"14px"}}>Alterar seus dados cadastrais</p>
-                        <p className="paragrafo-hover-minha-conta" style={{fontSize:"14px"}}>Alterar email ou telefone</p>
+                        <p className="paragrafo-hover-minha-conta" style={{fontSize:"14px"}}>Alterar email</p>
                         <p className="paragrafo-hover-minha-conta" style={{fontSize:"14px"}}>Alterar senha</p>
-                        <p className="paragrafo-hover-minha-conta" style={{fontSize:"14px"}}>Seus endereços de entrega</p>
-                        <p className="paragrafo-hover-minha-conta" style={{fontSize:"14px"}}>Gerenciar recebimento de mensagens por SMS ou e-mail</p>
+                        <p onClick={() => {navigate("/minha-conta/enderecos")}} className="paragrafo-hover-minha-conta" style={{fontSize:"14px"}}>Seus endereços de entrega</p>
+                       
                         </div>
                     </div>
                 </div>

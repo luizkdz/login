@@ -10,6 +10,7 @@ import { useCep } from "../context/CepContext";
 import ModalEditarEndereco from "../componentes/modalEditarEndereco";
 import ModalAdicionarEndereco from "../componentes/modalAdicionarEndereco";
 import {useStripe, useElements,CardNumberElement,CardExpiryElement,CardCvcElement} from '@stripe/react-stripe-js';
+import { useNavigate } from "react-router-dom";
 function PaginaEscolherFormaEntrega(){
 
     const [mostrarCardFormaEntrega, setMostrarCardFormaEntrega] = useState(false);
@@ -58,9 +59,18 @@ function PaginaEscolherFormaEntrega(){
     const [idPagamentoBoleto, setIdPagamentoBoleto] = useState("");
     const [precoTotalProdutos, setPrecoTotalProdutos] = useState(null);
     const [boletoPago, setBoletoPago] = useState("");
+    const [erroCartao, setErroCartao] = useState(false);
     const cartaoSelecionado = cartoesDeCreditoSalvos.find((item) => item.id === selecionarIdCartao);
-    
+    const navigate = useNavigate();
 
+    
+    const handleErroCartao = () => {
+        setErroCartao(true);
+        setTimeout(() => {
+            setErroCartao(false);
+        },3000)
+    }
+    
     const handleSimularPagarBoleto = async (boletoId) => {
         try{
             const resposta = await axios.post(`http://localhost:5000/confirmar-pagamento-boleto/${boletoId}`)
@@ -86,7 +96,7 @@ function PaginaEscolherFormaEntrega(){
 
     const calcularPrecoProdutos = () => {
         return carrinhoItens.reduce((soma, item) => {
-            return soma + Number(item.preco);
+            return soma + Number(item.preco) * Number(item.quantidade);
         },0)
     }
     
@@ -134,14 +144,17 @@ const adicionarCartaoStripe = async () => {
         })
         if(result.error){
             console.error("Erro ao salvar o cartão");
+            handleErroCartao();
         }
         else {
             console.log("Cartão salvo com sucesso");
+            handleBack();
         }
 
         const paymentMethodId = result.setupIntent.payment_method;
 
         await axios.post("http://localhost:5000/salvar-cartao-id",{paymentMethodId,nomeTitularCartao},{withCredentials:true});
+        
         
     }
     catch(err){
@@ -222,10 +235,10 @@ const handleStripeCartao = async () => {
             itens,
             metodoPagamento:selecionarOpcaoDePagamento,
             total:precoItensTotal,
-            enderecoLogradouro:enderecoEnvio.logradouro,
-            enderecoCidade:enderecoEnvio.cidade,
-            enderecoNumero:enderecoEnvio.numero,
-            enderecoComplemento:enderecoEnvio.complemento,
+            enderecoLogradouro:enderecoEnvio.logradouro || enderecoSelecionado.logradouro,
+            enderecoCidade:enderecoEnvio.cidade  || enderecoSelecionado.cidade,
+            enderecoNumero:enderecoEnvio.numero  || enderecoSelecionado.numero,
+            enderecoComplemento:enderecoEnvio.complemento  || enderecoSelecionado.complemento,
             enderecoEstado:estado,
             parcelas:numeroParcelas,
             valorParcelas:valorParcela,
@@ -260,8 +273,6 @@ const handleStripeBoleto = async () => {
 });
 const { clientSecret, boletoUrl } = await response.json();
 
-const result = await stripe.retrievePaymentIntent(clientSecret);
-
   setStatusPagamento("sucess");
   const respostaPedidoId = await handleConfirmarCompra();
 
@@ -289,10 +300,10 @@ const result = await stripe.retrievePaymentIntent(clientSecret);
             itens,
             metodoPagamento:selecionarOpcaoDePagamento,
             total:precoItensTotal,
-            enderecoLogradouro:enderecoEnvio.logradouro,
-            enderecoCidade:enderecoEnvio.cidade,
-            enderecoNumero:enderecoEnvio.numero,
-            enderecoComplemento:enderecoEnvio.complemento,
+            enderecoLogradouro:enderecoEnvio?.logradouro || enderecoSelecionado?.logradouro,
+            enderecoCidade:enderecoEnvio?.cidade || enderecoSelecionado?.cidade,
+            enderecoNumero:enderecoEnvio?.numero || enderecoSelecionado?.numero,
+            enderecoComplemento:enderecoEnvio?.complemento || enderecoSelecionado?.complemento,
             enderecoEstado:estado,
             parcelas:numeroParcelas,
             valorParcelas:valorParcela,
@@ -318,8 +329,8 @@ return true;
        try{
         
         const resposta = await axios.get(`http://localhost:5000/enderecos/${selecionarEnderecoEntrega}`,{withCredentials:true});
-        const enderecoEnvio = resposta.data;
-        
+        const enderecoEnvio = resposta.data
+        console.log(`eee`,enderecoEnvio);
         const itensParaEnviar = carrinhoItens.map((item) => { return ({
             nome:item.nome,
             quantidade:item.quantidade,
@@ -336,6 +347,7 @@ return true;
             pesos:`${item.pesos}${item.pesos_unidade}`,
             tamanhos:item.tamanhos,
             voltagens:`${item.voltagens}V`,
+            freteSelecionado:item.frete_selecionado
         })});
 
 
@@ -343,7 +355,8 @@ return true;
        const cartaoUsadoParaEnviar = cartaoSelecionado ? {numero:cartaoSelecionado.numero_mascarado,
         expiracao:cartaoSelecionado.data_expiracao} : null;
 
-
+        console.log(`ee`,enderecoEnvio);
+        console.log(`es`,enderecoSelecionado);
 
         const pedido = {
             itens:itensParaEnviar,
@@ -394,9 +407,8 @@ return true;
         try{
             const resposta = await axios.get(`http://localhost:5000/enderecos/${selecionarEndereco}`,{withCredentials:true});
             setEnderecoEnvio(resposta.data);
-            
             setSelecionarEnderecoEnvio(resposta.data.id_endereco);
-            
+            console.log(`idenrecoe`,resposta.data.id_endereco);
            
             carrinhoItens.map( async (item) => {
               const respostaCEP = await axios.post(`http://localhost:5000/calcular-prazo-preco`, {
@@ -424,8 +436,7 @@ return true;
 
         })
         setAtualizarEnderecoEscolhido(!enderecoEscolhido);
-            
-            setSelecionarEnderecoEntrega(resposta.data);
+            setSelecionarEnderecoEntrega(resposta.data.id_endereco);
         }
         catch(err){
             console.error("Não foi possivel carregar o endereço de envio");
@@ -452,12 +463,9 @@ return true;
             const enderecoFiltrado = resposta.data.filter((item) => {return item.padrao === 1});
             
             
-
-            
                 setSelecionarEnderecoEnvio(enderecoFiltrado[0].id_endereco);
-                
                 setSelecionarEnderecoEntrega(enderecoFiltrado[0].id_endereco);
-            
+               
             
             
             carrinhoItens.map( async (item) => {
@@ -503,7 +511,15 @@ return true;
         },3000)
     }
 
+    const [erroEndereco,setErroEndereco] = useState(false);
     
+    function handleErroEndereco() {
+        setErroEndereco(true);
+        setTimeout(() => {
+            setErroEndereco(false);
+        },3000)
+    }
+
     
 
     
@@ -587,7 +603,7 @@ return true;
             handleMostrarReviseEConfirme();
         }
         obterCarrinho();
-    }, [step]);
+    }, []);
 
     
 
@@ -604,7 +620,7 @@ return true;
     
       useEffect(() => {
         fetchEndereco();
-        
+        console.log("oi");
     },[carrinhoItens]);
     
 
@@ -614,12 +630,13 @@ return true;
 
     const handleNext = () => {
         setStep((prev) => prev + 1);
+        console.log(step + 1);
     };
     const handleBack = () => {
         setStep((prev) => prev - 1);
     };
 
-    const entregaConcluida = step === 3 || step === 4;
+    const entregaConcluida = step === 3 || step === 4 || ((step === 5) && (selecionarOpcaoDePagamento === "Cartao"));
 
     const imagemPagamento = entregaConcluida
   ? "/images/credit-card-pagina-entrega-azul.png"
@@ -690,7 +707,7 @@ const valorTotal = calcularPrecoTotal();
                             <p>{enderecoEnvio.logradouro} {enderecoEnvio.numero} {enderecoEnvio.complemento} -{enderecoEnvio.cidade} <br/> {enderecoEnvio.tipo_do_local}</p>
                             </div>
                             <p>R${calcularFreteTotal().toFixed(2)}</p>
-                        </div> : endereco.filter((item) => {return item.padrao === 1}).map((item) => {return (
+                        </div> : endereco.filter((item) => {return item.padrao === 1}).length > 0 ? endereco.filter((item) => {return item.padrao === 1}).map((item) => {return (
                             <div className="container-card-forma-entrega">
                             <input checked = {item.id_endereco === selecionarEnderecoEnvio} value={selecionarEnderecoEnvio} onChange={()=>{setSelecionarEnderecoEnvio(item.id_endereco);setSelecionarEnderecoEntrega(item.id_endereco)}} type="radio" className="input-radio-forma-entrega"/>
                             <div className="container-texto-forma-entrega">
@@ -699,14 +716,40 @@ const valorTotal = calcularPrecoTotal();
                             </div>
                             <p>R${calcularFreteTotal().toFixed(2)}</p>
                         </div>
-                        )})}
+                        )}) : <div style={{paddingTop:"10px",display:"flex",alignItems:"center",flexDirection:"column",gap:"20px"}}><img src="/images/house-endereco.png" style={{width:"100px",height:"100px"}}/><p style={{fontWeight:"bold"}}>Adicione um endereço padrão</p>
+                         <button onClick ={() => {navigate("/minha-conta/enderecos")}} style={{backgroundColor:"#111111",border:"none",borderRadius:"6px",color:"white",width:"100%",height:"40px"}}>Adicionar endereço padrão</button></div>}
                         <div className="container-alterar-endereco-pagina-forma-entrega">
-                            <a href="#" onClick={() => {handleNext();handleMostrarMeusEnderecos()}}>Alterar endereço ou escolher outro</a>
+                            {endereco.filter((item) => {return item.padrao === 1}).length > 0 ? <a href="#" onClick={() => {handleNext();handleMostrarMeusEnderecos()}}>Alterar endereço ou escolher outro</a>: ""}
                         </div>
                     </div>
-                    <button className="botao-continuar-forma-entrega" onClick={() => {setMostrarMeusEnderecos(false);handleNext();handleMostrarCardFormaEntrega();handleMostrarEnvioCard()}}>Continuar</button>
+                    <button className="botao-continuar-forma-entrega" onClick={() => {setMostrarMeusEnderecos(false);
+                    if(selecionarEndereco || selecionarEnderecoEnvio)
+                    {   
+                            handleNext()
+
+                    }
+                    else{
+                        handleErroEndereco();
+                    };handleMostrarCardFormaEntrega();handleMostrarEnvioCard()}}>Continuar</button>
                 </div>
                 )}
+                <div
+  style={{
+    position: "fixed",
+    bottom: erroEndereco ? "20px" : "-100px", // começa fora da tela
+    left: "50%",
+    transform: "translateX(-50%)",
+    backgroundColor: "#111111",
+    color: "#ffffff",
+    padding: "20px",
+    width: "600px",
+    borderRadius: "6px",
+    margin: "20px",
+    transition: "bottom 0.3s ease-in-out", // efeito suave
+  }}
+>
+  Selecione um endereço para continuar
+</div>
                 {step === 2 && mostrarMeusEnderecos ? <div style={{alignItems:"center"}}className="titulo-forma-entrega">
                     <p style={{fontSize:"24px"}}>Meus endereços</p>
                     <div style={{position:"relative"}}className="card-forma-entrega">
@@ -907,7 +950,7 @@ const valorTotal = calcularPrecoTotal();
                             
                             <div className="container-endereco-alterar-endereco">
                             <p style={{fontSize:"14px"}}>Entrega no endereço</p>
-                            <p style={{fontSize:"14px",color:"#3483fa"}}>Alterar endereço</p>
+                            <p style={{cursor:"pointer",fontSize:"14px",color:"#3483fa"}}>Alterar endereço</p>
                             </div>
                             </div>
                             </div>
@@ -1246,7 +1289,25 @@ const valorTotal = calcularPrecoTotal();
                             <img src={imagemCartao} style={{width:"250px",transition: "transform 0.6s",transitionDelay: "0.2s",transform: virarCartao ? "rotateY(180deg)" : "rotateY(0deg)",transformStyle: "preserve-3d",height:"250px"
                             }}/>
                             <button style={{position:"absolute"}}className="botao-continuar-forma-entrega" onClick={() => {adicionarCartaoStripe()}}>Continuar</button>
+                            
                             </div>
+                             <div
+  style={{
+    position: "fixed",
+    bottom: erroCartao ? "20px" : "-100px", // começa fora da tela
+    left: "50%",
+    transform: "translateX(-50%)",
+    backgroundColor: "#111111",
+    color: "#ffffff",
+    padding: "20px",
+    width: "600px",
+    borderRadius: "6px",
+    margin: "20px",
+    transition: "bottom 0.3s ease-in-out", // efeito suave
+  }}
+>
+  As informações do cartão são inválidas
+</div>
                             
                     <div>
                     
@@ -1319,7 +1380,7 @@ const valorTotal = calcularPrecoTotal();
                         <p>Você pagará</p>
                         <p>R${calcularPrecoTotal().toFixed(2)}</p>
                     </div>
-                    {((step === 4)  && (selecionarOpcaoDePagamento !== "Cartao")) || ((step === 5) && (selecionarOpcaoDePagamento === "Cartao"))  ? <button onClick={ async () => {if(selecionarOpcaoDePagamento === "Cartao"){
+                    {((step === 4)  && (selecionarOpcaoDePagamento !== "Cartao" && selecionarOpcaoDePagamento !== "novoCartao")) || ((step === 5) && (selecionarOpcaoDePagamento == "Cartao")) ? <button onClick={ async () => {if(selecionarOpcaoDePagamento === "Cartao"){
             const resultado = await handleStripeCartao();
             if(resultado === true){
                 handleNext();
@@ -1330,8 +1391,11 @@ const valorTotal = calcularPrecoTotal();
             if(resultado === true){
                 handleNext();
             }
+            }
+            else if(selecionarOpcaoDePagamento === "Pix"){
+                handleNext();
             } }} className="botao-confirmar-compra-checkout">Confirmar Compra</button> : ""}
-                    {step === 4  && (selecionarOpcaoDePagamento === "Cartao") ? <button onClick={() => {handleNext()}} className="botao-confirmar-compra-checkout">Continuar compra</button> : ""}
+                    {step === 4  && (selecionarOpcaoDePagamento == "Cartao") ? <button onClick={() => {handleNext()}} className="botao-confirmar-compra-checkout">Continuar compra</button> : ""}
                 </div> : ""}
                 
             </div> : ""}

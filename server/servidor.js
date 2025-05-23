@@ -912,17 +912,18 @@ app.get("/carregarCategorias",async (req,res) => {
     }
 })
 
-app.get("/cart", async (req,res) => {
+app.get("/cart",autenticarToken, async (req,res) => {
     try{
     const localidade = req.query.localidade || '';
-    const {userId} = req.query;
+    const userId = req.usuarioId;
     const params = [localidade];
     let query = `
     SELECT 
         ci.id, 
         ci.cart_id, 
         ci.produto_id, 
-        ci.quantidade, 
+        ci.quantidade,
+        ci.frete_selecionado,
         p.nome AS produto_nome, 
         p.preco, 
         p.preco_pix, 
@@ -1023,7 +1024,7 @@ app.get("/cart", async (req,res) => {
     }
 })
 app.post("/cart" , autenticarToken, async (req,res) => {
-    const {produtoId, quantidade, corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId} = req.body;
+    const {produtoId, quantidade, corId, voltagemId, dimensoesId, pesosId, generoId, estampasId, tamanhosId, materiaisId,freteSelecionado} = req.body;
     
     console.log(`dimensoesIde`,dimensoesId);
     const userId = req.usuarioId;
@@ -1176,6 +1177,10 @@ app.post("/cart" , autenticarToken, async (req,res) => {
         if (materiaisId) {
             columns.push("materiaisId");
             values.push(materiaisId);
+        }
+        if(freteSelecionado){
+            columns.push(`frete_selecionado`);
+            values.push(freteSelecionado);
         }
         
         const placeholders = columns.map(() => "?").join(", ");
@@ -2230,7 +2235,9 @@ app.delete("/cartoes-salvos/:idCartao", autenticarToken, async(req,res) => {
 
 app.post("/confirmar-compra", autenticarToken, async (req,res) => {
     const userId = req.usuarioId;
-    const {itens, statusPedido,codigoRastramento,dataEnvio,dataCancelamento,observacoes,valorTotal, metodoPagamento, enderecoEnvio, cartaoUsado,parcelas,valorParcela,valorFrete} = req.body.pedido;
+    const {itens, statusPedido,codigoRastramento,dataEnvio,dataCancelamento,observacoes,valorTotal, metodoPagamento, enderecoEnvio,enderecoSelecionado, cartaoUsado,parcelas,valorParcela,valorFrete,freteSelecionado} = req.body.pedido;
+    console.log(`enederecoEnvioe`,enderecoEnvio);
+    
     const numero = cartaoUsado?.numero || null
     const expiracao = cartaoUsado?.expiracao || null;
     const lougradouroEndereco = enderecoEnvio?.logradouro || null ;
@@ -2331,49 +2338,92 @@ app.post("/confirmar-compra", autenticarToken, async (req,res) => {
 
         let pedidoId = resultado.insertId;
 
-       
+       console.log(`itense`,itens);
+        
         for (const item of itens) {
             const columns = ['pedido_id', 'produto_id', 'quantidade', 'preco_unitario', 'sub_total'];
             const params = [pedidoId, item.produto_id, item.quantidade, item.preco, Number(item.preco) * Number(item.quantidade)];
-        
+            const variacoes = [];
+            const insertParams = [pedidoId,item.produto_id]
             if (item.cores) {
                 columns.push('cor_nome');
                 params.push(item.cores);
+                variacoes.push(`cor_nome = ?`)
+                insertParams.push(item.cores);
             }
             if (item.voltagens) {
                 columns.push('voltagem');
                 params.push(item.voltagens);
+                variacoes.push(`voltagem = ?`)
+                insertParams.push(item.voltagens);
             }
             if (item.dimensoes) {
                 columns.push('dimensoes');
                 params.push(item.dimensoes);
+                variacoes.push(`dimensoes = ?`)
+                insertParams.push(item.dimensoes);
             }
             if (item.pesos) {
                 columns.push('pesos');
                 params.push(item.pesos);
+                variacoes.push(`pesos = ?`)
+                insertParams.push(item.pesos);
             }
             if (item.generos) {
                 columns.push('generos');
                 params.push(item.generos);
+                variacoes.push(`generos = ?`)
+                insertParams.push(item.generos);
             }
             if (item.estampas) {
                 columns.push('estampas');
                 params.push(item.estampas);
+                variacoes.push(`estampas = ?`)
+                insertParams.push(item.estampas);
             }
             if (item.tamanhos) {
                 columns.push('tamanhos');
                 params.push(item.tamanhos);
+                variacoes.push(`tamanhos = ?`)
+                insertParams.push(item.tamanhos);
             }
             if (item.materiais) {
                 columns.push('materiais');
                 params.push(item.materiais);
+                variacoes.push(`materiais = ?`)
+                insertParams.push(item.materiais);
             }
-        
+            if(item.frete_selecionado){
+                columns.push(`frete_selecionado`);
+                params.push(item.frete_selecionado);
+            }
+
+            const whereClause = ['pedido_id = ?','produto_id = ?', ...variacoes].join(" AND ");
+            console.log(`insertParamse`,insertParams);
+            console.log(`variacoese`,variacoes);
+            console.log(`whereClausee`,whereClause);
+            const [existente] = await db.query(`SELECT * from itens_pedido where ${whereClause}`,insertParams);
+            console.log(existente[0]);
+
+            if(existente.length > 0){
+                const itemExistente = existente[0];
+
+                const novaQuantidade = Number(itemExistente.quantidade) + Number(item.quantidade);
+                const novoSubtotal = Number(item.preco) * novaQuantidade;
+            
+            await db.query(`UPDATE itens_pedido set quantidade = ?, sub_total = ? where ${whereClause}`,[novaQuantidade,novoSubtotal,...params])
+
+            }
+            else{
+            
             const placeholders = columns.map(() => '?').join(', ');
         
             const query = `INSERT INTO itens_pedido (${columns.join(', ')}) VALUES (${placeholders})`;
         
             await db.query(query, params);
+            }
+        
+            
         }
              
         
@@ -2443,7 +2493,11 @@ app.get("/meus-pedidos/:idPedido", autenticarToken, async (req, res) => {
                     f.valor as valor_frete
                     FROM itens_pedido ip
              left join produtos pr on pr.id = ip.produto_id
-             left join frete f on f.produto_id = ip.produto_id
+             LEFT JOIN (
+                SELECT produto_id, MIN(valor) AS valor
+                FROM frete
+                GROUP BY produto_id
+            ) f ON f.produto_id = ip.produto_id
              WHERE ip.pedido_id = ?`,
             [idPedido]
         );
@@ -2630,7 +2684,7 @@ app.post("/anunciar-produto", autenticarToken, async(req,res) => {
         tamanho,voltagem,opiniaoClientes,
     imagens,precoProdutoPix,numeroParcelas,precoTotalParcelado,desconto,cep,
     numeroParcelasGratis,
-    taxaJurosAoMes} = req.body;
+    taxaJurosAoMes,condicaoProduto,freteSelecionado} = req.body;
     
 
     try{
@@ -2677,12 +2731,19 @@ app.post("/anunciar-produto", autenticarToken, async(req,res) => {
             columns.push(`preco_parcelado`);
             params.push(precoTotalParcelado);
         }
+        if(condicaoProduto){
+            columns.push(`tipo_produto_id`);
+            params.push(condicaoProduto);
+        }
        
-        
-
         if(cep){
             columns.push(`cep_origem`)
             params.push(cep);
+        }
+
+        if(freteSelecionado){
+            columns.push(`frete_selecionado`);
+            params.push(freteSelecionado);
         }
 
         const placeholders = columns.join(", ");
@@ -2732,9 +2793,9 @@ app.post("/anunciar-produto", autenticarToken, async(req,res) => {
                 columns.push(`comprimento`)
                 params.push(comprimento);
             }
-            if(unidadeDimensoes){
+            if((unidadeDimensoes && comprimento) || (unidadeDimensoes && largura) || (unidadeDimensoes && altura)){
                 columns.push(`unidade`)
-                params.push(unidade);
+                params.push(unidadeDimensoes);
             }
 
             const placeholders = columns.join(", ");
@@ -2801,9 +2862,12 @@ app.post("/anunciar-produto", autenticarToken, async(req,res) => {
         }
         if(pesos){
             const {peso, unidadePeso} = pesos;
-            const [novoPeso] =  await db.query("INSERT INTO pesos (valor,unidade) values (?,?)",[peso,unidadePeso]);
-            let query = "INSERT INTO produtos_pesos (produto_id,peso_id) values (?,?)"
+            if(peso && unidadePeso) {
+                const [novoPeso] =  await db.query("INSERT INTO pesos (valor,unidade) values (?,?)",[peso,unidadePeso]);
+                 let query = "INSERT INTO produtos_pesos (produto_id,peso_id) values (?,?)"
             await db.query(query,[produtoId,novoPeso.insertId]);
+            }
+            
         }
         if(tamanho){
 
@@ -2859,7 +2923,7 @@ app.post("/anunciar-produto", autenticarToken, async(req,res) => {
             
         }
 
-
+        return res.status(200).json(produtoId);
 
     }
     catch(err){
@@ -2997,6 +3061,7 @@ app.post("/adicionar-nova-venda",autenticarToken, async (req,res) => {
             columns.push(`id_comprador`);
             params.push(userId);
         }
+
         
         const placeholders = columns.join(", ");
         const valuePlaceholders = columns.map(() => "?").join(", ");

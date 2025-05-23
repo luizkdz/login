@@ -4,6 +4,7 @@ import Header from '../componentes/header';
 import MenuLateral from '../componentes/menu-lateral';
 import './styles.css';
 import axios from 'axios';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 
 function PaginaMeusPedidos(){
@@ -12,11 +13,12 @@ const [meusPedidos,setMeusPedidos] = useState([]);
 const [pesquisa,setPesquisa] = useState("");
 const [filtroSelecionado,setFiltroSelecionado] = useState("Todas");
 const [quantidadeDeItens, setQuantidadeItens] = useState("");
-
+const navigate = useNavigate();
 
 
 
 const pesquisarEmMeusPedidos = async (filtroSelecionado = null) => {
+
     try{
         const resposta = await axios.get(`http://localhost:5000/meus-pedidos-pesquisa/${pesquisa}`, {
             params: { filtroSelecionado },
@@ -115,7 +117,7 @@ const pesquisarEmMeusPedidos = async (filtroSelecionado = null) => {
                     <p>{quantidadeDeItens} compras</p>
                     </div>
                     </div>
-                    {meusPedidos?.map((item) => {return (
+                    {meusPedidos?.slice().reverse().map((item) => {return (
                         <div className="card-meus-pedidos">
                         <div style={{display:"flex",justifyContent:"space-between"}}>
                         <div>
@@ -147,7 +149,7 @@ const pesquisarEmMeusPedidos = async (filtroSelecionado = null) => {
                                
                                 </div>
                             )})}
-                            <button style={{backgroundColor:"#111111",border:"none",borderRadius:"6px",color:"#ffffff",width:"100%",height:"40px"}}>Ver detalhes</button>
+                            <button onClick={() => {navigate(`/meus-pedidos/${item.id}`)}} style={{cursor:"pointer",backgroundColor:"#111111",border:"none",borderRadius:"6px",color:"#ffffff",width:"100%",height:"40px"}}>Ver detalhes</button>
                         </div>
                     </div>
                     )})}

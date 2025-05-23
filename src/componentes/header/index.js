@@ -207,7 +207,7 @@ function Header({props, produto}) {
         />
         <img 
           className="icone-lupa" 
-          src="/images/lupa.png" 
+          src="/images/magnifier.png" 
           alt="Buscar" 
           onClick={enviarPesquisa} 
         />
@@ -241,15 +241,15 @@ function Header({props, produto}) {
                         <div className="container-usuario">
                           <div className="usuario-setinha">
                             <img className="imagem-notificacao" src = "/images/notification.png"/>
-                            <img className="imagem-carrinho" src = "/images/carrinho-de-compras.png"/>
+                            <img style={{cursor:"pointer"}} onClick={() => {navigate("/carrinho")}} className="imagem-carrinho" src = "/images/carrinho-de-compras.png"/>
                             <p onClick={toggleMenu} className="nome-usuario"> {nome}</p>
                             <img className="imagem-dropdown" src="/images/setinha-dropdown.png"/>
                             </div>
                         {menuAberto && (
                             <div className="dropdown-menu">
                                 <ul>
-                                    <li>Perfil</li>
-                                    <li>Meus Pedidos</li>
+                                    <li onClick={() => {navigate("/minha-conta")}}>Perfil</li>
+                                    <li onClick={() => {navigate("/meus-pedidos")}}>Meus Pedidos</li>
                                     <li>Configurações</li>
                                     <li onClick={handleLogout}>Sair</li>
                                 </ul>

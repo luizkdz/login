@@ -14,7 +14,7 @@ function CarouselPaginaProduto({produtos: produtosProp, setProdutos :setProdutos
     const produtosAtuais = produtosProp ?? produtos;
     const setProdutosAtuais = setProdutosProp ?? setProdutos;
     const produtosDisponiveis = produtosAtuais.filter((item) => !carrinhoItens?.some((p) => p.produto_id === item.id));
-    const totalPaginas = Math.ceil(produtosDisponiveis.length / itensPassados);
+    const totalPaginas = Math.ceil((produtosDisponiveis.length - 1) / itensPassados);
       const next = () => {
         
         setIndex((prev) => (prev + 1) % totalPaginas);
@@ -62,7 +62,7 @@ function CarouselPaginaProduto({produtos: produtosProp, setProdutos :setProdutos
               <p className="nome-produto">{item.nome.length > 20 ? item.nome.slice(0,17) + "..." : item.nome}</p>
               <p>R$ {item.preco}</p>
               <p className="preco-parcelado">{item.parcelas_máximas}x de R$ {calcularPrecoParcelado(item.preco_parcelado,item.parcelas_máximas)}</p>
-              <p>ou R$<strong>{item.preco_pix}</strong> no Pix</p>
+              {item.preco_pix ? <p>ou R$<strong>{item.preco_pix}</strong> no Pix</p>: ""}
               <p>{item.entrega}</p>
               
             </div>
